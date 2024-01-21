@@ -169,8 +169,6 @@ export class AddCartonModal extends Component {
                                             defaultValue={this.props.unloadingcharges}
                                             placeholder="Unloading Charge" />
                                     </Form.Group>
-
-
                                     <Form.Group>
                                         <Button variant="primary" type="submit" style={{ marginTop: "10px" }}>
                                             Add

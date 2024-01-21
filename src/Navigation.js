@@ -19,6 +19,10 @@ export class Navigation extends Component{
                     Carton
                 </NavLink>
 
+                <NavLink className="d-inline p-2 bg-dark text-white" to="/lotList">
+                    Lot Master
+                </NavLink>
+
                 </Nav>
                 </Navbar.Collapse>
             </Navbar>

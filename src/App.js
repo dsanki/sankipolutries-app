@@ -3,6 +3,7 @@ import './App.css';
 
 import {Home} from './Home';
 import {Carton} from './Carton';
+import LotListComponent from './Component/LotMaster/LotListComponent';
 import {Navigation} from './Navigation';
 
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
@@ -20,6 +21,7 @@ function App() {
      <Routes>
      <Route path="/" element={<Home />} />
        <Route path="/carton" element={<Carton />} />
+       <Route path="/lotList" element={<LotListComponent />} />
      </Routes>
     </div>
     </BrowserRouter>
