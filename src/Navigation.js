@@ -22,6 +22,9 @@ export class Navigation extends Component{
                 <NavLink className="d-inline p-2 bg-dark text-white" to="/lotList">
                     Lot Master
                 </NavLink>
+                <NavLink className="d-inline p-2 bg-dark text-white" to="/chicksmaster">
+                    Chicks Master
+                </NavLink>
 
                 </Nav>
                 </Navbar.Collapse>

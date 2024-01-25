@@ -5,6 +5,8 @@ import {Home} from './Home';
 import {Carton} from './Carton';
 import LotListComponent from './Component/LotMaster/LotListComponent';
 import {Navigation} from './Navigation';
+import ChicksMasterComponent from './Component/Chicks/ChicksMasterComponent';
+
 
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
 
@@ -22,6 +24,7 @@ function App() {
      <Route path="/" element={<Home />} />
        <Route path="/carton" element={<Carton />} />
        <Route path="/lotList" element={<LotListComponent />} />
+       <Route path="/chicksmaster" element={<ChicksMasterComponent />} />
      </Routes>
     </div>
     </BrowserRouter>
