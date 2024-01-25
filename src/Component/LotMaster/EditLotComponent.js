@@ -15,6 +15,7 @@ function EditLotComponent(props) {
     const [lot, setLotData] = useState(initialvalues);
 
     const closeModal = () => {
+        props.onCountAdd(props.count);
         props.onHide();
     };
 
@@ -42,31 +43,6 @@ function EditLotComponent(props) {
                     alert('Failed');
                 })
     };
-
-    // const handleSubmit(event) {
-    //     event.preventDefault();
-    //     fetch(variables.REACT_APP_API + 'LotMaster', {
-    //         method: 'PUT',
-    //         headers: {
-    //             'Accept': 'application/json',
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify({
-    //             Id: event.target.Id.value,
-    //             LotName: event.target.LotName.value,
-    //             StartDate: event.target.StartDate.value,
-    //             EndDate: event.target.EndDate.value
-
-    //         })
-    //     })
-    //         .then(res => res.json())
-    //         .then((result) => {
-    //             alert(result);
-    //         },
-    //             (error) => {
-    //                 alert('Failed');
-    //             })
-    // }
 
   return (
     <div className="container">
@@ -120,9 +96,8 @@ function EditLotComponent(props) {
             </Row>
         </Modal.Body>
 
-        <Modal.Footer>
-            {/* <Button variant="danger" onClick={this.props.onHide}>Close</Button> */}
-            <Button onClick={() => {
+        <Modal.Footer>         
+            <Button variant="danger" onClick={() => {
                 closeModal();
             }
             }>Close</Button>
