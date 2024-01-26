@@ -4,7 +4,8 @@ import { Button, ButtonToolbar, Table } from 'react-bootstrap';
 import Moment from 'moment';
 // import EditLotComponent from './EditLotComponent'
 import AddChicksMasterComponent from './AddChicksMasterComponent'
-
+import EditChicksMasterComponent from './EditChicksMasterComponent'
+//
 
 function ChicksMasterComponent() {
 
@@ -25,7 +26,7 @@ function ChicksMasterComponent() {
         rate: 0,
         paid: 0,
         due: 0,
-        paymentdate:new Date()
+        paymentdate: new Date()
     };
 
     const [count, setCount] = useState(0);
@@ -61,9 +62,9 @@ function ChicksMasterComponent() {
             });
     }
 
-    const deleteChicks = (lotid) => {
+    const deleteChicks = (id) => {
         if (window.confirm('Are you sure?')) {
-            fetch(variables.REACT_APP_API + 'ChicksMaster/' + lotid, {
+            fetch(variables.REACT_APP_API + 'ChicksMaster/' + id, {
                 method: 'DELETE',
                 header: {
                     'Accept': 'application/json',
@@ -124,7 +125,7 @@ function ChicksMasterComponent() {
                                 count: count
                             }
                             ));
-                        }}>Add Lot</Button>
+                        }}>Add Chicks</Button>
 
                     <AddChicksMasterComponent show={addModalShow}
                         onHide={addModalClose}
@@ -182,35 +183,56 @@ function ChicksMasterComponent() {
                                 <td align='center'>{Moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
                                 <td align='center'>
                                     {
-                                        // <ButtonToolbar>
-                                        //     <Button className="mr-2" variant="primary" style={{ marginRight: "17.5px" }} onClick={() => {
-                                        //         setEditModalShow(true);
-                                        //         setLotData(prev => ({
-                                        //             ...prev,
-                                        //             lotid: p.Id,
-                                        //             lotname: p.LotName,
-                                        //             startdate: p.StartDate,
-                                        //             enddate: p.EndDate,
-                                        //             count: count
-                                        //         }
-                                        //         ));
+                                        <ButtonToolbar>
+                                            <Button className="mr-2" variant="primary"
+                                                style={{ marginRight: "17.5px" }}
+                                                onClick={() => {
+                                                    setEditModalShow(true);
+                                                    setChicksData(prev => ({
+                                                        ...prev,
+                                                        id: p.Id,
+                                                        date: p.Date,
+                                                        chicks: p.Chicks,
+                                                        extrachicks: p.ExtraChicks,
+                                                        totalchicks: p.TotalChicks,
+                                                        mortality: p.Mortality,
+                                                        lambchicks: p.LambChicks,
+                                                        duechicks: p.DueChicks,
+                                                        totalamount: p.TotalAmount,
+                                                        rate: p.Rate,
+                                                        paid: p.Paid,
+                                                        due: p.Due,
+                                                        paymentdate: p.PaymentDate,
+                                                        count: count
+                                                    }
+                                                    ));
+                                                }}>Edit</Button>
 
-                                        //     }}>Edit</Button>
+                                            <Button className="mr-2" variant="danger" size="sm"
+                                                onClick={() => deleteChicks(p.Id)}>
+                                                Delete
+                                            </Button>
 
-                                        <Button className="mr-2" variant="danger" size="sm"
-                                            onClick={() => deleteChicks(p.Id)}>
-                                            Delete
-                                        </Button>
+                                            <EditChicksMasterComponent show={editModalShow}
+                                                onHide={editModalClose}
+                                                id={chicksdata.id}
+                                                date={chicksdata.date}
+                                                chicks={chicksdata.chicks}
+                                                extrachicks={chicksdata.extrachicks}
+                                                totalchicks={chicksdata.totalchicks}
+                                                mortality={chicksdata.mortality}
+                                                lambchicks={chicksdata.lambchicks}
+                                                duechicks={chicksdata.duechicks}
+                                                totalamount={chicksdata.totalamount}
+                                                rate={chicksdata.rate}
+                                                paid={chicksdata.paid}
+                                                due={chicksdata.due}
+                                                paymentdate={chicksdata.paymentdate}
+                                                onCountAdd={addCount}
+                                            />
+                                        </ButtonToolbar>
 
-                                        //     <EditLotComponent show={editModalShow}
-                                        //         onHide={editModalClose}
-                                        //         lotid={lotdata.lotid}
-                                        //         lotname={lotdata.lotname}
-                                        //         startdate={lotdata.startdate}
-                                        //         enddate={lotdata.enddate}
-                                        //         onCountAdd={addCount}
-                                        //     />
-                                        // </ButtonToolbar>
+
                                     }
                                 </td>
                             </tr>
@@ -219,7 +241,7 @@ function ChicksMasterComponent() {
                 </tbody>
             </Table>
 
-            {/* <button
+            <button
                 onClick={handlePrevClick}
                 disabled={preDisabled}
             >
@@ -245,7 +267,7 @@ function ChicksMasterComponent() {
                 disabled={nextDisabled}
             >
                 Next
-            </button> */}
+            </button>
 
         </div>
     )

@@ -3,7 +3,7 @@ import { Modal, Button, Row, Col, Form } from 'react-bootstrap';
 import { variables } from '../../Variables';
 import DateComponent from '../DateComponent';
 
-function AddChicksMasterComponent(props) {
+function EditChicksMasterComponent(props) {
 
     const initialvalues = {
         id: props.id,
@@ -35,13 +35,13 @@ function AddChicksMasterComponent(props) {
     const handleSubmit = (e) => {
         e.preventDefault();
         fetch(variables.REACT_APP_API + 'ChicksMaster', {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                Id: e.target.id.value,
+                Id: props.id,
                 Date: e.target.date.value,
                 Chicks: e.target.Chicks.value,
                 ExtraChicks: e.target.ExtraChicks.value,
@@ -76,15 +76,15 @@ function AddChicksMasterComponent(props) {
                 size="lg"
                 aria-labelledby="contained-modal-title-vcenter"
                 centered
-              //  onHide={handleClose}
+            //  onHide={handleClose}
             >
                 <Modal.Header closeButton>
                     <Modal.Title id="contained-modal-title-vcenter" style={{
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-}}>
-                        Add Chicks
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}>
+                        Edit Chicks
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
@@ -127,7 +127,7 @@ function AddChicksMasterComponent(props) {
                                     <Form.Label column sm={3}>Chicks</Form.Label>
                                     <Col sm={4}>
                                         <Form.Control type="text" name="Chicks" required
-                                            defaultValue={props.Chicks}
+                                            defaultValue={props.chicks}
                                             placeholder="Chicks" />
                                     </Col>
                                 </Form.Group>
@@ -143,20 +143,20 @@ function AddChicksMasterComponent(props) {
                                         <Form.Label>Extra chicks</Form.Label>
                                         <Col >
                                             <Form.Control type="text" name="ExtraChicks" required
-                                                defaultValue={props.ExtraChicks}
+                                                defaultValue={props.extrachicks}
                                                 placeholder="Extra chicks" />
                                         </Col>
                                     </Form.Group>
                                     <Form.Group controlId="TotalChicks" as={Col}>
                                         <Form.Label>Total chicks</Form.Label>
                                         <Form.Control type="text" name="TotalChicks" required
-                                            defaultValue={props.TotalChicks}
+                                            defaultValue={props.totalchicks}
                                             placeholder="Total chicks" />
                                     </Form.Group>
                                     <Form.Group controlId="Mortality" as={Col}>
                                         <Form.Label>Mortality</Form.Label>
                                         <Form.Control type="text" name="Mortality" required
-                                            defaultValue={props.Mortality}
+                                            defaultValue={props.mortality}
                                             placeholder="Mortality" />
                                     </Form.Group>
                                 </Row>
@@ -165,20 +165,20 @@ function AddChicksMasterComponent(props) {
                                     <Form.Group controlId="LambChicks" as={Col}>
                                         <Form.Label>Lamb chicks</Form.Label>
                                         <Form.Control type="text" name="LambChicks" required
-                                            defaultValue={props.LambChicks}
+                                            defaultValue={props.lambchicks}
                                             placeholder="Lamb chicks" />
                                     </Form.Group>
                                     <Form.Group controlId="DueChicks" as={Col}>
                                         <Form.Label>Due chicks</Form.Label>
                                         <Form.Control type="text" name="DueChicks" required
-                                            defaultValue={props.DueChicks}
+                                            defaultValue={props.duechicks}
                                             placeholder="Due chicks" />
                                     </Form.Group>
 
                                     <Form.Group controlId="Rate" as={Col}>
                                         <Form.Label>Rate</Form.Label>
                                         <Form.Control type="text" name="Rate" required
-                                            defaultValue={props.Rate}
+                                            defaultValue={props.rate}
                                             placeholder="Rate" />
                                     </Form.Group>
 
@@ -188,21 +188,21 @@ function AddChicksMasterComponent(props) {
                                     <Form.Group controlId="TotalAmount" as={Col}>
                                         <Form.Label>Total amount</Form.Label>
                                         <Form.Control type="text" name="TotalAmount" required
-                                            defaultValue={props.TotalAmount}
+                                            defaultValue={props.totalamount}
                                             placeholder="Total amount" />
                                     </Form.Group>
 
                                     <Form.Group controlId="Paid" as={Col}>
                                         <Form.Label>Paid</Form.Label>
                                         <Form.Control type="text" name="Paid" required
-                                            defaultValue={props.Paid}
+                                            defaultValue={props.paid}
                                             placeholder="Paid" />
                                     </Form.Group>
 
                                     <Form.Group controlId="Due" as={Col}>
                                         <Form.Label>Due</Form.Label>
                                         <Form.Control type="text" name="Due" required
-                                            defaultValue={props.Due}
+                                            defaultValue={props.due}
                                             placeholder="Due" />
                                     </Form.Group>
                                 </Row>
@@ -211,21 +211,21 @@ function AddChicksMasterComponent(props) {
                                 <Form.Group controlId="PaymentDate" as={Row} className="mb-3">
                                     <Form.Label column sm={3}>PaymentDate</Form.Label>
                                     <Col sm={4}>
-                                        <DateComponent date={props.PaymentDate} />
+                                        <DateComponent date={props.paymentdate} />
                                     </Col>
                                 </Form.Group>
 
                                 <Form.Group>
                                     <Button variant="primary" type="submit" style={{ marginTop: "10px" }}>
-                                        Add
+                                        Update
                                     </Button>
 
-                                    <Button variant="danger" style={{ marginTop: "10px", marginLeft:"10px"}} onClick={() => {
+                                    <Button variant="danger" style={{ marginTop: "10px", marginLeft: "10px" }} onClick={() => {
                                         closeModal();
                                     }
                                     }>Close</Button>
 
-{/* <Button variant="secondary" onClick={handleClose}>
+                                    {/* <Button variant="secondary" onClick={handleClose}>
             Close
           </Button> */}
                                 </Form.Group>
@@ -247,5 +247,5 @@ function AddChicksMasterComponent(props) {
     )
 }
 
-export default AddChicksMasterComponent
+export default EditChicksMasterComponent
 
