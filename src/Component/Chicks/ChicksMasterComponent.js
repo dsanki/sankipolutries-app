@@ -121,7 +121,7 @@ function ChicksMasterComponent() {
                                 rate: 0,
                                 paid: 0,
                                 due: 0,
-                                paymentdate: new Date(),
+                                paymentdate: "",
                                 count: count
                             }
                             ));
