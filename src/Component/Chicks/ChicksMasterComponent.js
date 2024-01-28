@@ -14,19 +14,19 @@ function ChicksMasterComponent() {
     const [editModalShow, setEditModalShow] = useState(false);
 
     const initialvalues = {
-        id: 0,
-        date: new Date(),
-        chicks: 0,
-        extrachicks: 0,
-        totalchicks: 0,
-        mortality: 0,
-        lambchicks: 0,
-        duechicks: 0,
-        totalamount: 0,
-        rate: 0,
-        paid: 0,
-        due: 0,
-        paymentdate: new Date()
+        id: null,
+        date: "",
+        chicks: null,
+        extrachicks: null,
+        totalchicks: null,
+        mortality: null,
+        lambchicks: null,
+        duechicks: null,
+        totalamount: null,
+        rate: null,
+        paid: null,
+        due: null,
+        paymentdate: ""
     };
 
     const [count, setCount] = useState(0);
@@ -110,19 +110,20 @@ function ChicksMasterComponent() {
                             setAddModalShow(true);
                             setChicksData(prev => ({
                                 id: 0,
-                                date: new Date(),
-                                chicks: 0,
-                                extrachicks: 0,
-                                totalchicks: 0,
-                                mortality: 0,
-                                lambchicks: 0,
-                                duechicks: 0,
-                                totalamount: 0,
-                                rate: 0,
-                                paid: 0,
-                                due: 0,
+                                date: "",
+                                chicks: null,
+                                extrachicks: null,
+                                totalchicks:null,
+                                mortality: null,
+                                lambchicks: null,
+                                duechicks: null,
+                                totalamount: null,
+                                rate: null,
+                                paid: null,
+                                due: null,
                                 paymentdate: "",
                                 count: count
+                                
                             }
                             ));
                         }}>Add Chicks</Button>
@@ -143,6 +144,7 @@ function ChicksMasterComponent() {
                         due={chicksdata.due}
                         paymentdate={chicksdata.paymentdate}
                         onCountAdd={addCount}
+                        method="POST"
                     />
                 </ButtonToolbar>
             }
@@ -187,7 +189,7 @@ function ChicksMasterComponent() {
                                             <Button className="mr-2" variant="primary"
                                                 style={{ marginRight: "17.5px" }}
                                                 onClick={() => {
-                                                    setEditModalShow(true);
+                                                    setAddModalShow(true);
                                                     setChicksData(prev => ({
                                                         ...prev,
                                                         id: p.Id,
@@ -213,7 +215,26 @@ function ChicksMasterComponent() {
                                                 Delete
                                             </Button>
 
-                                            <EditChicksMasterComponent show={editModalShow}
+                                            <AddChicksMasterComponent show={addModalShow}
+                        onHide={addModalClose}
+                                                id={chicksdata.id}
+                                                date={chicksdata.date}
+                                                chicks={chicksdata.chicks}
+                                                extrachicks={chicksdata.extrachicks}
+                                                totalchicks={chicksdata.totalchicks}
+                                                mortality={chicksdata.mortality}
+                                                lambchicks={chicksdata.lambchicks}
+                                                duechicks={chicksdata.duechicks}
+                                                totalamount={chicksdata.totalamount}
+                                                rate={chicksdata.rate}
+                                                paid={chicksdata.paid}
+                                                due={chicksdata.due}
+                                                paymentdate={chicksdata.paymentdate}
+                                                onCountAdd={addCount}
+                                                method="PUT"
+                                            />
+
+                                                  {/* <EditChicksMasterComponent show={editModalShow}
                                                 onHide={editModalClose}
                                                 id={chicksdata.id}
                                                 date={chicksdata.date}
@@ -229,7 +250,7 @@ function ChicksMasterComponent() {
                                                 due={chicksdata.due}
                                                 paymentdate={chicksdata.paymentdate}
                                                 onCountAdd={addCount}
-                                            />
+                                            /> */}
                                         </ButtonToolbar>
 
 
