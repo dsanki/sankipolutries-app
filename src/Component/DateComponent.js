@@ -4,7 +4,7 @@ import moment from 'moment';
 
 export default function DateComponent(props) {
 
-    const [date, setDate] = useState(props.date);
+    const [date, setDate] = useState(props!=null && props.date!=null ?  props.date:null);
 
     //functions called
     const dateFromDateString = (dateString) => {

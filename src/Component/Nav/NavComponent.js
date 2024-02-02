@@ -51,7 +51,9 @@ export default function NavComponent(props) {
                 <NavLink to="/login" className={`btn btn-primary mx-2 ${localStorage.getItem('token') !== null ? "invisible" : "visible"}`} role="button">Login</NavLink>
             </form>
             {localStorage.getItem('username') !== null &&
-                <label class="custom-file-label"> Welcome <strong>{localStorage.getItem('username')}</strong></label>
+                <label className="custom-file-label" style={{
+                color: "lightblue"}}
+            > Welcome <strong>{localStorage.getItem('username')}</strong></label>
             }
             <button
                 onClick={() => {

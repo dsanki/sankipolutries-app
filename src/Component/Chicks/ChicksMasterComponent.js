@@ -4,11 +4,12 @@ import { Button, ButtonToolbar, Table } from 'react-bootstrap';
 import Moment from 'moment';
 // import EditLotComponent from './EditLotComponent'
 import AddChicksMasterComponent from './AddChicksMasterComponent'
-import EditChicksMasterComponent from './EditChicksMasterComponent'
+//import EditChicksMasterComponent from './EditChicksMasterComponent'
+import { useNavigate } from 'react-router-dom'
 //
 
 function ChicksMasterComponent() {
-
+    let history = useNavigate();
     const [chicks, setChicks] = useState([]);
     const [addModalShow, setAddModalShow] = useState(false);
     const [editModalShow, setEditModalShow] = useState(false);
@@ -36,6 +37,17 @@ function ChicksMasterComponent() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
 
+    useEffect((e) => {
+
+        if (localStorage.getItem('token')) {
+            fetchChicks();
+        }
+        else {
+            history("/login")
+        }
+    }, [obj]);
+
+
     let addModalClose = () => {
         setAddModalShow(false)
     };
@@ -48,9 +60,7 @@ function ChicksMasterComponent() {
         setEditModalShow(false)
     };
 
-    useEffect((e) => {
-        fetchChicks();
-    }, [obj]);
+
 
     const fetchChicks = async () => {
         fetch(variables.REACT_APP_API + 'ChicksMaster')
@@ -100,8 +110,11 @@ function ChicksMasterComponent() {
     const itemsToDiaplay = chicks && chicks.length > 0 ? chicks.slice(startIndex, endIndex) : [];
 
     return (
-        <div>
-            <h2>Welcome to Chicks Master Page</h2>
+        <div className="container">
+            <div className="row justify-content-center" style={{textAlign:'center', marginTop:'20px'}}>
+                <h2>Welcome to Chicks Master Page</h2>
+            </div>
+
             {
                 <ButtonToolbar>
                     <Button className="mr-2" variant="primary"
@@ -113,7 +126,7 @@ function ChicksMasterComponent() {
                                 date: "",
                                 chicks: null,
                                 extrachicks: null,
-                                totalchicks:null,
+                                totalchicks: null,
                                 mortality: null,
                                 lambchicks: null,
                                 duechicks: null,
@@ -123,7 +136,7 @@ function ChicksMasterComponent() {
                                 due: null,
                                 paymentdate: "",
                                 count: count
-                                
+
                             }
                             ));
                         }}>Add Chicks</Button>
@@ -186,7 +199,7 @@ function ChicksMasterComponent() {
                                 <td align='center'>
                                     {
                                         <ButtonToolbar>
-                                            <Button className="mr-2" variant="primary"
+                                            {/* <Button className="mr-2" variant="primary"
                                                 style={{ marginRight: "17.5px" }}
                                                 onClick={() => {
                                                     setAddModalShow(true);
@@ -208,15 +221,38 @@ function ChicksMasterComponent() {
                                                         count: count
                                                     }
                                                     ));
-                                                }}>Edit</Button>
+                                                }}>Edit</Button> */}
+                                                <i className="fa-solid fa-pen-to-square" style={{color: '#0545b3',    marginLeft: '15px'}} onClick={() => {
+                                                    setAddModalShow(true);
+                                                    setChicksData(prev => ({
+                                                        ...prev,
+                                                        id: p.Id,
+                                                        date: p.Date,
+                                                        chicks: p.Chicks,
+                                                        extrachicks: p.ExtraChicks,
+                                                        totalchicks: p.TotalChicks,
+                                                        mortality: p.Mortality,
+                                                        lambchicks: p.LambChicks,
+                                                        duechicks: p.DueChicks,
+                                                        totalamount: p.TotalAmount,
+                                                        rate: p.Rate,
+                                                        paid: p.Paid,
+                                                        due: p.Due,
+                                                        paymentdate: p.PaymentDate,
+                                                        count: count
+                                                    }
+                                                    ));
+                                                }}></i>
 
-                                            <Button className="mr-2" variant="danger" size="sm"
+                                            {/* <Button className="mr-2" variant="danger" size="sm"
                                                 onClick={() => deleteChicks(p.Id)}>
                                                 Delete
-                                            </Button>
+                                            </Button> */}
+{localStorage.getItem('isadmin')==='False' && 
+                                            <i className="fa-solid fa-trash" style={{color: '#f81616',marginLeft: '15px'}} onClick={() => deleteChicks(p.Id)}></i>}
 
                                             <AddChicksMasterComponent show={addModalShow}
-                        onHide={addModalClose}
+                                                onHide={addModalClose}
                                                 id={chicksdata.id}
                                                 date={chicksdata.date}
                                                 chicks={chicksdata.chicks}
@@ -234,7 +270,7 @@ function ChicksMasterComponent() {
                                                 method="PUT"
                                             />
 
-                                                  {/* <EditChicksMasterComponent show={editModalShow}
+                                            {/* <EditChicksMasterComponent show={editModalShow}
                                                 onHide={editModalClose}
                                                 id={chicksdata.id}
                                                 date={chicksdata.date}

@@ -48,35 +48,35 @@ function InputGroupTPD(props) {
 
     <Row className="mb-12">
 
-<Form.Group controlId="TotalAmount" as={Col}>
-                                        <Form.Label>Total amount</Form.Label>
-                                        <Form.Control type="number" name="TotalAmount" required
-                                            defaultValue={input_values.TotalAmount}
-                                            placeholder="Total amount" />
-                                        <Form.Control.Feedback type="invalid">
-                                            Please provide total.
-                                        </Form.Control.Feedback>
-                                    </Form.Group>
+      <Form.Group controlId="TotalAmount" as={Col}>
+        <Form.Label>Total amount</Form.Label>
+        <Form.Control type="number" name="TotalAmount" required
+          defaultValue={input_values.TotalAmount}
+          placeholder="Total amount" />
+        <Form.Control.Feedback type="invalid">
+          Please provide total.
+        </Form.Control.Feedback>
+      </Form.Group>
 
-                                    <Form.Group controlId="Paid" as={Col}>
-                                        <Form.Label>Paid</Form.Label>
-                                        <Form.Control type="number" name="Paid" required
-                                            defaultValue={input_values.Paid}
-                                            placeholder="Paid" />
-                                        <Form.Control.Feedback type="invalid">
-                                            Please provide paid amount.
-                                        </Form.Control.Feedback>
-                                    </Form.Group>
+      <Form.Group controlId="Paid" as={Col}>
+        <Form.Label>Paid</Form.Label>
+        <Form.Control type="number" name="Paid" required
+          defaultValue={input_values.Paid}
+          placeholder="Paid" />
+        <Form.Control.Feedback type="invalid">
+          Please provide paid amount.
+        </Form.Control.Feedback>
+      </Form.Group>
 
 
-                                    <Form.Group controlId="Due" as={Col}>
-                                        <Form.Label>Due</Form.Label>
-                                        <Form.Control type="number" name="Due" required
-                                            defaultValue={due}
-                                            placeholder="Due" />
-                                    </Form.Group>
+      <Form.Group controlId="Due" as={Col}>
+        <Form.Label>Due</Form.Label>
+        <Form.Control type="number" name="Due" required disabled
+          defaultValue={due}
+          placeholder="Due" />
+      </Form.Group>
 
-     
+
       <Form.Group controlId="LambChicks" as={Col}>
         <Form.Label>Lamb chicks</Form.Label>
         <Form.Control type="number" name="LambChicks" required

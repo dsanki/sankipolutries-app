@@ -1,50 +1,97 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { variables } from './../../Variables'
-import { Button, ButtonToolbar, Table } from 'react-bootstrap'; 
+import { Button, ButtonToolbar, Table } from 'react-bootstrap';
 import Moment from 'moment';
-import { EditCartonModal } from './../../EditCartonModal';
-import { AddCartonModal } from './../../AddCartonModal';
+import EditCarton from './EditCarton';
+import AddCarton from './AddCarton';
+import { useNavigate } from 'react-router-dom'
 
-const CartonList = () => {
-    const [cartons, setUserData] = useState([]);
+const CartonList = (props) => {
+    let history = useNavigate();
+    const [cartons, setCartons] = useState([]);
     const [clients, setClients] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [cartonId, setCartonId] = useState(0);
-    const [editModalShow ,setEditModalShow] = useState(false);
-    const [addModalShow ,setAddModalShow] = useState(false);
+    const [editModalShow, setEditModalShow] = useState(false);
+    const [addModalShow, setAddModalShow] = useState(false);
+    const [count, setCount] = useState(0);
 
-    // const [addModalClose ,setaddModalClose] = useState(false);
-    // const [editModalClose ,seteditModalClose] = useState(false);
-    //editModalShow
+    //const [_quanTity, setquanTity] = useState(0);
+    const initialvalues = {
+        cartonid: "",
+        quanTity: "",
+        billingDate: "",
+        rate: "",
+        totalAmount: "",
+        payment: "",
+        paymentDate: "",
+        unloadingCharges: "",
+        clientid: ""
+    };
 
-    // const initialValues = {  quanTity: '', billingDate: '', rate: '',totalAmount: '', payment: '', paymentDate: '', unloadingCharges: '', clientid: '', cartons: [], clients: [] };
-    // const [values, setValues] = useState(initialValues); 
-    const [ quanTity, billingDate, rate, totalAmount, payment, paymentDate, unloadingCharges, clientid ] = useState();
-    
-   // this.state = { cartons: [], addModalShow: false, editModalShow: false, clients: [] ,quanTity, billingDate, rate, totalAmount, payment, paymentDate, unloadingCharges, clientid}
+    const [cartonsdata, setCartonsData] = useState(initialvalues);
 
-    //
+    const [quanTity, billingDate, rate, totalAmount, payment, paymentDate, unloadingCharges, clientid] = useState();
 
     const APIURL = variables.REACT_APP_API + 'carton';
+    const obj = useMemo(() => ({ count }), [count]);
+    // useEffect(() => {
+    //     fetchClient();
+    //     fetchCarton();
+    // }, [])
 
-    useEffect(() => {
-        fetch(APIURL)
-            .then((res) => res.json())
-            .then((data) => {
-                setUserData(data);
-                //this.setState({ cartons: data });
-                setTotalPages(Math.ceil(data.length / 5));
-            });
+    useEffect((e) => {
 
-            fetch(variables.REACT_APP_API + 'client')
-            .then((res) => res.json())
-            .then((data) => {
+        if (localStorage.getItem('token')) {
+            fetchClient();
+            fetchCarton();
+        }
+        else {
+            history("/login")
+        }
+    }, [obj]);
+
+
+    const fetchClient = async () => {
+        await fetch(variables.REACT_APP_API + 'client')
+            .then(response => response.json())
+            .then(data => {
                 setClients(data);
-                //this.setState({ clients: data });
-            })
+            });
+    }
+    const fetchCarton = async () => {
+        await fetch(variables.REACT_APP_API + 'carton')
+            .then(response => response.json())
+            .then(data => {
+                setCartons(data);
+                setCount(data.length);
+                setTotalPages(Math.ceil(data.length / variables.PAGE_PAGINATION_NO));
+            });
+    }
 
-    }, [])
+    let addCount = (num) => {
+        setCount(num + 1);
+    };
+    const deleteCarton = (cartonid) => {
+        if (window.confirm('Are you sure?')) {
+            fetch(variables.REACT_APP_API + 'carton/' + cartonid, {
+                method: 'DELETE',
+                header: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => res.json())
+                .then((result) => {
+                    props.showAlert("Successfully deleted", "info")
+                },
+                    (error) => {
+                        props.showAlert("Error occurred!!", "danger")
+                    });
+
+            addCount(count);
+        }
+    }
 
     // current pages function
     const handlePageChange = (newPage) => {
@@ -63,20 +110,46 @@ const CartonList = () => {
     const preDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages
 
-    const itemsPerPage = 5;
+    const itemsPerPage =variables.PAGE_PAGINATION_NO;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const itemsToDiaplay = cartons.slice(startIndex, endIndex);
 
-    let addModalClose = () => this.setState({ addModalShow: false });
-    let editModalClose = () => this.setState({ editModalShow: false });
+    // let addModalClose = () => setAddModalShow({ addModalShow: false });
+    // let editModalClose = () => setEditModalShow({ editModalShow: false });
+
+    let addModalClose = () => {
+        setAddModalShow(false)
+    };
+
+    let editModalClose = () => {
+        setEditModalShow(false)
+    };
 
     return (
-      
-       
+
+
         <>
-        
-            <p>Learn Coding with Bhai React Pagination </p>
+
+            <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
+                <h2>Welcome to Carton List Page</h2>
+            </div>
+            {<ButtonToolbar>
+                <Button className="mr-2" variant="primary"
+                    style={{ marginRight: "17.5px" }}
+                    onClick={() => {
+                        setAddModalShow({ addModalShow: true });
+                        setCartonsData({ count: count });
+                        
+                    }}>Add Carton</Button>
+
+                <AddCarton show={addModalShow}
+                    onHide={addModalClose}
+                    onCountAdd={addCount}
+                    showAlert={props.showAlert}
+                    clientlist={clients}
+                />
+            </ButtonToolbar>}
             {<Table className="mt-4" striped bordered hover size="sm">
                 <thead>
                     <tr align='center'>
@@ -114,33 +187,13 @@ const CartonList = () => {
                                     <td>{carton.UnloadingCharge.toFixed(2)}</td>
                                     <td align='center'>
                                         <ButtonToolbar >
-                                        <Button className="mr-2" variant="info" style={{ marginRight: "17.5px" }} onClick={() => {
-    //this.setEditModalShow({ editModalShow: true }); 
-   setEditModalShow({editModalShow:true});
-   setEditModalShow({cartonId:carton.Id});
-   this.setState({
-        //editModalShow: true,
-        //cartonId: carton.Id,
-        quanTity: carton.Quantity,
-        billingDate: carton.BillingDate,
-        rate: carton.Rate,
-        totalAmount: carton.TotalAmount,
-        payment: carton.Payment,
-        paymentDate: carton.PaymentDate,
-        unloadingCharges: carton.UnloadingCharge,
-        clientid: carton.ClientId,
-        clientList: clients
+                                            <i className="fa-solid fa-pen-to-square" style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => {
+                                                setEditModalShow({ editModalShow: true });
+                                                setEditModalShow({ cartonId: carton.Id });
 
-    })
-  }}>
-                                                Edit
-                                            </Button>
-
-                                            {/* <Button className="mr-2" variant="info" style={{ marginRight: "17.5px" }}
-                                                onClick={() => 
-                                                    this.setState({
-                                                    //editModalShow: true,
-                                                    cartonId: carton.Id,
+                                                setCartonsData(prev => ({
+                                                    ...prev,
+                                                    cartonid:carton.Id,
                                                     quanTity: carton.Quantity,
                                                     billingDate: carton.BillingDate,
                                                     rate: carton.Rate,
@@ -149,30 +202,32 @@ const CartonList = () => {
                                                     paymentDate: carton.PaymentDate,
                                                     unloadingCharges: carton.UnloadingCharge,
                                                     clientid: carton.ClientId,
-                                                    clientList: clients
-
+                                                    //clientList: clients,
+                                                    count: count
                                                 }
-                                                )}>
-                                                Edit
-                                            </Button> */}
+                                                ));
+                                            }}> 
 
-                                            <Button className="mr-2" variant="danger" size="sm"
-                                                onClick={() => this.deleteCarton(carton.Id)}>
-                                                Delete
-                                            </Button>
+                                            </i>
+                                            {localStorage.getItem('isadmin') === 'true' &&
+                                                <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteCarton(carton.Id)}></i>}
 
-                                            <EditCartonModal show={editModalShow}
+                                          
+
+                                            <EditCarton show={editModalShow}
                                                 onHide={editModalClose}
-                                                cartonid={cartonId}
-                                                quantity={quanTity}
-                                                billingdate={billingDate}
-                                                rate={rate}
-                                                totalamount={totalAmount}
-                                                payment={payment}
-                                                paymentdate={paymentDate}
-                                                unloadingcharges={unloadingCharges}
-                                                clientid={clientid}
-                                                clientList={clients}
+                                                cartonid={cartonsdata.cartonid}
+                                                quantity={cartonsdata.quanTity}
+                                                billingdate={cartonsdata.billingDate}
+                                                rate={cartonsdata.rate}
+                                                totalamount={cartonsdata.totalAmount}
+                                                payment={cartonsdata.payment}
+                                                paymentdate={cartonsdata.paymentDate}
+                                                unloadingcharges={cartonsdata.unloadingCharges}
+                                                clientid={cartonsdata.clientid}
+                                                clientlist={clients}
+                                                onCountAdd={addCount}
+                                                showAlert={props.showAlert}
                                             />
                                         </ButtonToolbar>
                                     </td>

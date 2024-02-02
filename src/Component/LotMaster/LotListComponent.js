@@ -1,12 +1,19 @@
-import React, { Component, useState, useEffect, componentDidMount, componentDidUpdate, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useContext } from 'react'
 import { variables } from './../../Variables';
 import { Button, ButtonToolbar, Table } from 'react-bootstrap';
 import Moment from 'moment';
-import EditLotComponent from './EditLotComponent'
+// import EditLotComponent from './EditLotComponent'
 import AddLotComponent from './AddLotComponent'
+import AddLot from './AddLot'
+import EditLot from './EditLot'
+import loginContext from '../../Context/LoginContext';
+import { useNavigate } from 'react-router-dom'
 
+function LotListComponent(props) {
 
-function LotListComponent() {
+    let history = useNavigate();
+
+    const username = useContext(loginContext);
 
     const [lots, setLots] = useState([]);
     const [addModalShow, setAddModalShow] = useState(false);
@@ -39,11 +46,17 @@ function LotListComponent() {
     };
 
     useEffect((e) => {
-        fetchLots();
+        if (localStorage.getItem('token')) {
+            fetchLots();
+        }
+        else {
+            history("/login")
+        }
+
     }, [obj]);
 
     const fetchLots = async () => {
-        fetch(variables.REACT_APP_API + 'LotMaster')
+        await fetch(variables.REACT_APP_API + 'LotMaster')
             .then(response => response.json())
             .then(data => {
                 setLots(data);
@@ -58,9 +71,16 @@ function LotListComponent() {
                 method: 'DELETE',
                 header: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    //'auth-token': localStorage.getItem('token')
                 }
-            })
+            }).then(res => res.json())
+            .then((result) => {
+                props.showAlert("Successfully deleted", "info")
+            },
+                (error) => {
+                    props.showAlert("Error occurred!!", "danger")
+                });
 
             addCount(count);
         }
@@ -91,29 +111,21 @@ function LotListComponent() {
 
     return (
         <div>
-            <h2>Welcome to Lot List Page</h2>
+            <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
+                <h2>Welcome to Lot List Page</h2>
+            </div>
             {<ButtonToolbar>
                 <Button className="mr-2" variant="primary"
                     style={{ marginRight: "17.5px" }}
                     onClick={() => {
-                        setAddModalShow(true);
-                        setLotData(prev => ({
-                            lotid: 0,
-                            lotname: "",
-                            startdate: new Date(),
-                            enddate: new Date(),
-                            count: count
-                        }
-                        ));
+                        setAddModalShow({ addModalShow: true });
+                        setLotData({ count: count });
                     }}>Add Lot</Button>
 
-                <AddLotComponent show={addModalShow}
+                <AddLot show={addModalShow}
                     onHide={addModalClose}
-                    lotid={lotdata.lotid}
-                    lotname={lotdata.lotname}
-                    startdate={lotdata.startdate}
-                    enddate={lotdata.enddate}
                     onCountAdd={addCount}
+                    showAlert={props.showAlert}
                 />
             </ButtonToolbar>}
 
@@ -122,7 +134,7 @@ function LotListComponent() {
                     <tr align='center'>
                         <th>Lot Name</th>
                         <th>Start Date</th>
-                        <th>End Name</th>
+                        <th>End Date</th>
                         <th>Options</th>
                     </tr>
                 </thead>
@@ -136,8 +148,10 @@ function LotListComponent() {
                                 <td align='center'>
                                     {
                                         <ButtonToolbar>
-                                            <Button className="mr-2" variant="primary" style={{ marginRight: "17.5px" }} onClick={() => {
-                                                setEditModalShow(true);
+
+                                            <i className="fa-solid fa-pen-to-square" style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => {
+
+                                                setEditModalShow({ editModalShow: true });
                                                 setLotData(prev => ({
                                                     ...prev,
                                                     lotid: p.Id,
@@ -148,26 +162,26 @@ function LotListComponent() {
                                                 }
                                                 ));
 
-                                            }}>Edit</Button>
+                                            }}></i>
 
-                                            <Button className="mr-2" variant="danger" size="sm"
-                                                onClick={() => deleteLot(p.Id)}>
-                                                Delete
-                                            </Button>
+                                            {localStorage.getItem('isadmin') === 'true' &&
+                                                <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteLot(p.Id)}></i>}
 
-                                            <EditLotComponent show={editModalShow}
+
+                                            <EditLot show={editModalShow}
                                                 onHide={editModalClose}
                                                 lotid={lotdata.lotid}
                                                 lotname={lotdata.lotname}
                                                 startdate={lotdata.startdate}
                                                 enddate={lotdata.enddate}
                                                 onCountAdd={addCount}
+                                                showAlert={props.showAlert}
                                             />
                                         </ButtonToolbar>
                                     }
                                 </td>
                             </tr>
-                        )): ''
+                        )) : ''
                     }
                 </tbody>
             </Table>

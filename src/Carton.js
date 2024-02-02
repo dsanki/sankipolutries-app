@@ -1,7 +1,6 @@
 import React, { Component, useEffect } from 'react';
 import { variables } from './Variables';
-//import {tsConstructorType} from '@babel/types';
-//import { Table } from 'react-bootstrap';
+
 
 import { Button, ButtonToolbar, Table } from 'react-bootstrap'; 
 import { EditCartonModal } from './EditCartonModal';
@@ -9,6 +8,7 @@ import { AddCartonModal } from './AddCartonModal';
 import Moment from 'moment';
 import Pages from './Component/Pages';
 import CartonList from './Component/Carton/CartonList';
+import {useNavigate } from 'react-router-dom'
 
 
 export class Carton extends Component {
@@ -25,15 +25,21 @@ export class Carton extends Component {
             .then(data => {
                 this.setState({ cartons: data });
                 //this.setState({totalPages:Math.ceil(data.length / 20)});
+                console.log(3);
             });
 
+       
+
+    }
+
+    getClientList()
+    {
         fetch(variables.REACT_APP_API + 'client')
-            .then(responseClient => responseClient.json())
-            .then(dataClient => {
-                this.setState({ clients: dataClient });
-                //console.log(dataClient);
-            });
-
+        .then(responseClient => responseClient.json())
+        .then(dataClient => {
+            this.setState({ clients: dataClient });
+            //console.log(dataClient);
+        });
 
     }
     // refreshList(){
@@ -45,12 +51,28 @@ export class Carton extends Component {
     // }
 
     componentDidMount() {
+      
         this.refreshList();
+       this.getClientList();
     }
 
     componentDidUpdate() {
-        this.refreshList();
+        if(this.addModalShow==false || this.state.editModalShow==false)
+        {
+            this.refreshList();
+            this.getClientList();
+        }
+        
+        
     }
+
+    // componentDidUpdate(prevProps, prevState) {
+    //     // only update chart if the data has changed
+    //     if (prevProps.data !== this.props.data) {
+    //         this.refreshList();
+    //         console.log(2);
+    //     }
+    //   }
 
     
 

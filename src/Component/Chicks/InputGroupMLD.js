@@ -104,7 +104,7 @@ function InputGroupMLD(props) {
 
       <Form.Group controlId="DueChicks" as={Col}>
         <Form.Label>Due chicks</Form.Label>
-        <Form.Control type="number" name="DueChicks" required
+        <Form.Control type="number" name="DueChicks" required disabled 
           value={_due}
           placeholder="Due chicks" />
       </Form.Group>

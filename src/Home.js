@@ -1,12 +1,21 @@
-import React,{Component} from 'react';
+import React from 'react'
 
-export class Home extends Component{
+// function Home() {
+//   return (
+//         <div className="mt-5 d-flex justify-content-left">
+//            Welcome to Home page
+//         </div>
+//   )
+// }
 
-    render(){
-        return(
-            <div className="mt-5 d-flex justify-content-left">
-               Welcome to Home page
-            </div>
-        )
-    }
+// export default Home
+
+export const Home=()=>{
+    return (
+        <div className="mt-5 d-flex justify-content-left">
+           Welcome to Home page
+        </div>
+  )
 }
+
+
