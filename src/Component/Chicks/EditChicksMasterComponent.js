@@ -18,7 +18,8 @@ function EditChicksMasterComponent(props) {
         rate: props.rate,
         paid: props.paid,
         due: props.due,
-        paymentdate: props.paymentdate
+        paymentdate: props.paymentdate,
+        lotname: props.lotname
     };
 
     const [lot, setLotData] = useState(initialvalues);
@@ -55,16 +56,23 @@ function EditChicksMasterComponent(props) {
                 Rate: e.target.Rate.value,
                 Paid: e.target.Paid.value,
                 Due: e.target.Due.value,
-                PaymentDate: e.target.PaymentDate.value
+                PaymentDate: e.target.PaymentDate.value,
+                LotName: e.target.LotName.value
 
             })
         })
             .then(res => res.json())
             .then((result) => {
-                alert(result);
+                if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
+                    closeModal();
+                    props.showAlert("Successfully updated", "info")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                }
             },
                 (error) => {
-                    alert('Failed');
+                    props.showAlert("Error occurred!!", "danger")
                 })
     };
 
@@ -110,6 +118,20 @@ function EditChicksMasterComponent(props) {
                                             hidden />
                                     </div>
                                 </div>
+
+                                <Row className="mb-12">
+                                    <Form.Group controlId="LotName" as={Col} >
+                                        <Form.Label>Lot name</Form.Label>
+                                        <Col >
+                                            <Form.Control type="text" name="LotName" required
+                                                defaultValue={props.lotname}
+                                                placeholder="Lot name" />
+                                        </Col>
+                                    </Form.Group>
+                                    <Form.Control.Feedback type="invalid">
+                                        Please enter lot name
+                                    </Form.Control.Feedback>
+                                </Row>
 
                                 <Form.Group as={Row} className="mb-3" controlId="date">
                                     <Form.Label column sm={3}>Date</Form.Label>

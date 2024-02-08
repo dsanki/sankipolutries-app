@@ -25,7 +25,8 @@ function AddChicksMasterComponent(props) {
         rate: props.rate,
         paid: props.paid,
         due: props.due,
-        paymentdate: props.paymentdate
+        paymentdate: props.paymentdate,
+        lotname: props.lotname
     };
 
     const [lot, setLotData] = useState(initialvalues);
@@ -37,48 +38,57 @@ function AddChicksMasterComponent(props) {
     };
 
     const handleSubmit = (e) => {
-
+        e.preventDefault();
         const form = e.currentTarget;
 
         if (form.checkValidity() === false) {
-            e.preventDefault();
+
             e.stopPropagation();
+        }
+        else {
+            //const methodName=(e.target.id.value  !==null && e.target.id.value !=="0" ?'PUT':'POST');
+
+            fetch(variables.REACT_APP_API + 'ChicksMaster', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    Date: e.target.date.value,
+                    Chicks: e.target.Chicks.value,
+                    ExtraChicks: e.target.ExtraChicks.value,
+                    TotalChicks: e.target.TotalChicks.value,
+                    Mortality: e.target.Mortality.value,
+                    LambChicks: e.target.LambChicks.value,
+                    DueChicks: e.target.DueChicks.value,
+                    TotalAmount: e.target.TotalAmount.value,
+                    Rate: e.target.Rate.value,
+                    Paid: e.target.Paid.value,
+                    Due: e.target.Due.value,
+                    PaymentDate: e.target.PaymentDate.value,
+                    LotName: e.target.LotName.value,
+                })
+            })
+                .then(res => res.json())
+                .then((result) => {
+                    if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
+                        closeModal();
+                        props.showAlert("Successfully added", "info")
+                    }
+                    else {
+                        props.showAlert("Error occurred!!", "danger")
+                    }
+                },
+                    (error) => {
+                        props.showAlert("Error occurred!!", "danger")
+                    })
         }
 
         setValidated(true);
 
 
-    const methodName=(e.target.id.value  !==null && e.target.id.value !=="0" ?'PUT':'POST');
 
-        fetch(variables.REACT_APP_API + 'ChicksMaster', {
-            method: methodName,
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                Id: e.target.id.value,
-                Date: e.target.date.value,
-                Chicks: e.target.Chicks.value,
-                ExtraChicks: e.target.ExtraChicks.value,
-                TotalChicks: e.target.TotalChicks.value,
-                Mortality: e.target.Mortality.value,
-                LambChicks: e.target.LambChicks.value,
-                DueChicks: e.target.DueChicks.value,
-                TotalAmount: e.target.TotalAmount.value,
-                Rate: e.target.Rate.value,
-                Paid: e.target.Paid.value,
-                Due: e.target.Due.value,
-                PaymentDate: e.target.PaymentDate.value
-            })
-        })
-            .then(res => res.json())
-            .then((result) => {
-                alert(result);
-            },
-                (error) => {
-                    alert('Failed');
-                })
 
     };
 
@@ -103,37 +113,41 @@ function AddChicksMasterComponent(props) {
                     <Row>
                         <Col sm={12}>
                             <Form onSubmit={handleSubmit} noValidate validated={validated}>
-                                <div class="form-group row">
-                                    <Form.Label hidden>Id</Form.Label>
-                                    <div class="col-sm-10">
-                                        <Form.Control type="text" name="id" required
-                                            disabled
-                                            defaultValue={props.id}
-                                            placeholder="Id"
-                                            hidden />
-                                    </div>
-                                </div>
 
 
-                                <InputGroupCET chicks={props.chicks}
-                                    extrachicks={props.extrachicks}
-                                    totalchicks={props.totalchicks} />
+                                <Row className="mb-4">
+                                    <Form.Group as={Col} controlId="LotName">
+                                        <Form.Label>Lot name</Form.Label>
+                                        <Form.Control type="text" name="LotName" required
+                                            placeholder="Lot name"
+                                        />
+                                        <Form.Control.Feedback type="invalid">
+                                            Please enter lot name
+                                        </Form.Control.Feedback>
+                                    </Form.Group>
 
-                                <InputGroupMLD mortality={props.mortality}
-                                    lamb={props.lambchicks}
-                                    due={props.duechicks} />
+                                </Row>
 
-                               
+
+                                <InputGroupCET chicks={null}
+                                    extrachicks={null}
+                                    totalchicks={null} />
+
+                                <InputGroupMLD mortality={null}
+                                    lamb={null}
+                                    due={null} />
+
+
                                 <Row className="mb-12">
                                     <Form.Group as={Col} controlId="date">
                                         <Form.Label>Date</Form.Label>
-                                        <DateComponent date={props.date} />
+                                        <DateComponent date={null} />
                                     </Form.Group>
                                     <Form.Group controlId="Rate" as={Col} >
                                         <Form.Label>Rate</Form.Label>
 
                                         <Form.Control type="number" name="Rate" required
-                                            defaultValue={props.rate}
+
                                             placeholder="Rate" />
                                         <Form.Control.Feedback type="invalid">
                                             Please provide rate.
@@ -145,7 +159,7 @@ function AddChicksMasterComponent(props) {
                                     <Form.Group controlId="TotalAmount" as={Col}>
                                         <Form.Label>Total amount</Form.Label>
                                         <Form.Control type="number" name="TotalAmount" required
-                                            defaultValue={props.totalamount}
+
                                             placeholder="Total amount" />
                                         <Form.Control.Feedback type="invalid">
                                             Please provide total.
@@ -155,7 +169,7 @@ function AddChicksMasterComponent(props) {
                                     <Form.Group controlId="Paid" as={Col}>
                                         <Form.Label>Paid</Form.Label>
                                         <Form.Control type="number" name="Paid" required
-                                            defaultValue={props.paid}
+
                                             placeholder="Paid" />
                                         <Form.Control.Feedback type="invalid">
                                             Please provide paid amount.
@@ -165,8 +179,11 @@ function AddChicksMasterComponent(props) {
                                     <Form.Group controlId="Due" as={Col}>
                                         <Form.Label>Due</Form.Label>
                                         <Form.Control type="number" name="Due" required
-                                            defaultValue={props.due}
+
                                             placeholder="Due" />
+                                             <Form.Control.Feedback type="invalid">
+                                            Please provide due amount.
+                                        </Form.Control.Feedback>
                                     </Form.Group>
                                 </Row>
                                 <Form.Group><br /></Form.Group>
@@ -174,7 +191,7 @@ function AddChicksMasterComponent(props) {
                                 <Form.Group controlId="PaymentDate" as={Row} className="mb-3">
                                     <Form.Label column sm={3}>PaymentDate</Form.Label>
                                     <Col sm={4}>
-                                        <DateComponent date={props.paymentdate} />
+                                        <DateComponent date={null} />
                                     </Col>
                                 </Form.Group>
 

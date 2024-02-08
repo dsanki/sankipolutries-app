@@ -8,7 +8,7 @@ import AddChicksMasterComponent from './AddChicksMasterComponent'
 import { useNavigate } from 'react-router-dom'
 //
 
-function ChicksMasterComponent() {
+function ChicksMasterComponent(props) {
     let history = useNavigate();
     const [chicks, setChicks] = useState([]);
     const [addModalShow, setAddModalShow] = useState(false);
@@ -27,7 +27,8 @@ function ChicksMasterComponent() {
         rate: null,
         paid: null,
         due: null,
-        paymentdate: ""
+        paymentdate: "",
+        lotname:null
     };
 
     const [count, setCount] = useState(0);
@@ -121,6 +122,7 @@ function ChicksMasterComponent() {
                         style={{ marginRight: "17.5px" }}
                         onClick={() => {
                             setAddModalShow(true);
+                            
                             setChicksData(prev => ({
                                 id: 0,
                                 date: "",
@@ -135,7 +137,8 @@ function ChicksMasterComponent() {
                                 paid: null,
                                 due: null,
                                 paymentdate: "",
-                                count: count
+                                count: count,
+                                lotname:null
 
                             }
                             ));
@@ -143,21 +146,8 @@ function ChicksMasterComponent() {
 
                     <AddChicksMasterComponent show={addModalShow}
                         onHide={addModalClose}
-                        id={chicksdata.id}
-                        date={chicksdata.date}
-                        chicks={chicksdata.chicks}
-                        extrachicks={chicksdata.extrachicks}
-                        totalchicks={chicksdata.totalchicks}
-                        mortality={chicksdata.mortality}
-                        lambchicks={chicksdata.lambchicks}
-                        duechicks={chicksdata.duechicks}
-                        totalamount={chicksdata.totalamount}
-                        rate={chicksdata.rate}
-                        paid={chicksdata.paid}
-                        due={chicksdata.due}
-                        paymentdate={chicksdata.paymentdate}
                         onCountAdd={addCount}
-                        method="POST"
+                        showAlert={props.showAlert}
                     />
                 </ButtonToolbar>
             }
@@ -165,6 +155,7 @@ function ChicksMasterComponent() {
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
                     <tr align='center'>
+                        <th>Lot name</th>
                         <th>Date</th>
                         <th>Chicks</th>
                         <th>Extra cks</th>
@@ -184,6 +175,7 @@ function ChicksMasterComponent() {
                     {
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => (
                             <tr key={p.Id} align='center'>
+                                 <td align=''>{p.LotName}</td>
                                 <td align='center'>{Moment(p.Date).format('DD-MMM-YYYY')}</td>
                                 <td align='center'>{p.Chicks}</td>
                                 <td align='center'>{p.ExtraChicks}</td>
@@ -239,7 +231,8 @@ function ChicksMasterComponent() {
                                                         paid: p.Paid,
                                                         due: p.Due,
                                                         paymentdate: p.PaymentDate,
-                                                        count: count
+                                                        count: count,
+                                                        lotname:p.LotName
                                                     }
                                                     ));
                                                 }}></i>
@@ -248,7 +241,7 @@ function ChicksMasterComponent() {
                                                 onClick={() => deleteChicks(p.Id)}>
                                                 Delete
                                             </Button> */}
-{localStorage.getItem('isadmin')==='False' && 
+{localStorage.getItem('isadmin')==='true' && 
                                             <i className="fa-solid fa-trash" style={{color: '#f81616',marginLeft: '15px'}} onClick={() => deleteChicks(p.Id)}></i>}
 
                                             <AddChicksMasterComponent show={addModalShow}
@@ -268,6 +261,7 @@ function ChicksMasterComponent() {
                                                 paymentdate={chicksdata.paymentdate}
                                                 onCountAdd={addCount}
                                                 method="PUT"
+                                                lotname={chicksdata.lotname}
                                             />
 
                                             {/* <EditChicksMasterComponent show={editModalShow}
