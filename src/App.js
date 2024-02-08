@@ -8,10 +8,12 @@ import LotListComponent from './Component/LotMaster/LotListComponent';
 import NavComponent  from './Component/Nav/NavComponent';
 import ChicksMasterComponent from './Component/Chicks/ChicksMasterComponent';
 import LoginComponent from './Component/Login';
-
+import ClientList from './Component/Client/ClientList'
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import LotState from './Context/LotState';
 import Alert from './Component/Alert/Alert';
+import ShedLotMap from './Component/Chicks/ShedLotMap';
+import EggDailyTracker from './Component/EggDailyTracker/EggDailyTracker';
 
 function App() {
 
@@ -44,7 +46,13 @@ function App() {
               <Route path="/carton" element={<CartonList  showAlert={showAlert}/>} />
               <Route path="/lotList" element={<LotListComponent  showAlert={showAlert}/>} />
               <Route path="/chicksmaster" element={<ChicksMasterComponent showAlert={showAlert}/>} />
+              <Route path="/clientlist" element={<ClientList showAlert={showAlert}/>} />
               <Route path="/login" element={<LoginComponent showAlert={showAlert}/>} />
+              <Route path="/shedlotmap" element={<ShedLotMap showAlert={showAlert}/>} />
+              <Route path="/eggdailytracker" element={<EggDailyTracker showAlert={showAlert}/>} />
+              
+              
+              
             </Routes>
           </div>
          
