@@ -14,6 +14,7 @@ import LotState from './Context/LotState';
 import Alert from './Component/Alert/Alert';
 import ShedLotMap from './Component/Chicks/ShedLotMap';
 import EggDailyTracker from './Component/EggDailyTracker/EggDailyTracker';
+import MortalityList from './Component/Chicks/MortalityList'
 
 function App() {
 
@@ -50,6 +51,8 @@ function App() {
               <Route path="/login" element={<LoginComponent showAlert={showAlert}/>} />
               <Route path="/shedlotmap" element={<ShedLotMap showAlert={showAlert}/>} />
               <Route path="/eggdailytracker" element={<EggDailyTracker showAlert={showAlert}/>} />
+              <Route path="/mortalitylist" element={<MortalityList showAlert={showAlert}/>} />
+              
               
               
               
