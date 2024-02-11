@@ -4,6 +4,7 @@ import { Button, ButtonToolbar, Table } from 'react-bootstrap';
 import Moment from 'moment';
 import { useNavigate } from 'react-router-dom'
 import AddEggDailyTracker from './AddEggDailyTracker'
+import EditEggDailyTracker from './EditEggDailyTracker'
 
 function EggDailyTracker(props) {
 
@@ -17,13 +18,16 @@ function EggDailyTracker(props) {
 
     const [shedlist, setShedList] = useState([]);
     const [eggtrackerlist, setEggDailyTrackerList] = useState([]);
-    const [shedlotmaplist, setShedLotMapList] = useState(0);
+    const [shedlotmaplist, setShedLotMapList] = useState([]);
+
+    //const [lotname, setLotName] = useState();
 
     const initialvalues = {
         id: "",
         date: "",
         shedid: "",
         lotid: "",
+        totalbirds:"",
         totaleggs: "",
         brokeneggs: "",
         okeggs: "",
@@ -114,20 +118,20 @@ function EggDailyTracker(props) {
 
     const deleteTracker = (id) => {
         if (window.confirm('Are you sure?')) {
-            // fetch(variables.REACT_APP_API + 'Client/' + clientid, {
-            //     method: 'DELETE',
-            //     header: {
-            //         'Accept': 'application/json',
-            //         'Content-Type': 'application/json',
-            //         //'auth-token': localStorage.getItem('token')
-            //     }
-            // }).then(res => res.json())
-            // .then((result) => {
-            //     props.showAlert("Successfully deleted", "info")
-            // },
-            //     (error) => {
-            //         props.showAlert("Error occurred!!", "danger")
-            //     });
+            fetch(variables.REACT_APP_API + 'EggProductionDailyTracker/' + id, {
+                method: 'DELETE',
+                header: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    //'auth-token': localStorage.getItem('token')
+                }
+            }).then(res => res.json())
+            .then((result) => {
+                props.showAlert("Successfully deleted", "info")
+            },
+                (error) => {
+                    props.showAlert("Error occurred!!", "danger")
+                });
 
             addCount(count);
         }
@@ -215,6 +219,8 @@ function EggDailyTracker(props) {
                                                         date: egg.Date,
                                                         shedid: egg.ShedId,
                                                         lotid: egg.LotId,
+                                                        lotname:lotname,
+                                                        totalbirds:egg.TotalBirds,
                                                         totaleggs: egg.TotalEggs,
                                                         brokeneggs: egg.BrokenEggs,
                                                         okeggs: egg.OkEggs,
@@ -231,21 +237,24 @@ function EggDailyTracker(props) {
 
 
 
-                                                {/* <EditCarton show={editModalShow}
+                                                <EditEggDailyTracker show={editModalShow}
                                                     onHide={editModalClose}
-                                                    id={cartonsdata.cartonid}
-                                                    date={cartonsdata.quanTity}
-                                                    shedid={cartonsdata.billingDate}
-                                                    lotid={cartonsdata.rate}
-                                                    totaleggs={cartonsdata.totalAmount}
-                                                    brokeneggs={cartonsdata.payment}
-                                                    okeggs={cartonsdata.paymentDate}
-                                                    feedintech={cartonsdata.unloadingCharges}
-                                                    productionpercentage={cartonsdata.clientid}
+                                                    id={eggdata.id}
+                                                    date={eggdata.date}
+                                                    shedid={eggdata.shedid}
+                                                    lotid={eggdata.lotid}
+                                                    lotname={lotname}
+                                                    totalbirds={eggdata.totalbirds}
+                                                    totaleggs={eggdata.totaleggs}
+                                                    brokeneggs={eggdata.brokeneggs}
+                                                    okeggs={eggdata.okeggs}
+                                                    feedintech={eggdata.feedintech}
+                                                    productionpercentage={eggdata.productionpercentage}
                                                     shedlotmaplist={shedlotmaplist}
                                                     onCountAdd={addCount}
                                                     showAlert={props.showAlert}
-                                                /> */}
+                                                    shedlist={shedlist}
+                                                />
                                             </ButtonToolbar>
                                         </td>
 
