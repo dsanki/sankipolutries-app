@@ -22,7 +22,8 @@ export default function NavComponent(props) {
 
 
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-            <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" 
+            aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
             </button>
             {
@@ -32,30 +33,65 @@ export default function NavComponent(props) {
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="nav nav-pills">
                         <li className={`nav-item ${location.pathname === "/" ? "active" : ""}`}>
-                            <a className={`nav-link ${location.pathname === "/" ? "active" : ""}`} style={{fontSize:'20px'}} href="/">Home <span className="sr-only">(current)</span></a>
+                            <a className={`nav-link ${location.pathname === "/" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/">Home
+                                <span className="sr-only">(current)</span></a>
                         </li>
                         <li className="nav-item">
-                            <a className={`nav-link ${location.pathname === "/lotList" ? "active" : ""}`} style={{fontSize:'20px'}} href="/lotList">Lot Master <span className="sr-only">(current)</span></a>
+                            <a className={`nav-link ${location.pathname === "/lotList" ? "active" : ""}`} style={{fontSize:'20px'}} href="/lotList">Lot Master 
+                            <span className="sr-only">(current)</span></a>
                         </li>
                         <li className="nav-item">
-                            <a className={`nav-link ${location.pathname === "/carton" ? "active" : ""}`} style={{fontSize:'20px'}} href="/carton">Carton Master <span className="sr-only">(current)</span></a>
+                            <a className={`nav-link ${location.pathname === "/carton" ? "active" : ""}`} style={{fontSize:'20px'}} href="/carton">Carton Master 
+                            <span className="sr-only">(current)</span></a>
                         </li>
                         <li className="nav-item">
-                            <a className={`nav-link ${location.pathname === "/chicksmaster" ? "active" : ""}`} style={{fontSize:'20px'}} href="/chicksmaster">Chicks Master <span className="sr-only">(current)</span></a>
+                            <a className={`nav-link ${location.pathname === "/chicksmaster" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/chicksmaster">Chicks Master
+                                <span className="sr-only">(current)</span></a>
                         </li>
                         <li className="nav-item">
-                            <a className={`nav-link ${location.pathname === "/clientlist" ? "active" : ""}`} style={{fontSize:'20px'}} href="/clientlist">Client Master <span className="sr-only">(current)</span></a>
+                            <a className={`nav-link ${location.pathname === "/clientlist" ? "active" : ""}`} style={{fontSize:'20px'}} href="/clientlist">Client Master 
+                            <span className="sr-only">(current)</span></a>
                         </li>
                         <li className="nav-item">
-                            <a className={`nav-link ${location.pathname === "/shedlotmap" ? "active" : ""}`} style={{fontSize:'20px'}} href="/shedlotmap">Shed Lot Map <span className="sr-only">(current)</span></a>
+                            <a className={`nav-link ${location.pathname === "/shedlotmap" ? "active" : ""}`} style={{fontSize:'20px'}} href="/shedlotmap">Shed Lot Map 
+                            <span className="sr-only">(current)</span></a>
                         </li>
 
                         <li className="nav-item">
-                            <a className={`nav-link ${location.pathname === "/eggdailytracker" ? "active" : ""}`} style={{fontSize:'20px'}} href="/eggdailytracker">Egg Daily Tracker <span className="sr-only">(current)</span></a>
+                            <a className={`nav-link ${location.pathname === "/eggdailytracker" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/eggdailytracker">Egg Daily Tracker
+                                <span className="sr-only">(current)</span></a>
                         </li>
 
-                        
-                        
+                        <li className="nav-item">
+                            <a className={`nav-link ${location.pathname === "/mortalitylist" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/mortalitylist">Mortality Tracker
+                                <span className="sr-only">(current)</span></a>
+                        </li>
+                        <li className="nav-item">
+                            <a className={`nav-link ${location.pathname === "/customerlist" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/customerlist">Customers
+                                <span className="sr-only">(current)</span></a>
+                        </li>
+
+
+
+                        <li className="nav-item dropdown">
+                            <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Modules
+                            </a>
+                            <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                <a className="dropdown-item" style={{ fontSize: '20px' }} href="/carton">Carton Master
+                                    <span className="sr-only">(current)</span></a>
+                                {/* <a className={`dropdown-item ${location.pathname === "/clientlist" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/clientlist">Client Master
+                                    <span className="sr-only">(current)</span></a>
+                                <a className={`dropdown-item ${location.pathname === "/shedlotmap" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/shedlotmap">Shed Lot Map
+                                    <span className="sr-only">(current)</span></a>
+                                <a className="dropdown-item" href="#">Something else here</a>
+                                <a className={`dropdown-item ${location.pathname === "/lotList" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/lotList">Lot Master
+                                    <span className="sr-only">(current)</span></a> */}
+                            </div>
+                        </li>
+
+
+
                     </ul>
 
                 </div>
@@ -65,8 +101,9 @@ export default function NavComponent(props) {
             </form>
             {localStorage.getItem('username') !== null &&
                 <label className="custom-file-label" style={{
-                color: "lightblue"}}
-            > Welcome <strong>{localStorage.getItem('username')}</strong></label>
+                    color: "lightblue"
+                }}
+                > Welcome <strong>{localStorage.getItem('username')}</strong></label>
             }
             <button
                 onClick={() => {
