@@ -2,8 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { variables } from '../../Variables';
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'
-import DateComponent from '../DateComponent';
-import Moment from 'moment';
 import moment from 'moment';
 function CustomerList(props) {
 
@@ -297,13 +295,17 @@ function CustomerList(props) {
                             const cname = ctype.length > 0 ? ctype[0].ProductName : "";
                             return (
                                 <tr align='center' key={p.ID}>
-                                    <td align='left'>{p.FirstName}</td>
+                                    <td align='left'>
+                                    <a href={`/eggsale/${p.ID}`}>{p.FirstName}
+                                <span className="sr-only">(current)</span></a>
+                                        
+                                        </td>
                                     <td align='left'>{p.MiddleName}</td>
                                     <td align='left'>{p.LastName}</td>
                                     <td align='left'>{p.MobileNo}</td>
                                     <td align='left'>{cname}</td>
                                     <td align='left'>{p.Email}</td>
-                                    <td align='left'>{Moment(p.DOB).format('DD-MMM-YYYY')}</td>
+                                    <td align='left'>{moment(p.DOB).format('DD-MMM-YYYY')}</td>
                                     {/* <td>
                                         <ButtonToolbar>
                                             <Button className="mr-2" variant="primary"

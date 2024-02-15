@@ -16,6 +16,8 @@ import ShedLotMap from './Component/Chicks/ShedLotMap';
 import EggDailyTracker from './Component/EggDailyTracker/EggDailyTracker';
 import MortalityList from './Component/Chicks/MortalityList'
 import CustomerList from './Component/Customer/CustomerList'
+import EggSale from './Component/EggSale/EggSale';
+import Medicine from './Component/Medicine/Medicine';
 
 function App() {
 
@@ -54,6 +56,8 @@ function App() {
               <Route path="/eggdailytracker" element={<EggDailyTracker showAlert={showAlert}/>} />
               <Route path="/mortalitylist" element={<MortalityList showAlert={showAlert}/>} />
               <Route path="/customerlist" element={<CustomerList showAlert={showAlert}/>} />
+              <Route path="/eggsale/:id" element={<EggSale showAlert={showAlert}/>} />
+              <Route path="/Medicine" element={<Medicine showAlert={showAlert}/>} />
               
               
               
