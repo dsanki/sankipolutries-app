@@ -1,7 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 import React, { useState } from 'react'
-import { Home } from './Home';
+import  Home  from './Home';
 //import { Carton } from './Carton';
 import CartonList from './Component/Carton/CartonList';
 import LotListComponent from './Component/LotMaster/LotListComponent';
@@ -18,7 +18,8 @@ import MortalityList from './Component/Chicks/MortalityList'
 import CustomerList from './Component/Customer/CustomerList'
 import EggSale from './Component/EggSale/EggSale';
 import Medicine from './Component/Medicine/Medicine';
-
+import CollapsibleExample from './Component/Nav/CollapsibleExample';
+import RawMaterials from './Component/RawMaterials/RawMaterials'
 function App() {
 
   const [alert, setAlert] = useState(null);
@@ -44,6 +45,7 @@ function App() {
             </h3> */}
 
             <NavComponent />
+            <CollapsibleExample/>
             <Alert alert={alert}/>
             <Routes>
               <Route path="/" element={<Home  showAlert={showAlert}/>} />
@@ -58,6 +60,7 @@ function App() {
               <Route path="/customerlist" element={<CustomerList showAlert={showAlert}/>} />
               <Route path="/eggsale/:id" element={<EggSale showAlert={showAlert}/>} />
               <Route path="/Medicine" element={<Medicine showAlert={showAlert}/>} />
+              <Route path="/RawMaterials" element={<RawMaterials showAlert={showAlert}/>} />
               
               
               

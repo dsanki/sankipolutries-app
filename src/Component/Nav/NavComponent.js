@@ -1,7 +1,11 @@
 import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { Navbar, Nav } from 'react-bootstrap';
+import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
+
+import "bootstrap/dist/css/bootstrap.min.css"; 
+import "@popperjs/core"; 
+import "bootstrap";
 
 export default function NavComponent(props) {
 
@@ -20,10 +24,10 @@ export default function NavComponent(props) {
 
     return (
 
-
+<div>
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-            <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" 
-            aria-expanded="false" aria-label="Toggle navigation">
+            <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
             </button>
             {
@@ -37,24 +41,24 @@ export default function NavComponent(props) {
                                 <span className="sr-only">(current)</span></a>
                         </li>
                         <li className="nav-item">
-                            <a className={`nav-link ${location.pathname === "/lotList" ? "active" : ""}`} style={{fontSize:'20px'}} href="/lotList">Lot Master 
-                            <span className="sr-only">(current)</span></a>
+                            <a className={`nav-link ${location.pathname === "/lotList" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/lotList">Lot Master
+                                <span className="sr-only">(current)</span></a>
                         </li>
                         <li className="nav-item">
-                            <a className={`nav-link ${location.pathname === "/carton" ? "active" : ""}`} style={{fontSize:'20px'}} href="/carton">Carton Master 
-                            <span className="sr-only">(current)</span></a>
+                            <a className={`nav-link ${location.pathname === "/carton" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/carton">Carton Master
+                                <span className="sr-only">(current)</span></a>
                         </li>
                         <li className="nav-item">
                             <a className={`nav-link ${location.pathname === "/chicksmaster" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/chicksmaster">Chicks Master
                                 <span className="sr-only">(current)</span></a>
                         </li>
                         <li className="nav-item">
-                            <a className={`nav-link ${location.pathname === "/clientlist" ? "active" : ""}`} style={{fontSize:'20px'}} href="/clientlist">Client Master 
-                            <span className="sr-only">(current)</span></a>
+                            <a className={`nav-link ${location.pathname === "/clientlist" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/clientlist">Client Master
+                                <span className="sr-only">(current)</span></a>
                         </li>
                         <li className="nav-item">
-                            <a className={`nav-link ${location.pathname === "/shedlotmap" ? "active" : ""}`} style={{fontSize:'20px'}} href="/shedlotmap">Shed Lot Map 
-                            <span className="sr-only">(current)</span></a>
+                            <a className={`nav-link ${location.pathname === "/shedlotmap" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/shedlotmap">Shed Lot Map
+                                <span className="sr-only">(current)</span></a>
                         </li>
 
                         <li className="nav-item">
@@ -81,9 +85,26 @@ export default function NavComponent(props) {
                                 <span className="sr-only">(current)</span></a>
                         </li>
 
-                        
+                        <li className="nav-item">
+                            <a className={`nav-link ${location.pathname === "/rawmaterials" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/rawmaterials">Raw materials
+                                <span className="sr-only">(current)</span></a>
+                        </li>
 
                         
+
+                        <NavDropdown title="Dropdown" id="basic-nav-dropdown">
+                            <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
+                            <NavDropdown.Item href="#action/3.2">
+                                Another action
+                            </NavDropdown.Item>
+                            <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
+                            <NavDropdown.Divider />
+                            <NavDropdown.Item href="#action/3.4">
+                                Separated link
+                            </NavDropdown.Item>
+                        </NavDropdown>
+
+
 
                         <li className="nav-item dropdown">
                             <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -127,6 +148,31 @@ export default function NavComponent(props) {
 
 
         </nav>
+
+
+<nav className="navbar navbar-expand-lg navbar-light bg-light">
+  <a className="navbar-brand" href="#">Navbar</a>
+  <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" 
+  aria-expanded="false" aria-label="Toggle navigation">
+    <span className="navbar-toggler-icon"></span>
+  </button>
+  <div className="collapse navbar-collapse" id="navbarNavDropdown">
+    <ul className="navbar-nav">
+     
+      <li className="nav-item dropdown">
+        <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Dropdown link
+        </a>
+        <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+          <a className="dropdown-item" href="#">Action</a>
+          <a claclassNamess="dropdown-item" href="#">Another action</a>
+          <a className="dropdown-item" href="#">Something else here</a>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
+</div>
 
         //     <Navbar bg="dark" expand="lg">
         //         <Navbar.Toggle aria-controls="basic-navbar-nav" />
