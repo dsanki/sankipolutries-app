@@ -93,7 +93,7 @@ function AddChicksMasterComponent(props) {
     };
 
     return (
-        <div className="container">
+        <div className="ContainerOverride">
             <Modal
                 {...props}
                 size="lg"
@@ -142,6 +142,9 @@ function AddChicksMasterComponent(props) {
                                     <Form.Group as={Col} controlId="date">
                                         <Form.Label>Date</Form.Label>
                                         <DateComponent date={null} />
+                                        <Form.Control.Feedback type="invalid">
+                                                    Please select date
+                                                </Form.Control.Feedback>
                                     </Form.Group>
                                     <Form.Group controlId="Rate" as={Col} >
                                         <Form.Label>Rate</Form.Label>
@@ -191,8 +194,9 @@ function AddChicksMasterComponent(props) {
                                 <Form.Group controlId="PaymentDate" as={Row} className="mb-3">
                                     <Form.Label column sm={3}>PaymentDate</Form.Label>
                                     <Col sm={4}>
-                                        <DateComponent date={null} />
+                                        <DateComponent date={null} isRequired={true} />
                                     </Col>
+                                    
                                 </Form.Group>
 
                                 <Form.Group>
