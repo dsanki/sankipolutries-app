@@ -36,3 +36,54 @@
     transform: rotate(360deg);
   }
 }
+
+.ContainerOverride
+{
+  width: 100%;
+  padding-right: var(--bs-gutter-x, .75rem);
+  padding-left: var(--bs-gutter-x, .75rem);
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 1900px;
+  background-color: transparent !important;
+}
+
+.navbar {background: linear-gradient(45deg, #0d6efd, #df9292);}
+
+.navbar .navbar-nav .nav-link
+{
+  color:#fff;
+}
+
+
+.navbar .navbar-nav .dropdown-menu
+{
+  background: linear-gradient(45deg, #0d6efd, #df9292);
+}
+.navbar .navbar-nav .dropdown-menu .nav-link
+{
+  color:#fff;
+}
+
+.navbar .navbar-nav .dropdown-menu .nav-link
+{
+  color:#fff;
+}
+
+.navbar .navbar-brand
+{
+  color:#fff;
+  font-weight: bold;
+  font-size: 30px;
+}
+
+.btn.btn-primary.mx-2.logoutbtn
+{
+  background-color: #dfc5c5;
+  border-color: #fff;
+  color: #fff;
+}
+
+
+
+

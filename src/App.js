@@ -20,6 +20,8 @@ import EggSale from './Component/EggSale/EggSale';
 import Medicine from './Component/Medicine/Medicine';
 import CollapsibleExample from './Component/Nav/CollapsibleExample';
 import RawMaterials from './Component/RawMaterials/RawMaterials'
+import BirdSale from './Component/BirdSale/BirdSale'
+import NavTest from './Component/Nav/NavTest'
 function App() {
 
   const [alert, setAlert] = useState(null);
@@ -39,13 +41,14 @@ function App() {
       <LotState>
         <BrowserRouter>
         
-          <div className="container">
+          <div className="ContainerOverride">
             {/* <h3 className="m-3 d-flex justify-content-center">
               Welcome to Sanki Poultries Portal
             </h3> */}
 
-            <NavComponent />
-            <CollapsibleExample/>
+            {/* <NavComponent /> */}
+            {/* <CollapsibleExample/> */}
+            <NavTest/>
             <Alert alert={alert}/>
             <Routes>
               <Route path="/" element={<Home  showAlert={showAlert}/>} />
@@ -59,11 +62,9 @@ function App() {
               <Route path="/mortalitylist" element={<MortalityList showAlert={showAlert}/>} />
               <Route path="/customerlist" element={<CustomerList showAlert={showAlert}/>} />
               <Route path="/eggsale/:id" element={<EggSale showAlert={showAlert}/>} />
-              <Route path="/Medicine" element={<Medicine showAlert={showAlert}/>} />
-              <Route path="/RawMaterials" element={<RawMaterials showAlert={showAlert}/>} />
-              
-              
-              
+              <Route path="/medicine" element={<Medicine showAlert={showAlert}/>} />
+              <Route path="/rawmaterials" element={<RawMaterials showAlert={showAlert}/>} />
+              <Route path="/birdsale" element={<BirdSale showAlert={showAlert}/>} />
               
             </Routes>
           </div>
