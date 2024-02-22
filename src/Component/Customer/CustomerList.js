@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { variables } from '../../Variables';
-import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
+import { Modal, Button, ButtonToolbar, Table, Row, Col, Form, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
+
 function CustomerList(props) {
 
     let history = useNavigate();
@@ -18,6 +19,7 @@ function CustomerList(props) {
     const [editModalShow, setEditModalShow] = useState(false);
     const [addModalShow, setAddModalShow] = useState(false);
     const [photofilename, setPhotoFileName] = useState("annonymous.jpg");
+    //const [isCustomerTypeValid, setCustomerTypeValid] = useState(false);
 
     let addModalClose = () => {
         setAddModalShow(false);
@@ -97,27 +99,37 @@ function CustomerList(props) {
     }
 
     const custTypeChange = (e) => {
-        setCustData({ ...custdata, CustomerTypeId: e.target.value });
+        if (e.target.value === "-1" || e.target.value === -1) {
+            //  setCustomerTypeValid(false);
+
+        }
+        else {
+            //setCustomerTypeValid(true);
+            setCustData({ ...custdata, CustomerTypeId: e.target.value });
+        }
+
+
     }
 
-    const deleteCustomer=(id)=>{
+    const deleteCustomer = (id) => {
 
         if (window.confirm('Are you sure?')) {
             fetch(variables.REACT_APP_API + 'Customer/' + id, {
                 method: 'DELETE',
                 header: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
                 }
             }).then(res => res.json())
-            .then((result) => {
-                addCount(count);
-                props.showAlert("Successfully deleted", "info")
-            },
-                (error) => {
-                    props.showAlert("Error occurred!!", "danger")
-                });
-            
+                .then((result) => {
+                    addCount(count);
+                    props.showAlert("Successfully deleted", "info")
+                },
+                    (error) => {
+                        props.showAlert("Error occurred!!", "danger")
+                    });
+
         }
 
     }
@@ -138,6 +150,7 @@ function CustomerList(props) {
             .then(response => response.json())
             .then(data => {
                 setCustomerList(data);
+                setTotalPages(Math.ceil(data.length / variables.PAGE_PAGINATION_NO));
             });
     }
 
@@ -167,45 +180,50 @@ function CustomerList(props) {
     }
     const handleSubmitEdit = (e) => {
         e.preventDefault();
+        var _form = e.target.closest('.needs-validation');
+        console.log(_form.checkValidity());
+        if (!_form.checkValidity()) {
+            e.stopPropagation();
+        }
+        else {
 
-        fetch(variables.REACT_APP_API + 'Customer/UpdateCustomer', {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-                //'Authorization': localStorage.getItem('token')
-            },
-            body: JSON.stringify({
-                Id: custdata.ID,
-                FirstName: custdata.FirstName,//e.target.FirstName.value,
-                MiddleName: custdata.MiddleName,//e.target.MiddleName.value,
-                LastName: custdata.LastName,//e.target.LastName.value,
-                MobileNo: custdata.MobileNo,// e.target.MobileNo.value,
-                DOB: custdata.DOB,//e.target.DOB.value,
-                CustomerTypeId: custdata.CustomerTypeId,//e.target.CustomerTypeId.value,
-                Email: custdata.Email,// e.target.Email.value,
-                //PhotoURL:custdata.PhotoURL e.target.MortalityNumber.value,
-                IsActive: custdata.IsActive,
-                ProfileImageUrl: custdata.ProfileImageUrl
+            fetch(variables.REACT_APP_API + 'Customer/UpdateCustomer', {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                },
+                body: JSON.stringify({
+                    Id: custdata.ID,
+                    FirstName: custdata.FirstName,
+                    MiddleName: custdata.MiddleName,
+                    LastName: custdata.LastName,
+                    MobileNo: custdata.MobileNo,
+                    DOB: custdata.DOB,
+                    CustomerTypeId: custdata.CustomerTypeId,
+                    Email: custdata.Email,
+                    IsActive: custdata.IsActive,
+                    ProfileImageUrl: custdata.ProfileImageUrl
 
-            })
-        }).then(res => res.json())
-            .then((result) => {
-                if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
-                    addCount(count);
-                    setAddModalShow(false);
-                    
-                    props.showAlert("Successfully updated", "info")
-                }
-                else {
-                    props.showAlert("Error occurred!!", "danger")
-                }
+                })
+            }).then(res => res.json())
+                .then((result) => {
+                    if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
+                        addCount(count);
+                        setAddModalShow(false);
 
-            },
-                (error) => {
-                    props.showAlert("Error occurred!!", "danger")
-                });
-        //}
+                        props.showAlert("Successfully updated", "info")
+                    }
+                    else {
+                        props.showAlert("Error occurred!!", "danger")
+                    }
+
+                },
+                    (error) => {
+                        props.showAlert("Error occurred!!", "danger")
+                    });
+        }
 
         setValidated(true);
     }
@@ -220,56 +238,135 @@ function CustomerList(props) {
 
     const handleSubmitAdd = (e) => {
         e.preventDefault();
+        var _form = e.target.closest('.needs-validation');
+        console.log(_form.checkValidity());
+        if (!_form.checkValidity()) {
+            e.stopPropagation();
+        }
+        else {
+            fetch(variables.REACT_APP_API + 'Customer/AddCustomer', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                },
+                body: JSON.stringify({
+                    Id: custdata.ID,
+                    FirstName: custdata.FirstName,
+                    MiddleName: custdata.MiddleName,
+                    LastName: custdata.LastName,
+                    MobileNo: custdata.MobileNo,
+                    DOB: custdata.DOB,
+                    CustomerTypeId: custdata.CustomerTypeId,
+                    Email: custdata.Email,
+                    IsActive: custdata.IsActive,
+                    ProfileImageUrl: custdata.ProfileImageUrl
 
-        fetch(variables.REACT_APP_API + 'Customer/AddCustomer', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-                //'Authorization': localStorage.getItem('token')
-            },
-            body: JSON.stringify({
-                Id: custdata.ID,
-                FirstName: custdata.FirstName,//e.target.FirstName.value,
-                MiddleName: custdata.MiddleName,//e.target.MiddleName.value,
-                LastName: custdata.LastName,//e.target.LastName.value,
-                MobileNo: custdata.MobileNo,// e.target.MobileNo.value,
-                DOB: custdata.DOB,//e.target.DOB.value,
-                CustomerTypeId: custdata.CustomerTypeId,//e.target.CustomerTypeId.value,
-                Email: custdata.Email,// e.target.Email.value,
-                //PhotoURL:custdata.PhotoURL e.target.MortalityNumber.value,
-                IsActive: custdata.IsActive,
-                ProfileImageUrl: custdata.ProfileImageUrl
+                })
+            }).then(res => res.json())
+                .then((result) => {
+                    if (result.StatusCode === 200) {
+                        addCount(count);
+                        setAddModalShow(false);
+                        props.showAlert("Successfully added", "info")
+                    }
+                    if (result === 401) {
+                        history("/login")
+                    }
+                    else {
+                        props.showAlert("Error occurred!!", "danger")
+                    }
 
-            })
-        }).then(res => res.json())
-            .then((result) => {
-                if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
-                    addCount(count);
-                    setAddModalShow(false);
-                    props.showAlert("Successfully added", "info")
-                }
-                else {
-                    props.showAlert("Error occurred!!", "danger")
-                }
+                },
+                    (error) => {
+                        props.showAlert("Error occurred!!", "danger")
+                    });
 
-            },
-                (error) => {
-                    props.showAlert("Error occurred!!", "danger")
-                });
-        //}
+
+        }
 
         setValidated(true);
+
+
     }
+
+
+    // const [form, setForm] = useState({
+    //     customertype: null
+    // });
+
+    // const onHandleChange = useCallback((value, name) => {
+    //     setForm(prev => ({
+    //         ...prev,
+    //         [name]: value
+    //     }));
+    // }, []);
+
+    // const onValidate = (value, name) => {
+    //     setError(prev => ({
+    //         ...prev,
+    //         [name]: { ...prev[name], errorMsg: value }
+    //     }));
+    // }
+
+    // const [error, setError] = useState({
+    //     customertype: {
+    //         isReq: true,
+    //         errorMsg: '',
+    //         onValidateFunc: onValidate
+    //     }
+    // });
+
+    // const validateForm = () => {
+    //     let isInvalid = false;
+    //     Object.keys(error).forEach(x => {
+    //         const errObj = error[x];
+    //         if (errObj.errorMsg) {
+    //             isInvalid = true;
+    //         } else if (errObj.isReq && !form[x]) {
+    //             isInvalid = true;
+    //             onValidate(true, x);
+    //         }
+    //     });
+    //     return !isInvalid;
+    // }
+
+    const handlePageChange = (newPage) => {
+        setCurrentPage(newPage)
+    }
+    const handleNextClick = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1)
+        }
+    }
+    const handlePrevClick = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1)
+        }
+    }
+    const preDisabled = currentPage === 1;
+    const nextDisabled = currentPage === totalPages
+
+    const itemsPerPage =variables.PAGE_PAGINATION_NO;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const itemsToDiaplay = customerlist.slice(startIndex, endIndex);
+
 
     return (
         <div>
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
                 <h2>Welcome to Customer List  page</h2>
             </div>
-            <Button className="mr-2" variant="primary"
-                style={{ marginRight: "17.5px" }}
-                onClick={() => clickAddCustomer()}>Add</Button>
+            <div className="row">
+                <div className="col" style={{textAlign:'right'}}>
+                    <Button className="mr-2" variant="primary"
+                        style={{ marginRight: "17.5px" }}
+                        onClick={() => clickAddCustomer()}>Add</Button>
+                </div>
+
+            </div>
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
@@ -289,17 +386,17 @@ function CustomerList(props) {
 
                     {
 
-                        customerlist && customerlist.length > 0 ? customerlist.map((p) => {
+itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
                             //console.log(itemsToDiaplay.length);
                             const ctype = producttypes.filter((c) => c.ProductId === p.CustomerTypeId);
                             const cname = ctype.length > 0 ? ctype[0].ProductName : "";
                             return (
                                 <tr align='center' key={p.ID}>
                                     <td align='left'>
-                                    <a href={`/eggsale/${p.ID}`}>{p.FirstName}
-                                <span className="sr-only">(current)</span></a>
-                                        
-                                        </td>
+                                        <a href={`/eggsale/${p.ID}`}>{p.FirstName}
+                                            <span className="sr-only">(current)</span></a>
+
+                                    </td>
                                     <td align='left'>{p.MiddleName}</td>
                                     <td align='left'>{p.LastName}</td>
                                     <td align='left'>{p.MobileNo}</td>
@@ -320,7 +417,7 @@ function CustomerList(props) {
                                                 <i className="fa-solid fa-pen-to-square" style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => clickEditCustomer(p)}></i>
 
                                                 {localStorage.getItem('isadmin') === 'true' &&
-                                                <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteCustomer(p.ID)}></i>} 
+                                                    <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteCustomer(p.ID)}></i>}
 
 
 
@@ -334,7 +431,35 @@ function CustomerList(props) {
                 </tbody>
             </Table >
 
-            <div className="container" id="exampleModal">
+            <button
+                onClick={handlePrevClick}
+                disabled={preDisabled}
+            >
+                Prev
+            </button>
+            {
+                Array.from({ length: totalPages }, (_, i) => {
+                    return (
+                        <button
+                            onClick={() => handlePageChange(i + 1)}
+                            key={i}
+                            disabled={i + 1 === currentPage}
+                        >
+                            {i + 1}
+                        </button>
+                    )
+                })
+            }
+
+
+            <button
+                onClick={handleNextClick}
+                disabled={nextDisabled}
+            >
+                Next
+            </button>
+
+            <div className="ContainerOverride" id="exampleModal">
                 <Modal
                     show={addModalShow}
                     {...props}
@@ -342,7 +467,7 @@ function CustomerList(props) {
                     aria-labelledby="contained-modal-title-vcenter"
                     centered
                 >
-                    <Modal.Header closeButton>
+                    <Modal.Header>
                         <Modal.Title id="contained-modal-title-vcenter">
                             {custdata.modaltitle}
                         </Modal.Title>
@@ -353,7 +478,7 @@ function CustomerList(props) {
                             <Col sm={12}>
 
                                 <div>
-                                    <Form noValidate validated={validated}>
+                                    <Form noValidate validated={validated} className="needs-validation">
                                         <Row className="mb-12">
                                             <Form.Group controlId="FirstName" as={Col} >
                                                 <Form.Label>First name</Form.Label>
@@ -403,7 +528,9 @@ function CustomerList(props) {
                                                 <Form.Label>Customer type</Form.Label>
                                                 <Form.Select aria-label="Default select example"
                                                     onChange={custTypeChange} required>
-                                                    <option>--Select--</option>
+                                                    {/* <option key="-1" value="-1">--Select--</option> */}
+
+                                                    <option selected disabled value="">Choose...</option>
                                                     {
                                                         producttypes.map((item) => {
                                                             //const ctype = customertypes.filter((c) => c.ProductId === p.CustomerTypeId);
@@ -435,8 +562,11 @@ function CustomerList(props) {
                                                 <Form.Control
                                                     type="date"
                                                     value={custdata.DOB ? dateForPicker(custdata.DOB) : ''}
-                                                    onChange={dobChange}
+                                                    onChange={dobChange} required
                                                 />
+                                                <Form.Control.Feedback type="invalid">
+                                                    Please select DOB
+                                                </Form.Control.Feedback>
 
                                             </Form.Group>
 
@@ -445,7 +575,10 @@ function CustomerList(props) {
                                             <Form.Group as={Col} controlId="ProfileImageUrl">
 
                                                 <Form.Label>Customer photo</Form.Label>
-                                                <input class="form-control" type="file" id="formFile" onChange={profileImageUpload} />
+                                                <input class="form-control" type="file" id="formFile" onChange={profileImageUpload} multiple="false" accept="image/*"  />
+                                                <Form.Control.Feedback type="invalid">
+                                                    Please select image
+                                                </Form.Control.Feedback>
                                             </Form.Group>
                                             <Form.Group as={Col} controlId="ProfileImageUrl">
                                                 <img width="250px" height="250px" src={variables.PHOTO_URL + custdata.ProfileImageUrl} />
@@ -470,10 +603,10 @@ function CustomerList(props) {
                                                 : null
                                             }
 
-<Button variant="danger" style={{ marginTop: "30px", marginLeft: "10px" }} onClick={() => {
-                                        addModalClose();
-                                    }
-                                    }>Close</Button>
+                                            <Button variant="danger" style={{ marginTop: "30px", marginLeft: "10px" }} onClick={() => {
+                                                addModalClose();
+                                            }
+                                            }>Close</Button>
 
                                         </Form.Group>
                                     </Form>
