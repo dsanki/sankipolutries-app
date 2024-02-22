@@ -5,6 +5,7 @@ import moment from 'moment';
 export default function DateComponent(props) {
 
     const [date, setDate] = useState(props!=null && props.date!=null ?  props.date:null);
+    const isrequired=(props!=null && props.isRequired===true ? 'true':'false');
 
     //functions called
     const dateFromDateString = (dateString) => {
@@ -18,10 +19,12 @@ export default function DateComponent(props) {
     return (
         <Form.Control
             type="date"
-            value={date ? dateForPicker(date) : ''}
+            required={isrequired}
+            value={props.value ? dateForPicker(props.value) : ''}
             onfocus={dateForPicker(date)}
             placeholder={date ? dateForPicker(date) : "dd/mm/yyyy"}
-            onChange={(e) => setDate(dateFromDateString(e.target.value))}
+            //onChange={(e) => setDate(dateFromDateString(e.target.value))}
+            onChange={props.onChange}
         />
     );
 }
