@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { variables } from './../../Variables';
-import { Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
+import { Button, ButtonToolbar, Table, Row, Col, Form, Modal } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'
-import EditLotShedMap from './EditLotShedMap'
 
 function ShedLotMap(props) {
     let history = useNavigate();
@@ -10,12 +9,42 @@ function ShedLotMap(props) {
     const [lots, setLots] = useState([]);
     const [shedlotmaplist, SetShedLotMapList] = useState([]);
     const [validated, setValidated] = useState(false);
-    const [editModalShow, setEditModalShow] = useState(false);
+    const [addModalShow, setAddModalShow] = useState(false);
 
     const [count, setCount] = useState(0);
     const obj = useMemo(() => ({ count }), [count]);
 
-    const [shedlotdata, SetShedLotData] = useState([]);
+
+
+
+    const initialvalues = {
+        modaltitle: "",
+        Id:0,
+        ShedId: "",
+        LotId: ""
+    };
+
+    const [shedlotdata, setShedLotData] = useState(initialvalues);
+
+    const clickAddShedLot = () => {
+        setAddModalShow({ addModalShow: true });
+        setShedLotData({
+            modaltitle: "Add",
+            Id:0,
+            ShedId: "",
+            LotId: ""
+        })
+    }
+
+    const clickEditShedLot = (p) => {
+        setAddModalShow({ addModalShow: true });
+        setShedLotData({
+            modaltitle: "Edit",
+            Id:p.id,
+            ShedId: p.shedid,
+            LotId: p.lotid
+        })
+    }
 
     useEffect((e) => {
 
@@ -30,10 +59,16 @@ function ShedLotMap(props) {
     }, [obj]);
 
     const fetchSheds = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedList')
+        fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedList',
+            {
+                method: 'GET',
+                headers: {
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
             .then(response => response.json())
             .then(data => {
-                setShedList(data);
+                setShedList(data.Result);
             });
     }
 
@@ -42,18 +77,30 @@ function ShedLotMap(props) {
     }
 
     const fetchLots = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster/GetLots')
+        fetch(variables.REACT_APP_API + 'ChicksMaster/GetLots',
+            {
+                method: 'GET',
+                headers: {
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
             .then(response => response.json())
             .then(data => {
-                setLots(data);
+                setLots(data.Result);
             });
     }
 
     const fetchShedLotsMapList = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedLotMapList')
+        fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedLotMapList',
+            {
+                method: 'GET',
+                headers: {
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
             .then(response => response.json())
             .then(data => {
-                SetShedLotMapList(data);
+                SetShedLotMapList(data.Result);
             });
     }
 
@@ -61,15 +108,20 @@ function ShedLotMap(props) {
         setCount(num + 1);
     };
 
-    let editModalClose = () => {
-        setEditModalShow(false)
-    };
+    const onShedChange = (e) => {
+        setShedLotData({ ...shedlotdata, ShedId: e.target.value });
+    }
+    const onLotChange = (e) => {
+        setShedLotData({ ...shedlotdata, LotId: e.target.value });
+    }
 
-    const handleSubmit = (e) => {
+    const handleAdd = (e) => {
         e.preventDefault();
-        const form = e.currentTarget;
+        var form = e.target.closest('.needs-validation');
         if (form.checkValidity() === false) {
+
             e.stopPropagation();
+            setValidated(true);
         }
         else {
 
@@ -77,18 +129,65 @@ function ShedLotMap(props) {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                    //'Authorization': localStorage.getItem('token')
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
                 },
                 body: JSON.stringify({
-                    ShedId: e.target.ShedId.value,
-                    LotId: e.target.Id.value
-
+                    ShedId: shedlotdata.ShedId,
+                    LotId: shedlotdata.LotId
                 })
             }).then(res => res.json())
                 .then((result) => {
-                    if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
-                        //closeModal();
+                    if (result.StatusCode === 200) {
+                        addCount(count);
+                        setAddModalShow(false);
+                        props.showAlert("Successfully added", "info")
+                    }
+                    else {
+                        props.showAlert("Error occurred!!", "danger")
+                    }
+
+                },
+                    (error) => {
+                        props.showAlert("Error occurred!!", "danger")
+                    });
+        }
+
+        setValidated(true);
+    }
+
+    let addModalClose = () => {
+        setAddModalShow(false);
+        setValidated(false);
+    };
+
+
+    const handleEdit = (e) => {
+        e.preventDefault();
+        var form = e.target.closest('.needs-validation');
+        if (form.checkValidity() === false) {
+
+            e.stopPropagation();
+            setValidated(true);
+        }
+        else {
+
+            fetch(variables.REACT_APP_API + 'ChicksMaster/LotShedMapUpdate', {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                },
+                body: JSON.stringify({
+                    ShedId: shedlotdata.ShedId,
+                    LotId: shedlotdata.LotId
+                })
+            }).then(res => res.json())
+                .then((result) => {
+                    if (result.StatusCode === 200) {
+                        addCount(count);
+                        setAddModalShow(false);
                         props.showAlert("Successfully added", "info")
                     }
                     else {
@@ -108,72 +207,17 @@ function ShedLotMap(props) {
 
 
     return (
-        <>
-             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
+        <div className="ContainerOverride">
+            <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
                 <h2>Welcome to Shed - Lot Mapping Page</h2>
             </div>
-            <div>
-            <Form onSubmit={handleSubmit} noValidate validated={validated}>
-                <Row className="mb-12">
-
-                    <Form.Group controlId="ShedId" as={Col} >
-                        <Form.Label>Shed</Form.Label>
-                        <Form.Select aria-label="Default select example"
-                            onChange={(e) => setDropdownValue(e.target.value)} required>
-                            <option>--Select shed--</option>
-                            {
-                                shedlist.map((item) => {
-                                    return (
-                                        <option
-                                            key={item.ShedId}
-                                            defaultValue={item.ShedId == null ? null : item.ShedId}
-                                            //selected={item.ShedId === selectedValue}
-                                            value={item.ShedId}
-                                        >{item.ShedName}</option>
-                                    );
-                                })
-                            }
-                        </Form.Select>
-                        <Form.Control.Feedback type="invalid">
-                            Please select Shed
-                        </Form.Control.Feedback>
-
-                    </Form.Group>
-                    <Form.Group controlId="Id" as={Col} >
-                        <Form.Label>Lot</Form.Label>
-                        <Form.Select aria-label="Default select example"
-                            onChange={(e) => setDropdownValue(e.target.value)} required>
-                            <option>--Select Lot--</option>
-                            {
-                                lots.map((item) => {
-                                    return (
-                                        <option
-                                            key={item.Id}
-                                            defaultValue={item.Id == null ? null : item.Id}
-                                            //selected={item.ShedId === selectedValue}
-                                            value={item.Id}
-                                        >{item.LotName}</option>
-                                    );
-                                })
-                            }
-                        </Form.Select>
-                        <Form.Control.Feedback type="invalid">
-                            Please select lot
-                        </Form.Control.Feedback>
-
-                    </Form.Group>
-
-                    <Form.Group as={Col}>
-                        <Button variant="primary" type="submit" style={{ marginTop: "30px" }}>
-                            Add
-                        </Button>
-
-                    </Form.Group>
-
-                </Row>
-            </Form>
+            <div className="row">
+                <div className="col" style={{ textAlign: 'right' }}>
+                    <Button className="mr-2" variant="primary"
+                        style={{ marginRight: "17.5px" }}
+                        onClick={() => clickAddShedLot()}>Add</Button>
+                </div>
             </div>
-           
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
@@ -195,39 +239,11 @@ function ShedLotMap(props) {
                                 <td align='center'>
                                     {
                                         <ButtonToolbar>
-
-                                            <i className="fa-solid fa-pen-to-square" style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => {
-
-                                                setEditModalShow({ editModalShow: true });
-                                                SetShedLotData(prev => ({
-                                                    ...prev,
-                                                    lotid: p.lotid,
-                                                    //lotname: p.lotname,
-                                                    shedid: p.shedid,
-                                                    //shedname: p.shedname,
-                                                    //isproduction:p.isproduction,
-                                                    count: count
-                                                }
-                                                ));
-
-                                            }}></i>
+                                            <i className="fa-solid fa-pen-to-square" style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => clickEditShedLot(p)}></i>
 
                                             {localStorage.getItem('isadmin') === 'true' &&
-                                                <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteShedLotMap(p.shedid)}></i>}
+                                                <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteShedLotMap(p.ShedId)}></i>}
 
-
-                                            <EditLotShedMap show={editModalShow}
-                                                onHide={editModalClose}
-                                                lotid={shedlotdata.lotid}
-                                                //lotname={shedlotdata.lotname}
-                                                shedid={shedlotdata.shedid}
-                                                //shedname={shedlotdata.shedname}
-                                                //isproduction={shedlotdata.isproduction}
-                                                shedlist={shedlist}
-                                                lotlist={lots}
-                                                onCountAdd={addCount}
-                                                showAlert={props.showAlert}
-                                            />
                                         </ButtonToolbar>
                                     }
                                 </td>
@@ -236,7 +252,121 @@ function ShedLotMap(props) {
                     }
                 </tbody>
             </Table>
-        </>
+
+            <div className="" id="exampleModal">
+                <Modal
+                    show={addModalShow}
+                    {...props}
+                    size="lg"
+                    aria-labelledby="contained-modal-title-vcenter"
+                    centered
+                >
+                    <Modal.Header>
+                        <Modal.Title id="contained-modal-title-vcenter" style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}>
+                            {shedlotdata.modaltitle}
+                        </Modal.Title>
+                        <button type="button" class="btn-close" aria-label="Close" onClick={addModalClose}> </button>
+
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Row>
+                            <Col sm={12}>
+
+                                <div>
+                                    <Form noValidate validated={validated} className="needs-validation">
+                                        <Row className="mb-12">
+                                            <Form.Group controlId="ShedId" as={Col} >
+                                                <Form.Label>Shed</Form.Label>
+                                                <Form.Select aria-label="Default select example"
+                                                    onChange={onShedChange} required>
+                                                    <option selected disabled value="">Choose...</option>
+                                                    {
+                                                        shedlist.map((item) => {
+                                                            return (
+                                                                <option
+                                                                    key={item.ShedId}
+                                                                    defaultValue={item.ShedId == null ? null : item.ShedId}
+                                                                    selected={item.ShedId === shedlotdata.ShedId}
+                                                                    value={item.ShedId}
+                                                                >{item.ShedName}</option>
+                                                            );
+                                                        })
+                                                    }
+                                                </Form.Select>
+                                                <Form.Control.Feedback type="invalid">
+                                                    Please select Shed
+                                                </Form.Control.Feedback>
+
+                                            </Form.Group>
+                                            <Form.Group controlId="lotid" as={Col} >
+                                                <Form.Label>Lot</Form.Label>
+                                                <Form.Select aria-label="Default select example"
+                                                    onChange={onLotChange} required>
+                                                    <option selected disabled value="">Choose...</option>
+                                                    {
+                                                        lots.map((item) => {
+                                                            return (
+                                                                <option
+                                                                    key={item.Id}
+                                                                    defaultValue={item.Id == null ? null : item.Id}
+                                                                    selected={item.Id === shedlotdata.LotId}
+                                                                    value={item.Id}
+                                                                >{item.LotName}</option>
+                                                            );
+                                                        })
+                                                    }
+                                                </Form.Select>
+                                                <Form.Control.Feedback type="invalid">
+                                                    Please select lot
+                                                </Form.Control.Feedback>
+                                            </Form.Group>
+                                        </Row>
+                                        {/* <Form.Group as={Col}>
+                                            <Button variant="primary" type="submit" style={{ marginTop: "30px" }}>
+                                                Update
+                                            </Button>
+
+                                        </Form.Group> */}
+
+                                        <Form.Group as={Col}>
+                                            {shedlotdata.Id <= 0 ?
+
+                                                <Button variant="primary" type="submit" style={{ marginTop: "30px" }} onClick={(e) => handleAdd(e)}>
+                                                    Add
+                                                </Button>
+                                                : null
+                                            }
+
+                                            {shedlotdata.Id > 0 ?
+
+                                                <Button variant="primary" type="submit" style={{ marginTop: "30px" }} onClick={(e) => handleEdit(e)}>
+                                                    Update
+                                                </Button>
+                                                : null
+                                            }
+
+                                            <Button variant="danger" style={{ marginTop: "30px", marginLeft: "10px" }} onClick={() => {
+                                                addModalClose();
+                                            }
+                                            }>Close</Button>
+
+                                        </Form.Group>
+                                </Form>
+                            </div>
+                        </Col>
+                    </Row>
+                </Modal.Body>
+
+                <Modal.Footer>
+
+                </Modal.Footer>
+            </Modal>
+        </div >
+        </div >
     )
 }
 
