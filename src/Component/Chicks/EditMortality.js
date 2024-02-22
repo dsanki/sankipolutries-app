@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import EditLotShedMap from './EditLotShedMap'
 import DateComponent from '../DateComponent';
 
+
 function EditMortality(props) {
     let history = useNavigate();
     //const [mortalitylist, setMortalityList] = useState([]);
