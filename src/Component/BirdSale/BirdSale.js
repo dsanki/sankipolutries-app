@@ -3,7 +3,8 @@ import { variables } from '../../Variables';
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
-
+import DateComponent from '../DateComponent';
+import InputField from '../ReuseableComponent/InputField'
 function BirdSale(props) {
 
     let history = useNavigate();
@@ -46,7 +47,9 @@ function BirdSale(props) {
         Paid: "",
         Due: "",
         PaymentDate: "",
-        Comments: ""
+        Comments: "",
+        LotName: "",
+        TotalBirdSale: ""
 
     };
 
@@ -69,7 +72,9 @@ function BirdSale(props) {
             Paid: "",
             Due: "",
             PaymentDate: "",
-            Comments: ""
+            Comments: "",
+            LotName: "",
+            TotalBirdSale: ""
         })
     }
 
@@ -90,7 +95,9 @@ function BirdSale(props) {
             Paid: md.Paid,
             Due: md.Due,
             PaymentDate: md.PaymentDate,
-            Comments: md.Comments
+            Comments: md.Comments,
+            LotName: md.LotName,
+            TotalBirdSale: md.TotalBirdSale
         })
     }
 
@@ -99,21 +106,28 @@ function BirdSale(props) {
     }
 
     const shedChange = (e) => {
-        
+        let lotid = "";
+        let lotname = "";
+        let totalbirdsale = "";
 
         const filterval = shedlotmaplist.filter((c) => c.shedid === parseInt(e.target.value));
 
         if (filterval.length > 0) {
+            lotid = filterval[0].lotid;
+            lotname = filterval[0].lotname;
 
-           // setBirdSaleData({...birdsaledata, LotId: filterval[0].lotid});
+            // setBirdSaleData({...birdsaledata, LotId: filterval[0].lotid});
             setBirdSaleData({ ...birdsaledata, ShedId: e.target.value, LotId: filterval[0].lotid });
             setLotName(filterval[0].lotname);
 
             fetch(variables.REACT_APP_API + 'ChicksMaster/' + filterval[0].lotid)
                 .then(response => response.json())
                 .then(data => {
+                    totalbirdsale = data.TotalBirdSale;
                     setTotalBirds(data.TotalBirdSale);
                 });
+
+            setBirdSaleData({ ...birdsaledata, ShedId: e.target.value, LotId: lotid, LotName: lotname, TotalBirdSale: totalbirdsale });
         }
     }
 
@@ -130,11 +144,14 @@ function BirdSale(props) {
     }
 
     const totalWeightChange = (e) => {
+        let totalwt=e.target.value;
+        let totalamt=totalwt * birdsaledata.Rate;
+        let due=totalamt - birdsaledata.Paid
         setBirdSaleData({
             ...birdsaledata,
-            TotalWeight: e.target.value,
-            TotalAmount: e.target.value * birdsaledata.Rate,
-            Due: (e.target.value * birdsaledata.Rate) - birdsaledata.Paid
+            TotalWeight: totalwt,
+            TotalAmount:totalamt,
+            Due: due
         });
     }
 
@@ -143,11 +160,14 @@ function BirdSale(props) {
     }
 
     const rateChange = (e) => {
+        let rate= e.target.value;
+        let totalamt=birdsaledata.TotalWeight * rate;
+        let due=totalamt - birdsaledata.Paid
         setBirdSaleData({
             ...birdsaledata,
-            Rate: e.target.value,
-            TotalAmount: birdsaledata.TotalWeight * e.target.value,
-            Due: (birdsaledata.Quantity * e.target.value) - birdsaledata.Paid
+            Rate: rate,
+            TotalAmount: totalamt,
+            Due: due
         });
     }
 
@@ -186,46 +206,120 @@ function BirdSale(props) {
 
 
     const fetchUnit = async () => {
-        fetch(variables.REACT_APP_API + 'Unit')
+        fetch(variables.REACT_APP_API + 'Unit',
+        {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
+            }
+        })
             .then(response => response.json())
             .then(data => {
-                setUnitList(data);
+                if (data.StatusCode === 200) {
+                    setUnitList(data.Result);
+                }
+                else {
+                    errorHandle(data.StatusCode);
+                }
             });
     }
 
     const fetchSheds = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedList')
+        fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedList',
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
             .then(response => response.json())
             .then(data => {
-                setShedList(data);
+                if (data.StatusCode === 200) {
+                    setShedList(data.Result);
+                }
+                else {
+                    errorHandle(data.StatusCode);
+                }
             });
     }
 
     const fetchLots = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster/GetLots')
+        fetch(variables.REACT_APP_API + 'ChicksMaster/GetLots',
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
             .then(response => response.json())
             .then(data => {
-                setLots(data);
+                if (data.StatusCode === 200) {
+                    setLots(data.Result);
+                }
+                else {
+                    errorHandle(data.StatusCode);
+                }
             });
     }
 
     const fetchShedLotsMapList = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedLotMapList')
+        fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedLotMapList',
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
             .then(response => response.json())
             .then(data => {
-                SetShedLotMapList(data);
+                if (data.StatusCode === 200) {
+                    SetShedLotMapList(data.Result);
+                }
+                else {
+                    errorHandle(data.StatusCode);
+                }
             });
     }
 
-    // const [birdSaleList, setBirdSaleList] = useState([]);
-    // const [birdSaleListFilter, setBirdSaleListFilter] = useState([]);
+    const errorHandle = (code) => {
+        if (code === 401) {
+            history("/login")
+        }
+        else if (code === 404) {
+            props.showAlert("Data not found!!", "danger")
+        }
+        else {
+            props.showAlert("Error occurred!!", "danger")
+        }
+    }
 
     const fetchBirdSaleList = async () => {
-        fetch(variables.REACT_APP_API + 'BirdSale/GetBirdSale')
+        fetch(variables.REACT_APP_API + 'BirdSale/GetBirdSale',
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
             .then(response => response.json())
             .then(data => {
-                setBirdSaleList(data);
-                setBirdSaleListFilter(data);
+                if (data.StatusCode === 200) {
+                    setBirdSaleList(data.Result);
+                    setBirdSaleListFilter(data.Result);
+                }
+                else {
+                    errorHandle(data.StatusCode);
+                }
             });
     }
 
@@ -236,8 +330,8 @@ function BirdSale(props) {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
-                //'Authorization': localStorage.getItem('token')
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
             },
             body: JSON.stringify({
 
@@ -259,14 +353,14 @@ function BirdSale(props) {
             })
         }).then(res => res.json())
             .then((result) => {
-                if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
+                if (result.StatusCode === 200) {
                     addCount(count);
                     setAddModalShow(false);
 
                     props.showAlert("Successfully updated", "info")
                 }
                 else {
-                    props.showAlert("Error occurred!!", "danger")
+                    errorHandle(result.StatusCode);
                 }
 
             },
@@ -293,8 +387,8 @@ function BirdSale(props) {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
-                //'Authorization': localStorage.getItem('token')
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
             },
             body: JSON.stringify({
                 Id: birdsaledata.Id,
@@ -315,13 +409,13 @@ function BirdSale(props) {
             })
         }).then(res => res.json())
             .then((result) => {
-                if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
+                if (result.StatusCode === 200) {
                     addCount(count);
                     setAddModalShow(false);
                     props.showAlert("Successfully added", "info")
                 }
                 else {
-                    props.showAlert("Error occurred!!", "danger")
+                    errorHandle(result.StatusCode);
                 }
 
             },
@@ -406,6 +500,7 @@ function BirdSale(props) {
 
                             const _lot = lots.filter((c) => c.Id === p.LotId);
                             const _lotname = _lot.length > 0 ? _lot[0].LotName : "";
+                            p.LotName=_lotname;
 
                             return (
                                 <tr align='center' key={p.Id}>
@@ -447,13 +542,11 @@ function BirdSale(props) {
                     aria-labelledby="contained-modal-title-vcenter"
                     centered
                 >
-                    <Modal.Header closeButton>
+                    <Modal.Header>
                         <Modal.Title id="contained-modal-title-vcenter">
                             {birdsaledata.modaltitle}
                         </Modal.Title>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <button type="button" class="btn-close" aria-label="Close" onClick={addModalClose}> </button>
                     </Modal.Header>
                     <Modal.Body>
                         <Row>
@@ -463,19 +556,20 @@ function BirdSale(props) {
                                         <Row className="mb-3">
                                             <Form.Group as={Col} controlId="Date">
                                                 <Form.Label>Date</Form.Label>
-                                                <Form.Control
-                                                    type="date"
-                                                    value={birdsaledata.Date ? dateForPicker(birdsaledata.Date) : ''}
-                                                    onChange={dateChange}
-                                                />
+                                                <DateComponent date={null} onChange={dateChange} isRequired={true} value={birdsaledata.Date} />
+                                                <Form.Control.Feedback type="invalid">
+                                                    Please select date
+                                                </Form.Control.Feedback>
                                             </Form.Group>
                                         </Row>
                                         <Row className="mb-12">
                                             <Form.Group controlId="ShedId" as={Col} >
                                                 <Form.Label>Shed</Form.Label>
+                                                <Form.Control type="text" name="LotId" hidden disabled value={birdsaledata.LotId}
+                                                />
                                                 <Form.Select aria-label="Default select example"
                                                     onChange={shedChange} required>
-                                                    <option>--Select--</option>
+                                                    <option selected disabled value="">Choose...</option>
                                                     {
                                                         shedlist.map((item) => {
                                                             return (
@@ -494,52 +588,100 @@ function BirdSale(props) {
                                                 </Form.Control.Feedback>
                                             </Form.Group>
 
-                                            <Form.Group controlId="LotName" as={Col} >
+                                            <InputField controlId="LotName"
+                                                label="LotName"
+                                                type="text"
+                                                value={birdsaledata.LotName}
+                                                name="LotName"
+                                                placeholder="Lot name"
+                                                errormessage="Please provide lot name"
+                                                required={true}
+                                                disabled={true}
+                                            />
+
+                                            {/* <Form.Group controlId="LotName" as={Col} >
                                                 <Form.Label>Lot name</Form.Label>
-                                                <Form.Control type="text" name="LotId" hidden disabled value={birdsaledata.LotId}
-                                                />
+                                              
                                                 <Form.Control type="text" name="LotName" required disabled value={_lotname}
                                                     placeholder="" />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please enter lot name
                                                 </Form.Control.Feedback>
-                                            </Form.Group>
-</Row>
-<Row className="mb-12">
-                                            <Form.Group controlId="CustomerName" as={Col} >
+                                            </Form.Group> */}
+                                        </Row>
+                                        <Row className="mb-12">
+                                            <InputField controlId="CustomerName"
+                                                label="CustomerName"
+                                                type="text"
+                                                value={birdsaledata.CustomerName}
+                                                name="CustomerName"
+                                                placeholder="Customer name"
+                                                errormessage="Please provide customer name"
+                                                required={true}
+                                                disabled={false}
+                                                onChange={customerChange}
+                                            />
+
+
+                                            {/* <Form.Group controlId="CustomerName" as={Col} >
                                                 <Form.Label>Customer name</Form.Label>
                                                 <Form.Control type="text" name="CustomerName" required value={birdsaledata.CustomerName}
-                                                    placeholder="" onChange={customerChange}/>
+                                                    placeholder="" onChange={customerChange} />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please enter customer name
                                                 </Form.Control.Feedback>
-                                            </Form.Group>
+                                            </Form.Group> */}
 
-                                            <Form.Group controlId="BirdCount" as={Col} >
+                                            <InputField controlId="BirdCount"
+                                                label="BirdCount"
+                                                type="number"
+                                                value={birdsaledata.BirdCount}
+                                                name="BirdCount"
+                                                placeholder="Bird count"
+                                                errormessage="Please provide bird count"
+                                                required={true}
+                                                disabled={false}
+                                                onChange={birdcountChange}
+                                            />
+
+<InputField controlId="TotalWeight"
+                                                label="TotalWeight"
+                                                type="number"
+                                                value={birdsaledata.TotalWeight}
+                                                name="TotalWeight"
+                                                placeholder="Total weight"
+                                                errormessage="Please provide total weight"
+                                                required={true}
+                                                disabled={false}
+                                                onChange={totalWeightChange}
+                                            />
+
+
+                                            {/* <Form.Group controlId="BirdCount" as={Col} >
                                                 <Form.Label>Bird count</Form.Label>
                                                 <Form.Control type="number" name="BirdCount" required value={birdsaledata.BirdCount}
-                                                    placeholder="" onChange={birdcountChange}/>
+                                                    placeholder="" onChange={birdcountChange} />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please enter total bird count
                                                 </Form.Control.Feedback>
-                                            </Form.Group>
+                                            </Form.Group> */}
 
-                                            <Form.Group controlId="TotalWeight" as={Col} >
+                                            {/* <Form.Group controlId="TotalWeight" as={Col} >
                                                 <Form.Label>Total Weight</Form.Label>
                                                 <Form.Control type="number" name="TotalWeight" required value={birdsaledata.TotalWeight}
-                                                    placeholder="" onChange={totalWeightChange}/>
+                                                    placeholder="" onChange={totalWeightChange} />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please enter total weight
                                                 </Form.Control.Feedback>
-                                            </Form.Group>
-                                            </Row>
-                                            <Row className="mb-12">
+                                            </Form.Group> */}
+                                        </Row>
+                                        <Row className="mb-12">
 
                                             <Form.Group controlId="UnitId" as={Col} >
                                                 <Form.Label>Unit</Form.Label>
                                                 <Form.Select aria-label="Default select example"
                                                     onChange={unitIdChange} required>
-                                                    <option>--Select--</option>
+                                                    <option selected disabled value="">Choose...</option>
                                                     {
                                                         unitlist.map((item) => {
                                                             return (
@@ -557,55 +699,100 @@ function BirdSale(props) {
                                                     Please select unit
                                                 </Form.Control.Feedback>
                                             </Form.Group>
-                                    
-                                           
 
-                                           
-                                            <Form.Group controlId="Rate" as={Col} >
+                                            <InputField controlId="Rate"
+                                                label="Rate"
+                                                type="number"
+                                                value={birdsaledata.Rate}
+                                                name="Rate"
+                                                placeholder="Rate"
+                                                errormessage="Please enter rate"
+                                                required={true}
+                                                disabled={false}
+                                                onChange={rateChange}
+                                            />
+
+                                            {/* <Form.Group controlId="Rate" as={Col} >
                                                 <Form.Label>Rate</Form.Label>
                                                 <Form.Control type="number" name="Rate" required onChange={rateChange}
                                                     placeholder="Rate" value={birdsaledata.Rate} />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please enter rate
                                                 </Form.Control.Feedback>
-                                            </Form.Group>
+                                            </Form.Group> */}
 
 
                                         </Row>
                                         <Row className="mb-12">
-                                            <Form.Group controlId="TotalAmount" as={Col} >
+                                        <InputField controlId="TotalAmount" label="Total Amount"
+                                            type="number"
+                                            value={birdsaledata.TotalAmount}
+                                            name="TotalAmount"
+                                            placeholder="Total Amount"
+                                            errormessage="Please provide total amount"
+                                            required={true}
+                                            disabled={true}
+                                        />
+
+                                            {/* <Form.Group controlId="TotalAmount" as={Col} >
                                                 <Form.Label>Total amount</Form.Label>
                                                 <Form.Control type="number" name="TotalAmount" required onChange={totalAmountChange}
                                                     placeholder="Total amount" value={birdsaledata.TotalAmount} />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please enter total amount
                                                 </Form.Control.Feedback>
-                                            </Form.Group>
-                                            <Form.Group controlId="Paid" as={Col} >
+                                            </Form.Group> */}
+
+                                            <InputField controlId="Paid" label="Paid"
+                                            type="number"
+                                            value={birdsaledata.Paid}
+                                            name="Paid"
+                                            placeholder="Paid"
+                                            errormessage="Please provide paid amount"
+                                            required={true}
+                                            disabled={false}
+                                            onChange={paidChange}
+                                        />
+
+                                            {/* <Form.Group controlId="Paid" as={Col} >
                                                 <Form.Label>Paid</Form.Label>
                                                 <Form.Control type="number" name="Email" required onChange={paidChange} value={birdsaledata.Paid}
                                                     placeholder="Paid" />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please paid amount
                                                 </Form.Control.Feedback>
-                                            </Form.Group>
+                                            </Form.Group> */}
 
-                                            <Form.Group controlId="Due" as={Col} >
+                                            <InputField controlId="Due" label="Due"
+                                            type="number"
+                                            value={birdsaledata.Due}
+                                            name="Due"
+                                            placeholder="Due"
+                                            errormessage="Please provide due amount"
+                                            required={true}
+                                            disabled={true}
+                                        />
+
+                                            {/* <Form.Group controlId="Due" as={Col} >
                                                 <Form.Label>Due</Form.Label>
                                                 <Form.Control type="number" name="Due" disabled value={birdsaledata.Due}
                                                     placeholder="Due" />
 
-                                            </Form.Group>
+                                            </Form.Group> */}
 
                                         </Row>
                                         <Row className="mb-4">
                                             <Form.Group as={Col} controlId="PaymentDate">
                                                 <Form.Label>Payment date</Form.Label>
-                                                <Form.Control
+                                                <DateComponent date={null} onChange={paymentDateChange} isRequired={true} value={birdsaledata.PaymentDate} />
+                                                {/* <Form.Control
                                                     type="date"
                                                     value={birdsaledata.PaymentDate ? dateForPicker(birdsaledata.PaymentDate) : ''}
                                                     onChange={paymentDateChange}
-                                                />
+                                                /> */}
+                                                <Form.Control.Feedback type="invalid">
+                                                    Please select payment date
+                                                </Form.Control.Feedback>
                                             </Form.Group>
                                         </Row>
                                         <Row className="mb-12">

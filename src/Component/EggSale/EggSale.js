@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo,useContext } from 'react'
 import { variables } from '../../Variables';
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom'
 import moment from 'moment';
+import {ErrorMessageHandle} from '../../Utility';
 
 function EggSale(props) {
 
     let history = useNavigate();
     const { id } = useParams();
+
+    //const _context = useContext(CommonContext);
 
     //const [custid, setSetCustId] = useState(_id);
     const [eggsalelist, setEggSaleList] = useState([]);
@@ -91,20 +94,16 @@ function EggSale(props) {
 
     const quantityChange = (e) => {
         setEggSaletData({ ...eggsaledata, Quantity: e.target.value , TotalCost: e.target.value*eggsaledata.EggRate,FinalCost: (e.target.value*eggsaledata.EggRate)-eggsaledata.Discount});
-        //setEggSaletData({ ...eggsaledata, TotalCost: e.target.value*eggsaledata.EggRate });
     }
     const purchaseDateChange = (e) => {
         setEggSaletData({ ...eggsaledata, PurchaseDate: e.target.value });
     }
     const eggRateChange = (e) => {
         setEggSaletData({ ...eggsaledata, EggRate: e.target.value, TotalCost:e.target.value*eggsaledata.Quantity,FinalCost: (e.target.value*eggsaledata.Quantity)-eggsaledata.Discount});
-        //setEggSaletData({ ...eggsaledata, TotalCost: e.target.value*eggsaledata.Quantity });
 
     }
 
     const totalCostChange = (e) => {
-        
-        //setEggSaletData({ ...eggsaledata, TotalCost: e.target.value });
     }
     const discountChange = (e) => {
         setEggSaletData({ ...eggsaledata, Discount: e.target.value ,FinalCost: (eggsaledata.TotalCost-e.target.value)});
@@ -119,7 +118,6 @@ function EggSale(props) {
     }
 
     const dueChange = (e) => {
-       // setEggSaletData({ ...eggsaledata, Due: e.target.value });
     }
 
     const commentsChange = (e) => {
@@ -140,20 +138,46 @@ function EggSale(props) {
 
 
     const fetchEggSaleDetails = async (custid) => {
-        fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleDetailsByCustomerId?CustId=' + custid)
+        fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleDetailsByCustomerId?CustId=' + custid,
+        {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
+            }
+        })
             .then(response => response.json())
             .then(data => {
-                setEggSaleList(data);
-                console.log(data);
+                if (data.StatusCode === 200) 
+                {
+                    setEggSaleList(data.Result);
+                }
+                else{
+                    ErrorMessageHandle(data.StatusCode, props.showAlert);
+                }
             });
     }
 
     const fetchCustomerDetails = async (custid) => {
-        fetch(variables.REACT_APP_API + 'Customer/GetCustomerById?id=' + custid)
+        fetch(variables.REACT_APP_API + 'Customer/GetCustomerById?id=' + custid,
+        {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
+            }
+        })
             .then(response => response.json())
             .then(data => {
-                setCustomerDetails(data);
-                console.log(data);
+                if (data.StatusCode === 200) 
+                {
+                    setCustomerDetails(data.Result);
+                }
+                else{
+                    ErrorMessageHandle(data.StatusCode, props.showAlert);
+                }
             });
     }
 
@@ -181,8 +205,8 @@ function EggSale(props) {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
-                //'Authorization': localStorage.getItem('token')
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
             },
             body: JSON.stringify({
                 Id: eggsaledata.Id,
@@ -204,13 +228,15 @@ function EggSale(props) {
             })
         }).then(res => res.json())
             .then((result) => {
-                if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
+
+                if (result.StatusCode === 200) 
+                {
                     addCount(count);
                     setAddModalShow(false);
                     props.showAlert("Successfully added", "info")
                 }
-                else {
-                    props.showAlert("Error occurred!!", "danger")
+                else{
+                    ErrorMessageHandle(result.StatusCode, props.showAlert);
                 }
 
             },
@@ -230,8 +256,8 @@ function EggSale(props) {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
-                //'Authorization': localStorage.getItem('token')
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
             },
             body: JSON.stringify({
                 Id: eggsaledata.Id,
@@ -253,14 +279,14 @@ function EggSale(props) {
             })
         }).then(res => res.json())
             .then((result) => {
-                if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
+                if (result.StatusCode === 200) {
                     addCount(count);
                     setAddModalShow(false);
                     
                     props.showAlert("Successfully updated", "info")
                 }
                 else {
-                    props.showAlert("Error occurred!!", "danger")
+                    ErrorMessageHandle(result.StatusCode,props.showAlert)
                 }
 
             },

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { variables } from '../../Variables';
 import { Button, ButtonToolbar, Table, Row, Col, Form,Modal } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'
-import DateComponent from '../DateComponent';
+    import DateComponent from '../DateComponent';
 // import AddMortality from './AddMortality';
 // import EditMortality from './EditMortality';
 import InputField from '../ReuseableComponent/InputField'
@@ -19,7 +19,6 @@ function MortalityList(props) {
     const obj = useMemo(() => ({ count }), [count]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
-    const [editModalShow, setEditModalShow] = useState(false);
     const [addModalShow, setAddModalShow] = useState(false);
 
     const [shedlotdata, SetShedLotData] = useState([]);
@@ -425,7 +424,11 @@ function MortalityList(props) {
                                 </td>
 
                             </tr>
-                        )) : ''
+                        )) : <tr>
+                        <td style={{ textAlign: "center" }} colSpan={5}>
+                            No Records
+                        </td>
+                    </tr>
                     }
                 </tbody>
             </Table>
