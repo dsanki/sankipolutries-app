@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { variables } from './../../Variables'
 import { Button, ButtonToolbar, Table, Modal, Row, Col, Form } from 'react-bootstrap';
-//import Moment from 'moment';
 import { useNavigate } from 'react-router-dom'
-// import AddEggDailyTracker from './AddEggDailyTracker'
-// import EditEggDailyTracker from './EditEggDailyTracker'
 import moment from 'moment';
 import InputField from '../ReuseableComponent/InputField'
 import DateComponent from '../DateComponent';
-import {CalculateAgeInDays,CalculateAgeInWeeks} from './../../Utility'
+import { CalculateAgeInDays, CalculateAgeInWeeks, dateyyyymmdd } from './../../Utility'
 
 function EggDailyTracker(props) {
 
@@ -16,20 +13,17 @@ function EggDailyTracker(props) {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
-    const [editModalShow, setEditModalShow] = useState(false);
     const [addModalShow, setAddModalShow] = useState(false);
     const [count, setCount] = useState(0);
-
     const [shedlist, setShedList] = useState([]);
     const [eggtrackerlist, setEggDailyTrackerList] = useState([]);
+    const [eggtrackerlistForFilter, setEggtrackerlistForFilter] = useState([]);
     const [shedlotmaplist, setShedLotMapList] = useState([]);
     const [validated, setValidated] = useState(false);
-    //const [lotname, setLotName] = useState();
-
     const obj = useMemo(() => ({ count }), [count]);
-
     const [_agedays, setAgeDays] = useState(0);
     const [_ageweeks, setAgeWeeks] = useState(0);
+    const [filterDate, setFilterDate] = useState();
 
     const initialvalues = {
         id: 0,
@@ -44,7 +38,6 @@ function EggDailyTracker(props) {
         ProductionPercentage: "",
         AgeDays: "",
         AgeWeeks: ""
-
     };
 
     const [eggdata, setEggData] = useState(initialvalues);
@@ -83,16 +76,25 @@ function EggDailyTracker(props) {
             OkEggs: egg.OkEggs,
             FeedIntech: egg.FeedIntech,
             ProductionPercentage: egg.ProductionPercentage,
-            //AgeDays : CalculateAgeInWeeks(egg.LotDate),
-            //AgeWeeks : CalculateAgeInWeeks(egg.LotDate),
             AgeDays: egg.AgeDays,
-           AgeWeeks: egg.AgeWeeks,
+            AgeWeeks: egg.AgeWeeks,
             LotName: egg.LotName
         })
     }
 
     const onDateChange = (e) => {
         setEggData({ ...eggdata, Date: e.target.value });
+    }
+
+    const onDateFilterChange = (e) => {
+        setFilterDate(e.target.value);
+        if (e.target.value !== "") {
+            const _filterList = eggtrackerlistForFilter.filter((c) => dateyyyymmdd(c.Date) === dateyyyymmdd(e.target.value));
+            setEggDailyTrackerList(_filterList);
+        }
+        else {
+            setEggDailyTrackerList(eggtrackerlistForFilter);
+        }
     }
 
     const onTotalEggsChange = (e) => {
@@ -118,7 +120,6 @@ function EggDailyTracker(props) {
         let days = "";
         let weeks = "";
 
-
         const filterval = shedlotmaplist.filter((c) => c.shedid === parseInt(shedid));
         if (filterval.length > 0) {
             lotid = filterval[0].lotid;
@@ -136,35 +137,15 @@ function EggDailyTracker(props) {
                 .then(data => {
                     setLotDetails(data.Result);
                     totalbirds = data.Result.TotalChicks;
-                    // setTotalBirds(data.TotalChicks)
-
-                  //  var a = moment(new Date(), 'DD-MM-YYYY');
-                  //  var b = moment(new Date(data.Result.Date), 'DD-MM-YYYY');
                     weeks = CalculateAgeInWeeks(data.Result.Date);
                     days = CalculateAgeInDays(data.Result.Date);
-                    //setAgeDays(days);
-                    //setAgeWeeks(weeks);
-
-                  //alert(CalculateAgeInDays(data.Result.Date));
-
-
                     setEggData({ ...eggdata, ShedId: shedid, LotId: lotid, LotName: lotname, TotalBirds: totalbirds, AgeDays: days, AgeWeeks: weeks });
-
                 });
         }
-        else{
+        else {
             setEggData({ ...eggdata, ShedId: shedid, LotId: lotid, LotName: lotname, TotalBirds: totalbirds, AgeDays: days, AgeWeeks: weeks });
         }
-
-
     }
-
-    // const onTotalEggChange = (e) => {
-    //     setEggData({ ...eggdata, TotalEggs: e.target.value });
-    // }
-
-
-
 
     useEffect((e) => {
 
@@ -246,6 +227,7 @@ function EggDailyTracker(props) {
             .then(data => {
                 if (data.StatusCode === 200) {
                     setEggDailyTrackerList(data.Result);
+                    setEggtrackerlistForFilter(data.Result);
                     setCount(data.Result.length);
                     setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
                 }
@@ -280,25 +262,15 @@ function EggDailyTracker(props) {
     }
     const preDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages
-
     const itemsPerPage = variables.PAGE_PAGINATION_NO;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const itemsToDiaplay = eggtrackerlist.slice(startIndex, endIndex);
 
-    // let addModalClose = () => setAddModalShow({ addModalShow: false });
-    // let editModalClose = () => setEditModalShow({ editModalShow: false });
-
     let addModalClose = () => {
         setAddModalShow(false);
         setValidated(false);
     };
-
-    let editModalClose = () => {
-        setEditModalShow(false)
-    };
-
-
 
     const deleteTracker = (id) => {
         if (window.confirm('Are you sure?')) {
@@ -332,9 +304,7 @@ function EggDailyTracker(props) {
             addCount(count);
         }
     }
-
-
-
+    
     const handleAddEggTracker = (e) => {
         e.preventDefault();
         var form = e.target.closest('.needs-validation');
@@ -363,7 +333,6 @@ function EggDailyTracker(props) {
                     OkEggs: eggdata.OkEggs,
                     FeedIntech: eggdata.FeedIntech,
                     ProductionPercentage: eggdata.ProductionPercentage
-
 
                 })
             }).then(res => res.json())
@@ -420,8 +389,6 @@ function EggDailyTracker(props) {
                     OkEggs: eggdata.OkEggs,
                     FeedIntech: eggdata.FeedIntech,
                     ProductionPercentage: eggdata.ProductionPercentage
-
-
                 })
             }).then(res => res.json())
                 .then((result) => {
@@ -449,13 +416,16 @@ function EggDailyTracker(props) {
         setValidated(true);
     }
 
-
     return (
         <>
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
                 <h2>Welcome to Daily Production Tracker</h2>
             </div>
             <div className="row">
+                <div className="col" sm={12}>
+                    <p><strong>Filter date</strong></p>
+                    <DateComponent date={null} onChange={onDateFilterChange} isRequired={false} value={filterDate} />
+                </div>
                 <div className="col" style={{ textAlign: 'right' }}>
                     <Button className="mr-2" variant="primary"
                         style={{ marginRight: "17.5px" }}
@@ -471,31 +441,21 @@ function EggDailyTracker(props) {
                             <th>Shed</th>
                             <th>Lot </th>
                             <th>Birds</th>
-                            {/* <th>Mortality</th> */}
                             <th>Eggs</th>
                             <th>Eggs B</th>
                             <th>Eggs OK</th>
                             <th>FIntech</th>
                             <th>%</th>
-                            {/* <th>Wt(gm)</th> */}
                             <th>Options</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {/* {
-                            cartons.map(c => c.Id == cartonId)
-                        } */}
                         {
                             itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((egg) => {
                                 const filterByShedId = shedlotmaplist.filter((c) => c.shedid === egg.ShedId);
                                 const shedname = filterByShedId.length > 0 ? filterByShedId[0].shedname : "";
 
-                                // const filterByLotId = shedlotmaplist.filter((c) => c.lotid === egg.LotId);
-                                //const lotname = filterByLotId.length > 0 ? filterByLotId[0].lotname : "";
-
-                                //egg.LotName=lotname;
-
-                                egg.AgeDays =CalculateAgeInDays(egg.LotDate);
+                                egg.AgeDays = CalculateAgeInDays(egg.LotDate);
                                 egg.AgeWeeks = CalculateAgeInWeeks(egg.LotDate);
                                 return (
                                     <tr key={egg.id} align='center'>
@@ -503,7 +463,6 @@ function EggDailyTracker(props) {
                                         <td>{shedname}</td>
                                         <td>{egg.LotName}</td>
                                         <td>{egg.TotalBirds}</td>
-                                        {/* <td>{egg.Mortality}</td> */}
                                         <td>{egg.TotalEggs}</td>
                                         <td>{egg.BrokenEggs}</td>
                                         <td>{egg.OkEggs}</td>
@@ -520,9 +479,7 @@ function EggDailyTracker(props) {
                                                 </ButtonToolbar>
                                             }
                                         </td>
-
                                     </tr>
-
                                 )
                             }) : <tr>
                                 <td style={{ textAlign: "center" }} colSpan={14}>
@@ -569,11 +526,6 @@ function EggDailyTracker(props) {
                 </button>
             }
 
-
-
-
-
-
             <Modal
                 show={addModalShow}
                 {...props}
@@ -590,7 +542,6 @@ function EggDailyTracker(props) {
                 <Modal.Body>
                     <Row>
                         <Col sm={12}>
-
                             <div>
                                 <Form noValidate validated={validated} className="needs-validation">
                                     <Row className="mb-12">
@@ -601,7 +552,6 @@ function EggDailyTracker(props) {
                                             <Form.Control.Feedback type="invalid">
                                                 Please select date
                                             </Form.Control.Feedback>
-
                                         </Form.Group>
 
                                         <Form.Group controlId="ShedId" as={Col} >
@@ -751,9 +701,7 @@ function EggDailyTracker(props) {
                         </Col>
                     </Row>
                 </Modal.Body>
-
                 <Modal.Footer>
-
                 </Modal.Footer>
             </Modal>
 

@@ -3,6 +3,8 @@ import { variables } from '../../Variables';
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
+import InputField from '../ReuseableComponent/InputField'
+import DateComponent from '../DateComponent';
 
 function Medicine(props) {
 
@@ -137,27 +139,68 @@ function Medicine(props) {
 
 
   const fetchMedicineList = async () => {
-    fetch(variables.REACT_APP_API + 'Medicine/GetMedicine')
+    fetch(variables.REACT_APP_API + 'Medicine/GetMedicine',
+    {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': localStorage.getItem('token')
+        }
+    })
       .then(response => response.json())
       .then(data => {
-        setMedicineList(data);
-        setMedicineListForFilter(data);
+        if (data.StatusCode === 200) {
+        setMedicineList(data.Result);
+        setMedicineListForFilter(data.Result);
+        }
+        else if (data.StatusCode === 401) {
+          history("/login")
+      }
       });
   }
 
   const fetchUnit = async () => {
-    fetch(variables.REACT_APP_API + 'Unit')
+    fetch(variables.REACT_APP_API + 'Unit',
+    {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': localStorage.getItem('token')
+        }
+    })
       .then(response => response.json())
       .then(data => {
-        setUnitList(data);
+        if (data.StatusCode === 200) {
+          setUnitList(data.Result);
+          setCount(data.Result.length);
+          setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
+      }
+      else if (data.StatusCode === 401) {
+          history("/login")
+      }
       });
   }
 
   const fetchClient = async () => {
-    fetch(variables.REACT_APP_API + 'client')
+    fetch(variables.REACT_APP_API + 'client',
+    {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': localStorage.getItem('token')
+        }
+    })
       .then(response => response.json())
       .then(data => {
-        setClientList(data);
+        if (data.StatusCode === 200) {
+        setClientList(data.Result);
+        }
+        else if (data.StatusCode === 401) {
+          history("/login")
+      }
       });
   }
 
@@ -168,8 +211,8 @@ function Medicine(props) {
       method: 'PUT',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
-        //'Authorization': localStorage.getItem('token')
+        'Content-Type': 'application/json',
+        'Authorization': localStorage.getItem('token')
       },
       body: JSON.stringify({
 
@@ -223,8 +266,8 @@ function Medicine(props) {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
-        //'Authorization': localStorage.getItem('token')
+        'Content-Type': 'application/json',
+        'Authorization': localStorage.getItem('token')
       },
       body: JSON.stringify({
         MedicineID: meddata.MedicineID,
@@ -299,7 +342,7 @@ function Medicine(props) {
           </select>
         </div>
         <div className="col" style={{textAlign:'right'}}>
-          <Button className="mr-2" variant="primary"
+          <Button className="mr-2 btn-primary btn-primary-custom" variant="primary"
             style={{ marginRight: "17.5px" }}
             onClick={() => clickAddMedicine()}>Add</Button>
         </div>
@@ -308,7 +351,7 @@ function Medicine(props) {
 
       <Table className="mt-4" striped bordered hover size="sm">
         <thead>
-          <tr align='left'>
+          <tr align='left' className="tr-custom">
             <th>Date</th>
             <th>Supplier</th>
             <th>Medicine name</th>
@@ -368,13 +411,11 @@ function Medicine(props) {
           aria-labelledby="contained-modal-title-vcenter"
           centered
         >
-          <Modal.Header closeButton>
+          <Modal.Header>
             <Modal.Title id="contained-modal-title-vcenter">
               {meddata.modaltitle}
             </Modal.Title>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+            <button type="button" class="btn-close" aria-label="Close" onClick={addModalClose}> </button>
           </Modal.Header>
           <Modal.Body>
             <Row>
@@ -385,17 +426,21 @@ function Medicine(props) {
 
                       <Form.Group as={Col} controlId="Date">
                         <Form.Label>Date</Form.Label>
-                        <Form.Control
+                        <DateComponent date={null} onChange={dateChange} isRequired={true} value={meddata.Date} />
+                        <Form.Control.Feedback type="invalid">
+                          Please select date
+                        </Form.Control.Feedback>
+                        {/* <Form.Control
                           type="date"
                           value={meddata.Date ? dateForPicker(meddata.Date) : ''}
                           onChange={dateChange}
-                        />
+                        /> */}
                       </Form.Group>
                       <Form.Group controlId="ClientId" as={Col} >
                         <Form.Label>Supplier</Form.Label>
                         <Form.Select aria-label="Default select example"
                           onChange={clientChange} required>
-                          <option>--Select--</option>
+                           <option selected disabled value="">Choose...</option>
                           {
                             clientlist.filter((c) => c.ClientType === 2 || c.ClientType === 3).map((item) => {
                               return (
@@ -413,32 +458,51 @@ function Medicine(props) {
                           Please select supplier
                         </Form.Control.Feedback>
                       </Form.Group>
-
-                      <Form.Group controlId="MedicineName" as={Col} >
+                      <InputField controlId="MedicineName" label="Medicine name"
+                                            type="text"
+                                            value={meddata.MedicineName}
+                                            name="MedicineName"
+                                            placeholder="Medicine name"
+                                            errormessage="Please enter medicine name"
+                                            onChange={medicineNameChange}
+                                            required={true}
+                                            disabled={false}
+                                        />
+                      {/* <Form.Group controlId="MedicineName" as={Col} >
                         <Form.Label>Medicine name</Form.Label>
                         <Form.Control type="text" name="MedicineName" required value={meddata.MedicineName}
                           placeholder="Medicine name" onChange={medicineNameChange} />
                         <Form.Control.Feedback type="invalid">
                           Please enter medicine name
                         </Form.Control.Feedback>
-                      </Form.Group>
+                      </Form.Group> */}
 
                     </Row>
                     <Row className="mb-12">
-                      <Form.Group controlId="Quantity" as={Col} >
+                    <InputField controlId="Quantity" label="Quantity"
+                                            type="number"
+                                            value={meddata.Quantity}
+                                            name="Quantity"
+                                            placeholder="Quantity"
+                                            errormessage="Please enter quantity"
+                                            required={true}
+                                            disabled={false}
+                                            onChange={quantityChange}
+                                        />
+                      {/* <Form.Group controlId="Quantity" as={Col} >
                         <Form.Label>Quantity</Form.Label>
                         <Form.Control type="text" name="Quantity" onChange={quantityChange}
                           placeholder="Quantity" value={meddata.Quantity} />
                         <Form.Control.Feedback type="invalid">
                           Please enter quantity
                         </Form.Control.Feedback>
-                      </Form.Group>
+                      </Form.Group> */}
 
                       <Form.Group controlId="UnitId" as={Col} >
                         <Form.Label>Unit</Form.Label>
                         <Form.Select aria-label="Default select example"
                           onChange={unitChange} required>
-                          <option>--Select--</option>
+                           <option selected disabled value="">Choose...</option>
                           {
                             unitlist.map((item) => {
                               return (
@@ -456,38 +520,74 @@ function Medicine(props) {
                           Please select customer type
                         </Form.Control.Feedback>
                       </Form.Group>
-                      <Form.Group controlId="TotalAmount" as={Col} >
+
+                      <InputField controlId="TotalAmount" label="Total amount"
+                                            type="number"
+                                            value={meddata.TotalAmount}
+                                            name="TotalAmount"
+                                            placeholder="Total amount"
+                                            errormessage="Please enter total amount"
+                                            required={true}
+                                            disabled={false}
+                                            onChange={totalAmountChange}
+                                        />
+
+
+                      {/* <Form.Group controlId="TotalAmount" as={Col} >
                         <Form.Label>Total amount</Form.Label>
                         <Form.Control type="text" name="TotalAmount" required onChange={totalAmountChange}
                           placeholder="Total amount" value={meddata.TotalAmount} />
                         <Form.Control.Feedback type="invalid">
                           Please enter total amount
                         </Form.Control.Feedback>
-                      </Form.Group>
+                      </Form.Group> */}
                     </Row>
                     <Row className="mb-12">
-                      <Form.Group controlId="Paid" as={Col} >
+
+                    <InputField controlId="Paid" label="Paid"
+                                            type="number"
+                                            value={meddata.Paid}
+                                            name="Paid"
+                                            placeholder="Paid"
+                                            errormessage="Please enter paid amount"
+                                            required={true}
+                                            disabled={false}
+                                            onChange={paidChange}
+                                        />
+                      {/* <Form.Group controlId="Paid" as={Col} >
                         <Form.Label>Paid</Form.Label>
                         <Form.Control type="text" name="Email" required onChange={paidChange} value={meddata.Paid}
                           placeholder="Paid" />
                         <Form.Control.Feedback type="invalid">
                           Please paid amount
                         </Form.Control.Feedback>
-                      </Form.Group>
-
-                      <Form.Group controlId="Due" as={Col} >
+                      </Form.Group> */}
+<InputField controlId="Due" label="Due"
+                                            type="number"
+                                            value={meddata.Due}
+                                            name="Due"
+                                            placeholder="Due"
+                                            errormessage="Please enter due amount"
+                                            required={true}
+                                            disabled={true}
+                                        />
+                      {/* <Form.Group controlId="Due" as={Col} >
                         <Form.Label>Due</Form.Label>
                         <Form.Control type="text" name="Due" disabled value={meddata.Due}
                           placeholder="Due" />
 
-                      </Form.Group>
+                      </Form.Group> */}
                       <Form.Group as={Col} controlId="PaymentDate">
                         <Form.Label>Payment date</Form.Label>
-                        <Form.Control
+                        <DateComponent date={null} onChange={paymentDateChange} isRequired={true} value={meddata.PaymentDate} />
+                        <Form.Control.Feedback type="invalid">
+                          Please select payment date
+                        </Form.Control.Feedback>
+                        {/* <Form.Control
                           type="date"
                           value={meddata.PaymentDate ? dateForPicker(meddata.PaymentDate) : ''}
                           onChange={paymentDateChange}
-                        />
+                        /> */}
                       </Form.Group>
                     </Row>
 
@@ -509,7 +609,7 @@ function Medicine(props) {
                     <Form.Group as={Col}>
                       {meddata.MedicineID <= 0 ?
 
-                        <Button variant="primary" type="submit" style={{ marginTop: "30px" }} onClick={(e) => handleSubmitAdd(e)}>
+                        <Button variant="primary" className="btn-primary-custom" type="submit" style={{ marginTop: "30px" }} onClick={(e) => handleSubmitAdd(e)}>
                           Add
                         </Button>
                         : null
@@ -523,7 +623,7 @@ function Medicine(props) {
                         : null
                       }
 
-                      <Button variant="danger" style={{ marginTop: "30px", marginLeft: "10px" }} onClick={() => {
+                      <Button variant="danger"className="btn-danger-custom" style={{ marginTop: "30px", marginLeft: "10px" }} onClick={() => {
                         addModalClose();
                       }
                       }>Close</Button>

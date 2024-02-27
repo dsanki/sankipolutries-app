@@ -3,6 +3,8 @@ import { variables } from '../../Variables';
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
+import InputField from '../ReuseableComponent/InputField'
+import DateComponent from '../DateComponent';
 
 function CustomerList(props) {
 
@@ -16,9 +18,9 @@ function CustomerList(props) {
     const obj = useMemo(() => ({ count }), [count]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
-    const [editModalShow, setEditModalShow] = useState(false);
     const [addModalShow, setAddModalShow] = useState(false);
     const [photofilename, setPhotoFileName] = useState("annonymous.jpg");
+
     //const [isCustomerTypeValid, setCustomerTypeValid] = useState(false);
 
     let addModalClose = () => {
@@ -52,7 +54,7 @@ function CustomerList(props) {
             LastName: "",
             MobileNo: "",
             DOB: "",
-            CustomerTypeId: 0,
+            CustomerTypeId: "",
             Email: "",
             IsActive: true,
             ProfileImageUrl: "annonymous.jpg"
@@ -99,16 +101,7 @@ function CustomerList(props) {
     }
 
     const custTypeChange = (e) => {
-        if (e.target.value === "-1" || e.target.value === -1) {
-            //  setCustomerTypeValid(false);
-
-        }
-        else {
-            //setCustomerTypeValid(true);
-            setCustData({ ...custdata, CustomerTypeId: e.target.value });
-        }
-
-
+        setCustData({ ...custdata, CustomerTypeId: e.target.value });
     }
 
     const deleteCustomer = (id) => {
@@ -123,8 +116,19 @@ function CustomerList(props) {
                 }
             }).then(res => res.json())
                 .then((result) => {
-                    addCount(count);
-                    props.showAlert("Successfully deleted", "info")
+                    if (result.StatusCode === 200) {
+                        addCount(count);
+                        props.showAlert("Successfully deleted", "info");
+                    }
+                    else if (result.StatusCode === 401) {
+                        history("/login")
+                    }
+                    else if (result.StatusCode === 404) {
+                        props.showAlert("Data not found!!", "danger")
+                    }
+                    else {
+                        props.showAlert("Error occurred!!", "danger")
+                    }
                 },
                     (error) => {
                         props.showAlert("Error occurred!!", "danger")
@@ -146,19 +150,57 @@ function CustomerList(props) {
     }, [obj]);
 
     const fetchCustomer = async () => {
-        fetch(variables.REACT_APP_API + 'Customer/GetCustomer')
+        fetch(variables.REACT_APP_API + 'Customer/GetCustomer',
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
             .then(response => response.json())
             .then(data => {
-                setCustomerList(data);
-                setTotalPages(Math.ceil(data.length / variables.PAGE_PAGINATION_NO));
+                if (data.StatusCode === 200) {
+                    setCustomerList(data.Result);
+                    setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
+                }
+                else if (data.StatusCode === 401) {
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found!!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                }
             });
     }
 
     const fetchCutomerTypes = async () => {
-        fetch(variables.REACT_APP_API + 'ProductType/GetProductType')
+        fetch(variables.REACT_APP_API + 'ProductType/GetProductType',
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
             .then(response => response.json())
             .then(data => {
-                setProductType(data);
+                if (data.StatusCode === 200) {
+                    setProductType(data.Result);
+                }
+                else if (data.StatusCode === 401) {
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found!!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                }
             });
     }
 
@@ -168,13 +210,25 @@ function CustomerList(props) {
         formData.append("file", e.target.files[0], e.target.files[0].name);
         fetch(variables.REACT_APP_API + 'Customer/SaveProfileImage', {
             method: 'POST',
+            headers: {
+                'Authorization': localStorage.getItem('token')
+            },
             body: formData
         })
             .then(res => res.json())
             .then(data => {
-                //setPhotoFileName(data);
-
-                setCustData({ ...custdata, ProfileImageUrl: data });
+                if (data.StatusCode === 200) {
+                    setCustData({ ...custdata, ProfileImageUrl: data.Result });
+                }
+                else if (data.StatusCode === 401) {
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found!!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                }
             })
 
     }
@@ -209,11 +263,17 @@ function CustomerList(props) {
                 })
             }).then(res => res.json())
                 .then((result) => {
-                    if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
+                    if (result.StatusCode === 200) {
                         addCount(count);
                         setAddModalShow(false);
 
                         props.showAlert("Successfully updated", "info")
+                    }
+                    else if (result.StatusCode === 401) {
+                        history("/login")
+                    }
+                    else if (result.StatusCode === 404) {
+                        props.showAlert("Data not found!!", "danger")
                     }
                     else {
                         props.showAlert("Error occurred!!", "danger")
@@ -271,66 +331,22 @@ function CustomerList(props) {
                         setAddModalShow(false);
                         props.showAlert("Successfully added", "info")
                     }
-                    if (result === 401) {
+                    else if (result.StatusCode === 401) {
                         history("/login")
                     }
                     else {
                         props.showAlert("Error occurred!!", "danger")
                     }
-
                 },
                     (error) => {
                         props.showAlert("Error occurred!!", "danger")
                     });
-
-
         }
 
         setValidated(true);
 
 
     }
-
-
-    // const [form, setForm] = useState({
-    //     customertype: null
-    // });
-
-    // const onHandleChange = useCallback((value, name) => {
-    //     setForm(prev => ({
-    //         ...prev,
-    //         [name]: value
-    //     }));
-    // }, []);
-
-    // const onValidate = (value, name) => {
-    //     setError(prev => ({
-    //         ...prev,
-    //         [name]: { ...prev[name], errorMsg: value }
-    //     }));
-    // }
-
-    // const [error, setError] = useState({
-    //     customertype: {
-    //         isReq: true,
-    //         errorMsg: '',
-    //         onValidateFunc: onValidate
-    //     }
-    // });
-
-    // const validateForm = () => {
-    //     let isInvalid = false;
-    //     Object.keys(error).forEach(x => {
-    //         const errObj = error[x];
-    //         if (errObj.errorMsg) {
-    //             isInvalid = true;
-    //         } else if (errObj.isReq && !form[x]) {
-    //             isInvalid = true;
-    //             onValidate(true, x);
-    //         }
-    //     });
-    //     return !isInvalid;
-    // }
 
     const handlePageChange = (newPage) => {
         setCurrentPage(newPage)
@@ -348,7 +364,7 @@ function CustomerList(props) {
     const preDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages
 
-    const itemsPerPage =variables.PAGE_PAGINATION_NO;
+    const itemsPerPage = variables.PAGE_PAGINATION_NO;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const itemsToDiaplay = customerlist.slice(startIndex, endIndex);
@@ -360,7 +376,7 @@ function CustomerList(props) {
                 <h2>Welcome to Customer List  page</h2>
             </div>
             <div className="row">
-                <div className="col" style={{textAlign:'right'}}>
+                <div className="col" style={{ textAlign: 'right' }}>
                     <Button className="mr-2" variant="primary"
                         style={{ marginRight: "17.5px" }}
                         onClick={() => clickAddCustomer()}>Add</Button>
@@ -370,7 +386,7 @@ function CustomerList(props) {
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
-                    <tr align='left'>
+                    <tr align='left' className="tr-custom">
                         <th>First name</th>
                         <th>Middle name</th>
                         <th>Last name</th>
@@ -386,7 +402,7 @@ function CustomerList(props) {
 
                     {
 
-itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
+                        itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
                             //console.log(itemsToDiaplay.length);
                             const ctype = producttypes.filter((c) => c.ProductId === p.CustomerTypeId);
                             const cname = ctype.length > 0 ? ctype[0].ProductName : "";
@@ -426,7 +442,11 @@ itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
                                     </td>
                                 </tr>
                             )
-                        }) : ''
+                        }) : <tr>
+                        <td style={{ textAlign: "center" }} colSpan={14}>
+                            No Records
+                        </td>
+                    </tr>
                     }
                 </tbody>
             </Table >
@@ -471,7 +491,7 @@ itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
                         <Modal.Title id="contained-modal-title-vcenter">
                             {custdata.modaltitle}
                         </Modal.Title>
-
+                        <button type="button" class="btn-close" aria-label="Close" onClick={addModalClose}> </button>
                     </Modal.Header>
                     <Modal.Body>
                         <Row>
@@ -480,61 +500,72 @@ itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
                                 <div>
                                     <Form noValidate validated={validated} className="needs-validation">
                                         <Row className="mb-12">
-                                            <Form.Group controlId="FirstName" as={Col} >
-                                                <Form.Label>First name</Form.Label>
-                                                <Form.Control type="text" name="FirstName" required value={custdata.FirstName}
-                                                    placeholder="First name" onChange={firstNameChange} />
-                                                <Form.Control.Feedback type="invalid">
-                                                    Please enter first name
-                                                </Form.Control.Feedback>
-                                            </Form.Group>
 
-                                            <Form.Group controlId="MiddleName" as={Col} >
-                                                <Form.Label>Middle name</Form.Label>
-                                                <Form.Control type="text" name="MiddleName" onChange={middleNameChange}
-                                                    placeholder="Middle name" value={custdata.MiddleName} />
-                                            </Form.Group>
-                                            <Form.Group controlId="LastName" as={Col} >
-                                                <Form.Label>Last name</Form.Label>
-                                                <Form.Control type="text" name="LastName" required onChange={lastNameChange}
-                                                    placeholder="Last name" value={custdata.LastName} />
-                                                <Form.Control.Feedback type="invalid">
-                                                    Please enter last name
-                                                </Form.Control.Feedback>
-                                            </Form.Group>
+                                            <InputField controlId="FirstName" label="First name"
+                                                type="text"
+                                                value={custdata.FirstName}
+                                                name="FirstName"
+                                                placeholder="First name"
+                                                errormessage="Please enter first name"
+                                                onChange={firstNameChange}
+                                                required={true}
+                                                disabled={false}
+                                            />
 
+                                            <InputField controlId="MiddleName" label="Middle name"
+                                                type="text"
+                                                value={custdata.MiddleName}
+                                                name="MiddleName"
+                                                placeholder="Middle name"
+                                                errormessage="Please enter middle name"
+                                                onChange={middleNameChange}
+                                                required={false}
+                                                disabled={false}
+                                            />
+
+                                            <InputField controlId="LastName" label="Last name"
+                                                type="text"
+                                                value={custdata.LastName}
+                                                name="LastName"
+                                                placeholder="Last name"
+                                                errormessage="Please enter last name"
+                                                onChange={lastNameChange}
+                                                required={true}
+                                                disabled={false}
+                                            />
                                         </Row>
 
                                         <Row className="mb-12">
-                                            <Form.Group controlId="Email" as={Col} >
-                                                <Form.Label>Email</Form.Label>
-                                                <Form.Control type="text" name="Email" required onChange={emailChange} value={custdata.Email}
-                                                    placeholder="Email" />
-                                                <Form.Control.Feedback type="invalid">
-                                                    Please enter email
-                                                </Form.Control.Feedback>
-                                            </Form.Group>
 
-                                            <Form.Group controlId="MobileNo" as={Col} >
-                                                <Form.Label>Mobile no</Form.Label>
-                                                <Form.Control type="text" name="MobileNo" required onChange={mobileNoChange} value={custdata.MobileNo}
-                                                    placeholder="Mobile no" />
-                                                <Form.Control.Feedback type="invalid">
-                                                    Please enter mobile no
-                                                </Form.Control.Feedback>
-                                            </Form.Group>
+                                            <InputField controlId="Email" label="Email"
+                                                type="email"
+                                                value={custdata.Email}
+                                                name="Email"
+                                                placeholder="Email"
+                                                errormessage="Please enter email"
+                                                onChange={emailChange}
+                                                required={true}
+                                                disabled={false}
+                                            />
+
+                                            <InputField controlId="MobileNo" label="Mobile no"
+                                                type="number"
+                                                value={custdata.MobileNo}
+                                                name="MobileNo"
+                                                placeholder="Mobile no"
+                                                errormessage="Please enter mobile no"
+                                                onChange={mobileNoChange}
+                                                required={true}
+                                                disabled={false}
+                                            />
 
                                             <Form.Group controlId="CustomerTypeId" as={Col} >
                                                 <Form.Label>Customer type</Form.Label>
                                                 <Form.Select aria-label="Default select example"
                                                     onChange={custTypeChange} required>
-                                                    {/* <option key="-1" value="-1">--Select--</option> */}
-
                                                     <option selected disabled value="">Choose...</option>
                                                     {
                                                         producttypes.map((item) => {
-                                                            //const ctype = customertypes.filter((c) => c.ProductId === p.CustomerTypeId);
-                                                            //const cname = ctype.length > 0 ? ctype[0].ProductName : "";
 
                                                             return (
 
@@ -556,26 +587,18 @@ itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
 
                                         <Row className="mb-3">
                                             <Form.Group as={Col} controlId="DOB">
-                                                <Form.Label>Date</Form.Label>
-                                                {/* <DateComponent date={custdata.DOB} /> */}
-
-                                                <Form.Control
-                                                    type="date"
-                                                    value={custdata.DOB ? dateForPicker(custdata.DOB) : ''}
-                                                    onChange={dobChange} required
-                                                />
+                                                <Form.Label>DOB</Form.Label>
+                                                <DateComponent date={null} onChange={dobChange} isRequired={true} value={custdata.DOB} />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please select DOB
                                                 </Form.Control.Feedback>
-
                                             </Form.Group>
 
                                         </Row>
                                         <Row className="mb-12">
                                             <Form.Group as={Col} controlId="ProfileImageUrl">
-
                                                 <Form.Label>Customer photo</Form.Label>
-                                                <input class="form-control" type="file" id="formFile" onChange={profileImageUpload} multiple="false" accept="image/*"  />
+                                                <input class="form-control" type="file" id="formFile" onChange={profileImageUpload} multiple="false" accept="image/*" />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please select image
                                                 </Form.Control.Feedback>
@@ -583,7 +606,6 @@ itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
                                             <Form.Group as={Col} controlId="ProfileImageUrl">
                                                 <img width="250px" height="250px" src={variables.PHOTO_URL + custdata.ProfileImageUrl} />
                                             </Form.Group>
-
                                         </Row>
 
                                         <Form.Group as={Col}>

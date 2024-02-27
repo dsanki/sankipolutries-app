@@ -30,6 +30,14 @@ import moment from 'moment';
     return weeks;
   };
 
+  export const dateyyyymmddhhmmss = (dateString) => {
+    return moment(new Date(dateString)).format('YYYY-MM-DDT00:00:00.000');
+};
+
+export const dateyyyymmdd = (dateString) => {
+    return moment(new Date(dateString)).format('YYYY-MM-DD')
+};
+
 
 
 //  export const fetchShedsList = async () => {

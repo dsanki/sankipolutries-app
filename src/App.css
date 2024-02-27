@@ -48,7 +48,7 @@
   background-color: transparent !important;
 }
 
-.navbar {background: linear-gradient(45deg, #0d6efd, #df9292);}
+.navbar {background: linear-gradient(45deg, #7da1d7, #df9292);}
 
 .navbar .navbar-nav .nav-link
 {
@@ -58,7 +58,7 @@
 
 .navbar .navbar-nav .dropdown-menu
 {
-  background: linear-gradient(45deg, #0d6efd, #df9292);
+  background: linear-gradient(45deg, #7da1d7, #df9292);
 }
 .navbar .navbar-nav .dropdown-menu .nav-link
 {
@@ -83,6 +83,52 @@
   border-color: #fff;
   color: #fff;
 }
+.navbar-expand-lg .navbar-nav .dropdown-menu
+{
+  min-width: 13rem !important;
+}
+.btn-primary
+{
+  
+  background: linear-gradient(45deg, #7da1d7, #221752);
+  width: 71px;
+  font-size: large;
+  font-weight: bold;
+}
+
+.tr-custom {
+  background: linear-gradient(45deg, #7da1d7, #df9292);
+  color: #fff;
+}
+
+.table-striped>tbody>tr:nth-of-type(odd)>* {
+  /* background: linear-gradient(45deg, #e9eef4, #fddbdb); */
+  --bs-table-accent-bg: rgb(221 92 92 / 5%);
+}
+
+.btn-danger
+{
+  background: linear-gradient(45deg, #9b555b, #ff0000);
+  width: 71px;
+  font-size: large;
+  font-weight: bold;
+}
+
+.form-label
+{
+  font-weight: bold;
+  color:#494444;
+}
+
+.modal-title
+{
+  font-weight: bold;
+  color:#494444;
+}
+h2, p{
+  color:#4e4444; 
+}
+
 
 
 

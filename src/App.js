@@ -10,7 +10,7 @@ import ChicksMasterComponent from './Component/Chicks/ChicksMasterComponent';
 import LoginComponent from './Component/Login';
 import ClientList from './Component/Client/ClientList'
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import LotState from './Context/LotState';
+import CommonState from './Context/CommonState';
 import Alert from './Component/Alert/Alert';
 import ShedLotMap from './Component/Chicks/ShedLotMap';
 import EggDailyTracker from './Component/EggDailyTracker/EggDailyTracker';
@@ -22,6 +22,7 @@ import CollapsibleExample from './Component/Nav/CollapsibleExample';
 import RawMaterials from './Component/RawMaterials/RawMaterials'
 import BirdSale from './Component/BirdSale/BirdSale'
 import NavTest from './Component/Nav/NavTest'
+import NavSticky from './Component/Nav/NavSticky'
 function App() {
 
   const [alert, setAlert] = useState(null);
@@ -38,7 +39,7 @@ function App() {
 
   return (
     <>
-      <LotState>
+      {/* <CommonState> */}
         <BrowserRouter>
         
           <div className="ContainerOverride">
@@ -49,6 +50,8 @@ function App() {
             {/* <NavComponent /> */}
             {/* <CollapsibleExample/> */}
             <NavTest/>
+{/* <NavSticky/> */}
+
             <Alert alert={alert}/>
             <Routes>
               <Route path="/" element={<Home  showAlert={showAlert}/>} />
@@ -61,6 +64,7 @@ function App() {
               <Route path="/eggdailytracker" element={<EggDailyTracker showAlert={showAlert}/>} />
               <Route path="/mortalitylist" element={<MortalityList showAlert={showAlert}/>} />
               <Route path="/customerlist" element={<CustomerList showAlert={showAlert}/>} />
+              <Route path="/eggsale" element={<EggSale showAlert={showAlert}/>} />
               <Route path="/eggsale/:id" element={<EggSale showAlert={showAlert}/>} />
               <Route path="/medicine" element={<Medicine showAlert={showAlert}/>} />
               <Route path="/rawmaterials" element={<RawMaterials showAlert={showAlert}/>} />
@@ -70,7 +74,7 @@ function App() {
           </div>
          
         </BrowserRouter>
-      </LotState>
+      {/* </CommonState> */}
     </>
   );
 }
