@@ -399,7 +399,11 @@ function Medicine(props) {
                   </td>
                 </tr>
               )
-            }) : ''
+            }) :  <tr>
+            <td style={{ textAlign: "center" }} colSpan={14}>
+                No Records
+            </td>
+        </tr>
           }
         </tbody>
       </Table >
