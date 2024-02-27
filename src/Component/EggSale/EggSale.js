@@ -99,7 +99,7 @@ function EggSale(props) {
     const eggRateChange = (e) => {
         setEggSaletData({ ...eggsaledata, EggRate: e.target.value, TotalCost: e.target.value * eggsaledata.Quantity, FinalCost: (e.target.value * eggsaledata.Quantity) - eggsaledata.Discount });
     }
-    
+
     const discountChange = (e) => {
         setEggSaletData({ ...eggsaledata, Discount: e.target.value, FinalCost: (eggsaledata.TotalCost - e.target.value) });
     }
@@ -347,6 +347,32 @@ function EggSale(props) {
         setValidated(true);
     }
 
+    const handlePageChange = (newPage) => {
+        setCurrentPage(newPage)
+    }
+
+    const handleNextClick = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1)
+        }
+    }
+
+    const handlePrevClick = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1)
+        }
+    }
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+
+    const preDisabled = currentPage === 1;
+    const nextDisabled = currentPage === totalPages;
+    const itemsPerPage = variables.PAGE_PAGINATION_NO;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const itemsToDiaplay = eggsalelist && eggsalelist.length > 0 ? eggsalelist.slice(startIndex, endIndex) : [];
+
     return (
         <div>
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
@@ -385,7 +411,7 @@ function EggSale(props) {
 
                     {
 
-                        eggsalelist && eggsalelist.length > 0 ? eggsalelist.map((p) => {
+                        itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
                             return (
                                 <tr align='center' key={p.Id}>
 
@@ -416,13 +442,47 @@ function EggSale(props) {
                                 </tr>
                             )
                         }) : <tr>
-                        <td style={{ textAlign: "center" }} colSpan={14}>
-                            No Records
-                        </td>
-                    </tr>
+                            <td style={{ textAlign: "center" }} colSpan={14}>
+                                No Records
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </Table >
+
+            {
+                eggsalelist && eggsalelist.length > variables.PAGE_PAGINATION_NO &&
+                <button
+                    onClick={handlePrevClick}
+                    disabled={preDisabled}
+                >
+                    Prev
+                </button>
+            }
+            {
+
+                Array.from({ length: totalPages }, (_, i) => {
+                    return (
+                        eggsalelist && eggsalelist.length > variables.PAGE_PAGINATION_NO &&
+                        <button
+                            onClick={() => handlePageChange(i + 1)}
+                            key={i}
+                            disabled={i + 1 === currentPage}
+                        >
+                            {i + 1}
+                        </button>
+                    )
+                })
+            }
+
+            {eggsalelist && eggsalelist.length > variables.PAGE_PAGINATION_NO &&
+                <button
+                    onClick={handleNextClick}
+                    disabled={nextDisabled}
+                >
+                    Next
+                </button>
+            }
 
             <div className="container" id="exampleModal">
                 <Modal
@@ -481,7 +541,7 @@ function EggSale(props) {
 
                                             <InputField controlId="TotalCost" label="Total cost"
                                                 type="number"
-                                                value={eggsaledata.TotalCost!==""?eggsaledata.TotalCost.toFixed(2): eggsaledata.TotalCost}
+                                                value={eggsaledata.TotalCost !== "" ? eggsaledata.TotalCost.toFixed(2) : eggsaledata.TotalCost}
                                                 name="TotalCost"
                                                 placeholder="Total cost"
                                                 errormessage="Please enter total cost"
@@ -502,7 +562,7 @@ function EggSale(props) {
 
                                             <InputField controlId="FinalCost" label="Final cost"
                                                 type="number"
-                                                value={eggsaledata.FinalCost!==""?eggsaledata.FinalCost.toFixed(2): eggsaledata.FinalCost}
+                                                value={eggsaledata.FinalCost !== "" ? eggsaledata.FinalCost.toFixed(2) : eggsaledata.FinalCost}
                                                 name="FinalCost"
                                                 placeholder="Final cost"
                                                 errormessage="Please enter final cost"
@@ -525,7 +585,7 @@ function EggSale(props) {
 
                                             <InputField controlId="Due" label="Due"
                                                 type="number"
-                                                value={eggsaledata.Due!==""? eggsaledata.Due.toFixed(2):eggsaledata.Due}
+                                                value={eggsaledata.Due !== "" ? eggsaledata.Due.toFixed(2) : eggsaledata.Due}
                                                 name="Due"
                                                 placeholder="Due"
                                                 errormessage="Please enter due amount"

@@ -325,6 +325,13 @@ function BirdSale(props) {
 
     const handleSubmitEdit = (e) => {
         e.preventDefault();
+        var form = e.target.closest('.needs-validation');
+        if (form.checkValidity() === false) {
+
+            e.stopPropagation();
+            setValidated(true);
+        }
+        else {
 
         fetch(variables.REACT_APP_API + 'BirdSale/UpdateBirdSale', {
             method: 'PUT',
@@ -367,7 +374,7 @@ function BirdSale(props) {
                 (error) => {
                     props.showAlert("Error occurred!!", "danger")
                 });
-        //}
+        }
 
         setValidated(true);
     }
@@ -382,6 +389,13 @@ function BirdSale(props) {
 
     const handleSubmitAdd = (e) => {
         e.preventDefault();
+        var form = e.target.closest('.needs-validation');
+        if (form.checkValidity() === false) {
+
+            e.stopPropagation();
+            setValidated(true);
+        }
+        else {
 
         fetch(variables.REACT_APP_API + 'BirdSale/AddBirdSale', {
             method: 'POST',
@@ -423,6 +437,7 @@ function BirdSale(props) {
                     props.showAlert("Error occurred!!", "danger")
                 });
         //}
+            }
 
         setValidated(true);
     }
@@ -527,7 +542,11 @@ function BirdSale(props) {
                                     </td>
                                 </tr>
                             )
-                        }) : ''
+                        }) : <tr>
+                        <td style={{ textAlign: "center" }} colSpan={14}>
+                            No Records
+                        </td>
+                    </tr>
                     }
                 </tbody>
             </Table >
@@ -552,7 +571,7 @@ function BirdSale(props) {
                         <Row>
                             <Col sm={12}>
                                 <div>
-                                    <Form noValidate validated={validated}>
+                                    <Form noValidate validated={validated} className="needs-validation">
                                         <Row className="mb-3">
                                             <Form.Group as={Col} controlId="Date">
                                                 <Form.Label>Date</Form.Label>
