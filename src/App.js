@@ -23,6 +23,7 @@ import RawMaterials from './Component/RawMaterials/RawMaterials'
 import BirdSale from './Component/BirdSale/BirdSale'
 import NavTest from './Component/Nav/NavTest'
 import NavSticky from './Component/Nav/NavSticky'
+import ChicksVaccinationTracker from './Component/Vaccination/ChicksVaccinationTracker'
 function App() {
 
   const [alert, setAlert] = useState(null);
@@ -59,7 +60,7 @@ function App() {
               <Route path="/lotList" element={<LotListComponent  showAlert={showAlert}/>} />
               <Route path="/chicksmaster" element={<ChicksMasterComponent showAlert={showAlert}/>} />
               <Route path="/clientlist" element={<ClientList showAlert={showAlert}/>} />
-              <Route path="/login" element={<LoginComponent showAlert={showAlert}/>} />
+             
               <Route path="/shedlotmap" element={<ShedLotMap showAlert={showAlert}/>} />
               <Route path="/eggdailytracker" element={<EggDailyTracker showAlert={showAlert}/>} />
               <Route path="/mortalitylist" element={<MortalityList showAlert={showAlert}/>} />
@@ -69,9 +70,11 @@ function App() {
               <Route path="/medicine" element={<Medicine showAlert={showAlert}/>} />
               <Route path="/rawmaterials" element={<RawMaterials showAlert={showAlert}/>} />
               <Route path="/birdsale" element={<BirdSale showAlert={showAlert}/>} />
-              
+              <Route path="/vaccinationtracker" element={<ChicksVaccinationTracker showAlert={showAlert}/>} />
+              <Route path="/login" element={<LoginComponent showAlert={showAlert}/>} />
             </Routes>
           </div>
+          
          
         </BrowserRouter>
       {/* </CommonState> */}

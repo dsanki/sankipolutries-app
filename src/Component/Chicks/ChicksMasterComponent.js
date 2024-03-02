@@ -344,7 +344,7 @@ function ChicksMasterComponent(props) {
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
-                    <tr align='center'>
+                    <tr align='center' className="tr-custom">
                         <th>Lot name</th>
                         <th>Date</th>
                         <th>Chicks</th>

@@ -136,7 +136,7 @@ function EggDailyTracker(props) {
                 .then(response => response.json())
                 .then(data => {
                     setLotDetails(data.Result);
-                    totalbirds = data.Result.TotalChicks;
+                    totalbirds = data.Result.TotalChicks - (data.Result.Mortality + data.Result.TotalMortality + data.Result.TotalBirdSale);
                     weeks = CalculateAgeInWeeks(data.Result.Date);
                     days = CalculateAgeInDays(data.Result.Date);
                     setEggData({ ...eggdata, ShedId: shedid, LotId: lotid, LotName: lotname, TotalBirds: totalbirds, AgeDays: days, AgeWeeks: weeks });
@@ -436,7 +436,7 @@ function EggDailyTracker(props) {
             {
                 <Table className="mt-4" striped bordered hover size="sm">
                     <thead>
-                        <tr align='center'>
+                        <tr align='center' className="tr-custom">
                             <th>Date</th>
                             <th>Shed</th>
                             <th>Lot </th>

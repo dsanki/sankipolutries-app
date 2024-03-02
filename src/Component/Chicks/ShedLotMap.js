@@ -221,7 +221,7 @@ function ShedLotMap(props) {
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
-                    <tr align='center'>
+                    <tr align='center' className="tr-custom">
                         <th>Shed name</th>
                         <th>Lot Name</th>
                         <th>Is Production</th>

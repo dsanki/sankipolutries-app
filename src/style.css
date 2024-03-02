@@ -101,7 +101,13 @@ font-weight: 500;
 color: #ffffff;
 transition: 0.15s;}
 
-.nav-item .nav-link:hover{color: #FE4066;}
+/* .nav-item .nav-link:hover{color: #FE4066;} */
+.nav-item .nav-link:hover {
+	color: #7d7072;
+	background: #e7d3d3;
+	/* font-size: 40px; */
+	/* font-weight: bold; */
+	}
 
 .header-btn{color:#ffffff;
 border-radius: 30px;

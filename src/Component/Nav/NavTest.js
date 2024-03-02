@@ -16,7 +16,7 @@ function NavTest() {
 
     let location = useLocation();
     useEffect(() => {
-        console.log(location.pathname);
+        //console.log(location.pathname);
     }, [location])
 
     return (
@@ -33,7 +33,7 @@ function NavTest() {
                    
 
 
-                        <div className="collapse navbar-collapse" id="navbarSupportedContent" style={{marginLeft:"144px"}}>
+                        <div className="collapse navbar-collapse" id="navbarSupportedContent">
                         {
                         localStorage.getItem('token') !== null &&
                             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
@@ -61,6 +61,12 @@ function NavTest() {
                                             <a className={`nav-link ${location.pathname === "/birdsale" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/birdsale">Bird sale
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
+                                        <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/vaccinationtracker" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/vaccinationtracker">Vaccination Tracker
+                                                <span className="sr-only">(current)</span></a>
+                                        </li>
+
+                                        
                                     </ul>
                                 </li>
 
@@ -85,7 +91,7 @@ function NavTest() {
 
                                 <li className="nav-item dropdown">
                                     <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={{ fontSize: '20px' }}>
-                                        Dropdown
+                                        Others Modules
                                     </a>
                                     <ul className="dropdown-menu">
                                         <li className="nav-item">
@@ -124,9 +130,12 @@ function NavTest() {
 
                             </ul>
                         }
-                            <form className="form-inline my-2 my-lg-0 pull-right">
-                                <NavLink to="/login" className={`btn btn-primary mx-2 logoutbtn ${localStorage.getItem('token') !== null ? "invisible" : "visible"}`} role="button">Login</NavLink>
-                            </form>
+                        {
+                            location.pathname!=="/login" &&    <form className="form-inline my-2 my-lg-0 pull-right">
+                            <NavLink to="/login" className={`btn btn-primary mx-2 logoutbtn ${localStorage.getItem('token') !== null ? "invisible" : "visible"}`} role="button">Login</NavLink>
+                        </form>
+                        }
+                         
                             {localStorage.getItem('username') !== null &&
                                 <label className="custom-file-label" style={{
                                     color: "#fff"

@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { variables } from '../../Variables';
-import { Button, ButtonToolbar, Table, Row, Col, Form,Modal } from 'react-bootstrap';
+import { Button, ButtonToolbar, Table, Row, Col, Form, Modal } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'
-    import DateComponent from '../DateComponent';
-// import AddMortality from './AddMortality';
-// import EditMortality from './EditMortality';
+import DateComponent from '../DateComponent';
 import InputField from '../ReuseableComponent/InputField'
 import Moment from 'moment';
+import Loading from '../Loading/Loading'
+import { FetchMortalityList, FetchShedLotMapList, FetchShedsList, NumberInputKeyDown, HandleLogout } from '../../Utility'
+
+
 function MortalityList(props) {
     let history = useNavigate();
 
     const [mortalitylist, setMortalityList] = useState([]);
-    const [lots, setLots] = useState([]);
     const [shedlotmaplist, SetShedLotMapList] = useState([]);
     const [validated, setValidated] = useState(false);
     const [shedlist, setShedList] = useState([]);
@@ -20,17 +21,12 @@ function MortalityList(props) {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [addModalShow, setAddModalShow] = useState(false);
-
-    const [shedlotdata, SetShedLotData] = useState([]);
+    const [isloaded, setIsLoaded] = useState(true);
 
     let addModalClose = () => {
         setAddModalShow(false);
         setValidated(false);
     };
-    const [_lotdetails, setLotDetails] = useState();
-    const [_totalbirds, setTotalBirds] = useState();
-
-
 
     const initialvalues = {
         modaltitle: "",
@@ -40,7 +36,7 @@ function MortalityList(props) {
         LotId: "",
         MortalityNumber: "",
         LotName: "",
-        TotalBirdSale: ""
+        TotalBirds: ""
     };
 
     const [mortalitydata, setMortalityData] = useState(initialvalues);
@@ -55,7 +51,7 @@ function MortalityList(props) {
             LotId: "",
             MortalityNumber: "",
             LotName: "",
-            TotalBirdSale: ""
+            TotalBirds: ""
         })
     }
 
@@ -69,7 +65,7 @@ function MortalityList(props) {
             LotId: mo.lotid,
             MortalityNumber: mo.mortality,
             LotName: mo.lotname,
-            TotalBirdSale: mo.TotalBirdSale
+            TotalBirds: mo.totalbirds
         })
     }
 
@@ -77,68 +73,67 @@ function MortalityList(props) {
 
         if (localStorage.getItem('token')) {
             fetchSheds();
-            fetchLots();
             fetchShedLotsMapList();
-            fetchMortalityList();
         }
         else {
+            HandleLogout();
             history("/login")
         }
-    }, [obj]);
+    }, []);
 
     const dateChange = (e) => {
         setMortalityData({ ...mortalitydata, Date: e.target.value });
     }
 
-    // const lotidChange = (e) => {
-    //     setMortalityData({ ...mortalitydata, LotId: e.target.value });
-    // }
-
     const onShedChange = (e) => {
         const shedid = e.target.value;
         let lotid = "";
         let lotname = "";
-        let totalbirdsale = "";
+        let totalbirds = "";
 
         const filterval = shedlotmaplist.filter((c) => c.shedid === parseInt(shedid));
         if (filterval.length > 0) {
             lotid = filterval[0].lotid;
             lotname = filterval[0].lotname;
-            fetch(variables.REACT_APP_API + 'ChicksMaster/' + filterval[0].lotid)
+            fetch(variables.REACT_APP_API + 'ChicksMaster/' + filterval[0].lotid,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': localStorage.getItem('token')
+                    }
+                })
                 .then(response => response.json())
                 .then(data => {
-                    setLotDetails(data);
-                    totalbirdsale = data.TotalBirdSale;
-                    setTotalBirds(data.TotalBirdSale)
+                    totalbirds = data.Result.TotalChicks - (data.Result.Mortality + data.Result.TotalMortality + data.Result.TotalBirdSale);
+                    setMortalityData({ ...mortalitydata, ShedId: shedid, LotId: lotid, LotName: lotname, TotalBirds: totalbirds });
                 });
         }
-
-        setMortalityData({ ...mortalitydata, ShedId: shedid, LotId: lotid, LotName: lotname, TotalBirdSale: totalbirdsale });
+        else {
+            setMortalityData({ ...mortalitydata, ShedId: shedid, LotId: lotid, LotName: lotname, TotalBirds: totalbirds });
+        }
     }
 
     const mortalityChange = (e) => {
-        setMortalityData({ ...mortalitydata, MortalityNumber: e.target.value });
+        const re = /^[0-9\b]+$/;
+        if (e.target.value === '' || re.test(e.target.value)) {
+            setMortalityData({ ...mortalitydata, MortalityNumber: e.target.value });
+        }
     }
 
-
-
     const fetchSheds = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedList',
-            {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                }
-            })
-            .then(response => response.json())
+        const _data = FetchShedsList()
             .then(data => {
                 if (data.StatusCode === 200) {
                     setShedList(data.Result);
                 }
                 else if (data.StatusCode === 401) {
+                    HandleLogout();
                     history("/login")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
                 }
             });
     }
@@ -152,13 +147,15 @@ function MortalityList(props) {
                     'Content-Type': 'application/json',
                     'Authorization': localStorage.getItem('token')
                 }
-            }).then(res => res.json())
+            })
+                .then(res => res.json())
                 .then((result) => {
                     if (result.StatusCode === 200) {
-                        //closeModal();
+                        addCount(1);
                         props.showAlert("Successfully deleted", "info")
                     }
                     else if (result.StatusCode === 401) {
+                        HandleLogout();
                         history("/login")
                     }
                     else {
@@ -169,85 +166,56 @@ function MortalityList(props) {
                     (error) => {
                         props.showAlert("Error occurred!!", "danger")
                     });
-
-            addCount(count);
         }
 
     }
 
-    const fetchLots = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster/GetLots',
-            {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.StatusCode === 200) {
-                    setLots(data.Result);
-                }
-                else if (data.StatusCode === 401) {
-                    history("/login")
-                }
-                else if (data.StatusCode === 500) {
-                    history("/login")
-                }
-
-            });
-    }
-
     const fetchShedLotsMapList = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedLotMapList',
-            {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                }
-            })
-            .then(response => response.json())
+
+        const _data = FetchShedLotMapList()
             .then(data => {
                 if (data.StatusCode === 200) {
                     SetShedLotMapList(data.Result);
                 }
                 else if (data.StatusCode === 401) {
-                    history("/login")
+                    HandleLogout();
+                    history("/login");
                 }
                 else if (data.StatusCode === 500) {
-                    history("/login")
+                    history("/login");
+                    HandleLogout();
                 }
             });
     }
 
-    const fetchMortalityList = async () => {
-        fetch(variables.REACT_APP_API + 'Mortality/GetMortalityShedLotMapList',
-            {
-                method: 'GET',
-                headers: {
-                    'Authorization': localStorage.getItem('token')
-                }
-            })
-            .then(response => response.json())
+    useEffect(() => {
+        fetchMortalityList();
+    }, [obj]);
+
+    const fetchMortalityList = () => {
+        setIsLoaded(true);
+
+        const _data = FetchMortalityList()
             .then(data => {
                 if (data.StatusCode === 200) {
                     setMortalityList(data.Result);
-                    setCount(data.Result.length);
                     setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
+                    setIsLoaded(false);
                 }
                 else if (data.StatusCode === 401) {
+                    setIsLoaded(false);
+                    HandleLogout();
                     history("/login")
                 }
                 else if (data.StatusCode === 500) {
+                    setIsLoaded(false);
+                    HandleLogout();
                     history("/login")
                 }
 
-            });
-    }
+            })
+            .catch(err => console.log(err));
+    };
 
     const handlePageChange = (newPage) => {
         setCurrentPage(newPage)
@@ -268,9 +236,10 @@ function MortalityList(props) {
     const itemsPerPage = variables.PAGE_PAGINATION_NO;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const itemsToDiaplay = mortalitylist.slice(startIndex, endIndex);
-
-
+    let itemsToDiaplay = mortalitylist.slice(startIndex, endIndex);
+    if (itemsToDiaplay.length === 0 && mortalitylist.length > 0) {
+        setCurrentPage(currentPage - 1);
+    }
 
     let addCount = (num) => {
         setCount(num + 1);
@@ -305,10 +274,14 @@ function MortalityList(props) {
                 .then((result) => {
                     if (result.StatusCode === 200) {
                         addCount(count);
-                        setAddModalShow(false);
+                        addModalClose();
                         props.showAlert("Successfully added", "info")
                     }
+                    else if (result.StatusCode === 300) {
+                        props.showAlert("Data is exists for this shed for the day!!", "danger")
+                    }
                     else if (result.StatusCode === 401) {
+                        HandleLogout();
                         history("/login")
                     }
                     else if (result.StatusCode === 404) {
@@ -357,14 +330,18 @@ function MortalityList(props) {
                 .then((result) => {
                     if (result.StatusCode === 200) {
                         addCount(count);
-                        setAddModalShow(false);
-                        props.showAlert("Successfully added", "info")
+                        addModalClose();
+                        props.showAlert("Successfully updated!!", "info")
                     }
                     else if (result.StatusCode === 401) {
+                        HandleLogout();
                         history("/login")
                     }
                     else if (result.StatusCode === 404) {
                         props.showAlert("Data not found!!", "danger")
+                    }
+                    else if (result.StatusCode === 400) {
+                        props.showAlert("Bad Request!!", "danger")
                     }
                     else {
                         props.showAlert("Error occurred!!", "danger")
@@ -382,6 +359,7 @@ function MortalityList(props) {
 
     return (
         <>
+
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
                 <h2>Mortality tracker</h2>
             </div>
@@ -395,17 +373,22 @@ function MortalityList(props) {
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
-                    <tr align='center'>
+                    <tr align='center' className="tr-custom">
                         <th>Date</th>
+                        <th>Shed</th>
                         <th>Lot Name</th>
                         <th>Mortality</th>
                         <th>Options</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {isloaded && <Loading />}
+
                     {
+
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => (
-                            <tr key={p.id} align='center'>
+
+                            !isloaded && <tr key={p.id} align='center'>
                                 <td align='center'>{Moment(p.date).format('DD-MMM-YYYY')}</td>
                                 <td align='center'>{p.shedname}</td>
                                 <td align='center'>{p.lotname}</td>
@@ -417,54 +400,52 @@ function MortalityList(props) {
                                             <i className="fa-solid fa-pen-to-square" style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => clickEditMortality(p)}></i>
 
                                             {localStorage.getItem('isadmin') === 'true' &&
-                                                <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteMortality(p.Id)}></i>}
+                                                <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteMortality(p.id)}></i>}
 
                                         </ButtonToolbar>
                                     }
                                 </td>
-
                             </tr>
                         )) : <tr>
-                        <td style={{ textAlign: "center" }} colSpan={5}>
-                            No Records
-                        </td>
-                    </tr>
+                            <td style={{ textAlign: "center" }} colSpan={5}>
+                                No Records
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </Table>
 
             {
                 mortalitylist && mortalitylist.length > variables.PAGE_PAGINATION_NO &&
-                <button
-                    onClick={handlePrevClick}
-                    disabled={preDisabled}
-                >
-                    Prev
-                </button>
-            }
-            {
+                <>
+                    <button
+                        onClick={handlePrevClick}
+                        disabled={preDisabled}
+                    >
+                        Prev
+                    </button>
+                    {
+                        Array.from({ length: totalPages }, (_, i) => {
+                            return (
+                                <button
+                                    onClick={() => handlePageChange(i + 1)}
+                                    key={i}
+                                    disabled={i + 1 === currentPage}
+                                >
+                                    {i + 1}
+                                </button>
+                            )
+                        })
+                    }
 
-                Array.from({ length: totalPages }, (_, i) => {
-                    return (
-                        mortalitylist && mortalitylist.length > variables.PAGE_PAGINATION_NO &&
-                        <button
-                            onClick={() => handlePageChange(i + 1)}
-                            key={i}
-                            disabled={i + 1 === currentPage}
-                        >
-                            {i + 1}
-                        </button>
-                    )
-                })
-            }
+                    <button
+                        onClick={handleNextClick}
+                        disabled={nextDisabled}
+                    >
+                        Next
+                    </button>
 
-            {mortalitylist && mortalitylist.length > variables.PAGE_PAGINATION_NO &&
-                <button
-                    onClick={handleNextClick}
-                    disabled={nextDisabled}
-                >
-                    Next
-                </button>
+                </>
             }
 
             <Modal
@@ -501,7 +482,7 @@ function MortalityList(props) {
                                             <Form.Label>Shed</Form.Label>
                                             <Form.Select aria-label="Default select example"
                                                 onChange={onShedChange} required>
-                                              <option selected disabled value="">Choose...</option>
+                                                <option selected disabled value="">Choose...</option>
                                                 {
                                                     shedlist.map((item) => {
                                                         return (
@@ -520,34 +501,34 @@ function MortalityList(props) {
                                             </Form.Control.Feedback>
 
                                         </Form.Group>
-                                        {/* <Form.Group controlId="LotName" as={Col} >
-                                            <Form.Label>Lot name</Form.Label>
-                                            <Form.Control type="text" name="LotId" hidden disabled value={_lotid}
-                                            />
-                                            <Form.Control type="text" name="LotName" required disabled value={_lotname}
-                                                placeholder="" />
-                                            <Form.Control.Feedback type="invalid">
-                                                Please enter lot name
-                                            </Form.Control.Feedback>
-                                        </Form.Group> */}
 
                                         <InputField controlId="LotName"
-                                                label="LotName"
-                                                type="text"
-                                                value={mortalitydata.LotName}
-                                                name="LotName"
-                                                placeholder="Lot name"
-                                                errormessage="Please provide lot name"
-                                                required={true}
-                                                disabled={true}
-                                            />
+                                            label="Lot name"
+                                            type="text"
+                                            value={mortalitydata.LotName}
+                                            name="LotName"
+                                            placeholder="Lot name"
+                                            errormessage="Please provide lot name"
+                                            required={true}
+                                            disabled={true}
+                                        />
+                                        <InputField controlId="TotalBirds"
+                                            label="Total birds"
+                                            type="number"
+                                            value={mortalitydata.TotalBirds}
+                                            name="TotalBirds"
+                                            placeholder="Total birds"
+                                            errormessage="Please enter total birds"
+                                            required={true}
+                                            disabled={true}
+                                        />
 
 
 
                                         <Row className="mb-4">
                                             <InputField controlId="MortalityNumber"
-                                                label="MortalityNumber"
-                                                type="number"
+                                                label="Mortality number"
+                                                type="text"
                                                 value={mortalitydata.MortalityNumber}
                                                 name="MortalityNumber"
                                                 placeholder="Mortality number"
@@ -555,51 +536,33 @@ function MortalityList(props) {
                                                 onChange={mortalityChange}
                                                 required={true}
                                                 disabled={false}
+                                                onKeyDown={NumberInputKeyDown}
                                             />
-                                            {/* <Form.Group controlId="MortalityNumber" as={Col} >
-                                                    <Form.Label>Mortality Number</Form.Label>
-
-
-
-
-                                                    <Form.Control type="number" name="MortalityNumber" required onChange={mortalityChange}
-
-                                                        placeholder="Mortality number" />
-                                                    <Form.Control.Feedback type="invalid">
-                                                        Please provide Mortality Number.
-                                                    </Form.Control.Feedback>
-                                                </Form.Group> */}
                                         </Row>
-                                        {/* <Form.Group as={Col}>
-                                            <Button variant="primary" type="submit" style={{ marginTop: "30px" }}>
-                                                Add
-                                            </Button>
-
-                                        </Form.Group> */}
 
                                         <Form.Group as={Col}>
-                                        {mortalitydata.Id <= 0 ?
+                                            {mortalitydata.Id <= 0 ?
 
-                                            <Button variant="primary" type="submit" style={{ marginTop: "30px" }} onClick={(e) => handleSubmitAdd(e)}>
-                                                Add
-                                            </Button>
-                                            : null
-                                        }
+                                                <Button variant="primary" type="submit" style={{ marginTop: "30px" }} onClick={(e) => handleSubmitAdd(e)}>
+                                                    Add
+                                                </Button>
+                                                : null
+                                            }
 
-                                        {mortalitydata.Id > 0 ?
+                                            {mortalitydata.Id > 0 ?
 
-                                            <Button variant="primary" type="submit" style={{ marginTop: "30px" }} onClick={(e) => handleSubmitEdit(e)}>
-                                                Update
-                                            </Button>
-                                            : null
-                                        }
+                                                <Button variant="primary" type="submit" style={{ marginTop: "30px" }} onClick={(e) => handleSubmitEdit(e)}>
+                                                    Update
+                                                </Button>
+                                                : null
+                                            }
 
-                                        <Button variant="danger" style={{ marginTop: "30px", marginLeft: "10px" }} onClick={() => {
-                                            addModalClose();
-                                        }
-                                        }>Close</Button>
+                                            <Button variant="danger" style={{ marginTop: "30px", marginLeft: "10px" }} onClick={() => {
+                                                addModalClose();
+                                            }
+                                            }>Close</Button>
 
-                                    </Form.Group>
+                                        </Form.Group>
 
                                     </Row>
                                 </Form>
