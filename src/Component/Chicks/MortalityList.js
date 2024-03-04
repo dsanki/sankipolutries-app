@@ -7,7 +7,7 @@ import InputField from '../ReuseableComponent/InputField'
 import Moment from 'moment';
 import Loading from '../Loading/Loading'
 
-import { FetchMortalityList, FetchShedLotMapList, FetchShedsList, NumberInputKeyDown, HandleLogout } from '../../Utility'
+import { FetchMortalityList, FetchShedLotMapList, FetchShedsList, NumberInputKeyDown, HandleLogout, dateyyyymmdd } from '../../Utility'
 
 
 function MortalityList(props) {
@@ -23,6 +23,12 @@ function MortalityList(props) {
   const [totalPages, setTotalPages] = useState(0);
   const [addModalShow, setAddModalShow] = useState(false);
   const [isloaded, setIsLoaded] = useState(true);
+
+  const [mortalitylistForFilter, setMortalityListForFilter] = useState([]);
+
+  const [filterFromDate, setFilterFromDate] = useState("");
+  const [filterToDate, setFilterToDate] = useState("");
+  const [filterShed, setFilterShed] = useState();
 
   let addModalClose = () => {
     setAddModalShow(false);
@@ -207,6 +213,7 @@ function MortalityList(props) {
       .then(data => {
         if (data.StatusCode === 200) {
           setMortalityList(data.Result);
+          setMortalityListForFilter(data.Result);
           setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
           setIsLoaded(false);
         }
@@ -363,20 +370,92 @@ function MortalityList(props) {
     setValidated(true);
   }
 
+
+  const onDateFilterFromChange = (e) => {
+    setFilterFromDate(e.target.value);
+    getFilterData(e.target.value, filterToDate, filterShed);
+  }
+
+
+  const getFilterData = (fromDate, toDate, shedid) => {
+    let _filterList = [];
+    if (fromDate !== "" && toDate !== "") {
+      _filterList = mortalitylistForFilter.filter((c) => dateyyyymmdd(c.date) >= dateyyyymmdd(fromDate) && dateyyyymmdd(c.date) <= dateyyyymmdd(toDate));
+    }
+    else if (fromDate === "" && toDate !== "") {
+      _filterList = mortalitylistForFilter.filter((c) => dateyyyymmdd(c.date) <= dateyyyymmdd(toDate));
+    }
+    else if (fromDate !== "" && toDate === "") {
+      _filterList = mortalitylistForFilter.filter((c) => dateyyyymmdd(c.date) >= dateyyyymmdd(fromDate));
+    }
+    else {
+      _filterList = mortalitylistForFilter;
+    }
+
+    if (shedid !== "") {
+      _filterList = _filterList.filter((c) => c.shedid === parseInt(shedid));
+    }
+
+
+    setMortalityList(_filterList);
+  }
+
+  const onDateFilterToChange = (e) => {
+    setFilterToDate(e.target.value);
+    getFilterData(filterFromDate, e.target.value, filterShed);
+  }
+
+  const onShedFilterChange = (e) => {
+    setFilterShed(e.target.value);
+    getFilterData(filterFromDate, filterToDate, e.target.value)
+  }
+
   return (
     <div>
-{isloaded && <Loading />}
-      <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
+      {isloaded && <Loading />}
+      <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '10px' }}>
         <h2>Mortality tracker</h2>
       </div>
-      <div className="row">
-        <div className="col" style={{ textAlign: 'right' }}>
-          <Button className="mr-2" variant="primary"
-            style={{ marginRight: "17.5px" }}
-            onClick={() => clickAddMortality()}>Add</Button>
+
+      <div className="container" style={{marginTop: '30px' }}>
+        <div className="row align-items-center">
+          <div className="col">
+            <p><strong>From</strong></p>
+            <DateComponent date={null} onChange={onDateFilterFromChange} isRequired={false} value={filterFromDate} />
+          </div>
+          <div className="col">
+            <p><strong>To</strong></p>
+            <DateComponent date={null} onChange={onDateFilterToChange} isRequired={false} value={filterToDate} />
+          </div>
+          <div className="col">
+            <p><strong>Shed</strong></p>
+            <Form.Select aria-label="Default select example"
+              onChange={onShedFilterChange}>
+              <option selected  value="">Choose...</option>
+              {
+                shedlist.map((item) => {
+                  return (
+                    <option
+                      key={item.ShedId}
+                      defaultValue={item.ShedId == null ? null : item.ShedId}
+                      selected={item.ShedId === filterShed}
+                      value={item.ShedId}
+                    >{item.ShedName}</option>
+                  );
+                })
+              }
+            </Form.Select>
+          </div>
         </div>
       </div>
 
+      <div className="row">
+        <div className="col" style={{ textAlign: 'right', marginTop: '20px' }}>
+          <Button className="mr-2" variant="primary"
+            style={{ marginRight: "17.5px" }}
+            onClick={() => clickAddMortality()}>New</Button>
+        </div>
+      </div>
       <Table className="mt-4" striped bordered hover size="sm">
         <thead>
           <tr align='center' className="tr-custom">
@@ -388,7 +467,6 @@ function MortalityList(props) {
           </tr>
         </thead>
         <tbody>
-          
 
           {
 
