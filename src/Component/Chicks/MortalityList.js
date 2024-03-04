@@ -6,8 +6,9 @@ import DateComponent from '../DateComponent';
 import InputField from '../ReuseableComponent/InputField'
 import Moment from 'moment';
 import Loading from '../Loading/Loading'
+import * as XLSX from 'xlsx';
 
-import { FetchMortalityList, FetchShedLotMapList, FetchShedsList, NumberInputKeyDown, HandleLogout, dateyyyymmdd } from '../../Utility'
+import { FetchMortalityList, FetchShedLotMapList, FetchShedsList, NumberInputKeyDown, HandleLogout, dateyyyymmdd, downloadExcel } from '../../Utility'
 
 
 function MortalityList(props) {
@@ -409,6 +410,24 @@ function MortalityList(props) {
     setFilterShed(e.target.value);
     getFilterData(filterFromDate, filterToDate, e.target.value)
   }
+  
+  const onDownloadExcel=()=>
+  {
+
+    const updatedList = mortalitylist.map(obj => {
+          return {
+            Date:obj.date,
+              Shed: obj.shedname,
+              LotName: obj.lotname,
+              Mortality:obj.mortality,
+              TotalBirds: obj.totalbirds
+          }
+  });
+
+  downloadExcel(updatedList,"MortalityList");
+  }
+
+
 
   return (
     <div>
@@ -450,6 +469,9 @@ function MortalityList(props) {
       </div>
 
       <div className="row">
+        <div className="col" style={{ textAlign: 'left', marginTop: '20px' }}>
+        <i className="fa-regular fa-file-excel fa-2xl" style={{color: '#bea2a2'}} onClick={() =>onDownloadExcel() } ></i>
+        </div>
         <div className="col" style={{ textAlign: 'right', marginTop: '20px' }}>
           <Button className="mr-2" variant="primary"
             style={{ marginRight: "17.5px" }}

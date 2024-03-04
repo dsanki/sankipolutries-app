@@ -2,6 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
 import { variables } from './Variables'
+import * as XLSX from 'xlsx';
 
 
 export const ErrorMessageHandle = (code, showAlert) => {
@@ -99,7 +100,34 @@ export const FetchShedLotMapList = async () => {
   return data;
 }
 
- 
+
+export const FetchChicks = async () => {
+  const response = await fetch(variables.REACT_APP_API + 'ChicksMaster',
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+  const data = await response.json();
+  return data;
+}
+
+export const downloadExcel = (data, name) => {
+
+  if (data.length > 0) {
+    /* new worksheet from JS objects */
+    var ws = XLSX.utils.json_to_sheet(data);
+
+    /* new workbook */
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, name);
+    /* write file */
+    XLSX.writeFile(wb, `${name}.xlsx`);
+  }
+};
+
+
 
 // export function   FetchData() {
 //   return new Promise((resolve, reject) => {
