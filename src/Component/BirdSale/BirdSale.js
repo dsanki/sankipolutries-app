@@ -486,7 +486,7 @@ function BirdSale(props) {
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
-                    <tr align='left'>
+                    <tr align='left' className="tr-custom">
                         <th>Date</th>
                         <th>Shed</th>
                         <th>Lot</th>

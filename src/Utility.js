@@ -99,6 +99,38 @@ export const FetchShedLotMapList = async () => {
   return data;
 }
 
+ 
+
+// export function   FetchData() {
+//   return new Promise((resolve, reject) => {
+//     fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedLotMapList',
+//     {
+//       method: 'GET',
+//       headers: {
+//         'Authorization': localStorage.getItem('token')
+//       }
+//     })
+//       .then(response => {
+//         return response.json();
+//       })
+//       .then(data => resolve(data))
+//       .catch(error => reject(error));
+//   });
+// }
+
+// export const FetchShedLotMapListTest = async () => {
+//   const response = await fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedLotMapList',
+//     {
+//       method: 'GET',
+//       headers: {
+//         'Authorization': localStorage.getItem('token')
+//       }
+//     });
+
+//   const data = await response.json();
+//   return data;
+// }
+
 // export const FetchSheds = async () => {
 //   const response = await fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedList',
 //     {
