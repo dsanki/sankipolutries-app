@@ -92,7 +92,7 @@
 {
   
   background: linear-gradient(45deg, #7da1d7, #221752);
-  width: 71px;
+  min-width: 75px;
   font-size: large;
   font-weight: bold;
 }
@@ -150,6 +150,12 @@ h2, p{
   top: 50%;
   left: 45%;
 }
+
+i.fa-regular.fa-file-excel.fa-2xl, i.fa-solid.fa-trash,i.fa-solid.fa-pen-to-square {
+  cursor: pointer;
+}
+
+
 
 
 
