@@ -113,6 +113,47 @@ export const FetchChicks = async () => {
   return data;
 }
 
+
+
+
+export const FetchLotById = async (id) => {
+  const response = fetch(variables.REACT_APP_API + 'ChicksMaster/' + id,
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+  const data = await response.json();
+  return data;
+}
+
+export const FetchUnit = async () => {
+  const response =await fetch(variables.REACT_APP_API + 'Unit',
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+
+  const data = await response.json();
+  return data;
+}
+
+export const FetchLots = async () => {
+  const response = await fetch(variables.REACT_APP_API + 'ChicksMaster/GetLots',
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+
+  const data = await response.json();
+  return data;
+}
+
 export const downloadExcel = (data, name) => {
 
   if (data.length > 0) {
@@ -126,6 +167,18 @@ export const downloadExcel = (data, name) => {
     XLSX.writeFile(wb, `${name}.xlsx`);
   }
 };
+
+export const FetchBirdSaleList = async () => {
+  const response =await fetch(variables.REACT_APP_API + 'BirdSale/GetBirdSale',
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+  const data = await response.json();
+  return data;
+}
 
 
 
