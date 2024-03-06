@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
 import DateComponent from '../DateComponent';
 import InputField from '../ReuseableComponent/InputField'
-import { FetchUnit, FetchShedsList, FetchLots, FetchLotById, FetchShedLotMapList, FetchBirdSaleList, dateyyyymmdd, downloadExcel, HandleLogout } from '../../Utility'
+import { FetchUnit, FetchShedsList, FetchLots, FetchLotById, FetchShedLotMapList, FetchBirdSaleList, dateyyyymmdd, downloadExcel, HandleLogout, NumberInputKeyDown } from '../../Utility'
 import Loading from '../Loading/Loading'
 function BirdSale(props) {
 
@@ -24,12 +24,13 @@ function BirdSale(props) {
     const [addModalShow, setAddModalShow] = useState(false);
     const [_lotname, setLotName] = useState();
     const [_totalbirds, setTotalBirds] = useState();
-    const [isloaded, setIsLoaded] = useState(true);
+    
 
     const [birdSaleListFilter, setBirdSaleListFilter] = useState([]);
     const [filterFromDate, setFilterFromDate] = useState("");
     const [filterToDate, setFilterToDate] = useState("");
     const [filterShed, setFilterShed] = useState();
+    const [isloaded, setIsLoaded] = useState(true);
 
 
 
@@ -159,19 +160,27 @@ function BirdSale(props) {
     }
 
     const birdcountChange = (e) => {
-        setBirdSaleData({ ...birdsaledata, BirdCount: e.target.value });
+
+        const re = /^[0-9\b]+$/;
+        if (e.target.value === '' || re.test(e.target.value)) {
+            setBirdSaleData({ ...birdsaledata, BirdCount: e.target.value });
+        }
+
     }
 
     const totalWeightChange = (e) => {
+        const re = /^\d*\.?\d{0,2}$/
         let totalwt = e.target.value;
+        if (totalwt === '' || re.test(totalwt)) {
         let totalamt = totalwt * birdsaledata.Rate;
         let due = totalamt - birdsaledata.Paid
         setBirdSaleData({
             ...birdsaledata,
             TotalWeight: totalwt,
-            TotalAmount: totalamt,
-            Due: due
+            TotalAmount: totalamt.toFixed(2),
+            Due: due.toFixed(2)
         });
+    }
     }
 
     const unitIdChange = (e) => {
@@ -179,27 +188,33 @@ function BirdSale(props) {
     }
 
     const rateChange = (e) => {
+        const re = /^\d*\.?\d{0,2}$/
         let rate = e.target.value;
+        if (rate === '' || re.test(rate)) {
         let totalamt = birdsaledata.TotalWeight * rate;
         let due = totalamt - birdsaledata.Paid
         setBirdSaleData({
             ...birdsaledata,
             Rate: rate,
-            TotalAmount: totalamt,
-            Due: due
+            TotalAmount: totalamt.toFixed(2),
+            Due: due.toFixed(2)
         });
+    }
     }
 
-    const totalAmountChange = (e) => {
-        setBirdSaleData({
-            ...birdsaledata,
-            TotalAmount: e.target.value,
-            Due: e.target.value - birdsaledata.Paid
-        });
-    }
+    // const totalAmountChange = (e) => {
+    //     setBirdSaleData({
+    //         ...birdsaledata,
+    //         TotalAmount: e.target.value,
+    //         Due: e.target.value - birdsaledata.Paid
+    //     });
+    // }
 
     const paidChange = (e) => {
-        setBirdSaleData({ ...birdsaledata, Paid: e.target.value, Due: birdsaledata.TotalAmount - e.target.value });
+        const re = /^\d*\.?\d{0,2}$/
+        if (e.target.value === '' || re.test(e.target.value)) {
+        setBirdSaleData({ ...birdsaledata, Paid: e.target.value, Due: (birdsaledata.TotalAmount - e.target.value).toFixed(2) });
+        }
     }
     const paymentDateChange = (e) => {
         setBirdSaleData({ ...birdsaledata, PaymentDate: e.target.value });
@@ -284,7 +299,7 @@ function BirdSale(props) {
 
     const errorHandle = (code) => {
         if (code === 300) {
-            props.showAlert("Data is exists for this shed for the day!!", "danger")
+            props.showAlert("Data is exists!!", "danger")
         }
         else if (code === 401) {
             HandleLogout();
@@ -443,8 +458,33 @@ function BirdSale(props) {
         setValidated(true);
     }
 
-    const deleteBirdSale = () => {
-
+    const deleteBirdSale = (id) => {
+        if (window.confirm('Are you sure?')) {
+            fetch(variables.REACT_APP_API + 'BirdSale/' + id, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': localStorage.getItem('token')
+              }
+            })
+              .then(res => res.json())
+              .then((result) => {
+                if (result.StatusCode === 200) {
+                  addCount(count);
+                  props.showAlert("Successfully deleted", "info")
+                }
+                else if (result.StatusCode === 401) {
+                  HandleLogout();
+                  history("/login")
+                }
+                else {
+                  props.showAlert("Error occurred!!", "danger")
+                }
+      
+              },
+                (error) => {
+                  props.showAlert("Error occurred!!", "danger")
+                });
+          }
     }
 
 
@@ -526,7 +566,7 @@ function BirdSale(props) {
         <div>
             {isloaded && <Loading />}
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '30px', marginBottom: '30px' }}>
-                <h2>Bird Sale</h2>
+                <h2>Bird Sale Tracker</h2>
             </div>
             <div className="container" style={{ marginTop: '30px' }}>
                 <div className="row align-items-center">
@@ -567,7 +607,7 @@ function BirdSale(props) {
                 <div className="col" style={{ textAlign: 'right', marginTop: '20px' }}>
                     <Button className="mr-2" variant="primary"
                         style={{ marginRight: "17.5px" }}
-                        onClick={() => clickAddBirdSale()}>Add</Button>
+                        onClick={() => clickAddBirdSale()}>New</Button>
                 </div>
 
             </div>
@@ -760,7 +800,7 @@ function BirdSale(props) {
 
                                             <InputField controlId="BirdCount"
                                                 label="Bird count*"
-                                                type="number"
+                                                type="text"
                                                 value={birdsaledata.BirdCount}
                                                 name="BirdCount"
                                                 placeholder="Bird count"
@@ -768,11 +808,12 @@ function BirdSale(props) {
                                                 required={true}
                                                 disabled={false}
                                                 onChange={birdcountChange}
+                                                onKeyDown={NumberInputKeyDown}
                                             />
 
                                             <InputField controlId="TotalWeight"
                                                 label="Total weight*"
-                                                type="number"
+                                                type="text"
                                                 value={birdsaledata.TotalWeight}
                                                 name="TotalWeight"
                                                 placeholder="Total weight"
@@ -810,7 +851,7 @@ function BirdSale(props) {
 
                                             <InputField controlId="Rate"
                                                 label="Rate*"
-                                                type="number"
+                                                type="text"
                                                 value={birdsaledata.Rate}
                                                 name="Rate"
                                                 placeholder="Rate"
@@ -822,7 +863,7 @@ function BirdSale(props) {
                                         </Row>
                                         <Row className="mb-12">
                                             <InputField controlId="TotalAmount" label="Total amount*"
-                                                type="number"
+                                                type="text"
                                                 value={birdsaledata.TotalAmount}
                                                 name="TotalAmount"
                                                 placeholder="Total Amount"
@@ -832,7 +873,7 @@ function BirdSale(props) {
                                             />
 
                                             <InputField controlId="Paid" label="Paid*"
-                                                type="number"
+                                                type="text"
                                                 value={birdsaledata.Paid}
                                                 name="Paid"
                                                 placeholder="Paid"
@@ -842,7 +883,7 @@ function BirdSale(props) {
                                                 onChange={paidChange}
                                             />
                                             <InputField controlId="Due" label="Due"
-                                                type="number"
+                                                type="text"
                                                 value={birdsaledata.Due}
                                                 name="Due"
                                                 placeholder="Due"

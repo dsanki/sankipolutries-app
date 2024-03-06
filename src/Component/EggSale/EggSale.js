@@ -6,6 +6,8 @@ import moment from 'moment';
 import { ErrorMessageHandle } from '../../Utility';
 import InputField from '../ReuseableComponent/InputField'
 import DateComponent from '../DateComponent';
+import { dateyyyymmdd, HandleLogout, downloadExcel } from './../../Utility'
+import Loading from '../Loading/Loading'
 
 function EggSale(props) {
 
@@ -17,6 +19,10 @@ function EggSale(props) {
     const obj = useMemo(() => ({ count }), [count]);
     const [validated, setValidated] = useState(false);
     const [addModalShow, setAddModalShow] = useState(false);
+    const [filterFromDate, setFilterFromDate] = useState("");
+    const [filterToDate, setFilterToDate] = useState("");
+    const [isloaded, setIsLoaded] = useState(true);
+    const [eggsalelistfilter, setEggSaleListFilter] = useState([]);
 
     const initialvalues = {
         modaltitle: "",
@@ -91,21 +97,33 @@ function EggSale(props) {
     }
 
     const quantityChange = (e) => {
-        setEggSaletData({ ...eggsaledata, Quantity: e.target.value, TotalCost: e.target.value * eggsaledata.EggRate, FinalCost: (e.target.value * eggsaledata.EggRate) - eggsaledata.Discount });
+        const re = /^[0-9\b]+$/;
+        if (e.target.value === '' || re.test(e.target.value)) {
+            setEggSaletData({ ...eggsaledata, Quantity: e.target.value, TotalCost: e.target.value * eggsaledata.EggRate, FinalCost: (e.target.value * eggsaledata.EggRate) - eggsaledata.Discount });
+        }
     }
     const purchaseDateChange = (e) => {
         setEggSaletData({ ...eggsaledata, PurchaseDate: e.target.value });
     }
     const eggRateChange = (e) => {
-        setEggSaletData({ ...eggsaledata, EggRate: e.target.value, TotalCost: e.target.value * eggsaledata.Quantity, FinalCost: (e.target.value * eggsaledata.Quantity) - eggsaledata.Discount });
+        const re = /^\d*\.?\d{0,2}$/
+        if (e.target.value === '' || re.test(e.target.value)) {
+            setEggSaletData({ ...eggsaledata, EggRate: e.target.value, TotalCost: e.target.value * eggsaledata.Quantity, FinalCost: (e.target.value * eggsaledata.Quantity) - eggsaledata.Discount });
+        }
     }
 
     const discountChange = (e) => {
-        setEggSaletData({ ...eggsaledata, Discount: e.target.value, FinalCost: (eggsaledata.TotalCost - e.target.value) });
+        const re = /^\d*\.?\d{0,2}$/
+        if (e.target.value === '' || re.test(e.target.value)) {
+            setEggSaletData({ ...eggsaledata, Discount: e.target.value, FinalCost: (eggsaledata.TotalCost - e.target.value) });
+        }
     }
 
     const paidChange = (e) => {
-        setEggSaletData({ ...eggsaledata, Paid: e.target.value, Due: eggsaledata.FinalCost - e.target.value });
+        const re = /^\d*\.?\d{0,2}$/
+        if (e.target.value === '' || re.test(e.target.value)) {
+            setEggSaletData({ ...eggsaledata, Paid: e.target.value, Due: eggsaledata.FinalCost - e.target.value });
+        }
     }
 
     const commentsChange = (e) => {
@@ -116,16 +134,28 @@ function EggSale(props) {
 
         if (localStorage.getItem('token')) {
             setEggSaletData({ ...eggsaledata, CustomerId: id });
-            fetchEggSaleDetails(id);
             fetchCustomerDetails(id);
         }
         else {
+            HandleLogout();
+            history("/login")
+        }
+    }, []);
+
+    useEffect((e) => {
+
+        if (localStorage.getItem('token')) {
+            fetchEggSaleDetails(id);
+        }
+        else {
+            HandleLogout();
             history("/login")
         }
     }, [obj]);
 
 
     const fetchEggSaleDetails = async (custid) => {
+        setIsLoaded(true);
         fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleDetailsByCustomerId?CustId=' + custid,
             {
                 method: 'GET',
@@ -139,19 +169,23 @@ function EggSale(props) {
             .then(data => {
                 if (data.StatusCode === 200) {
                     setEggSaleList(data.Result);
+                    setEggSaleListFilter(data.Result);
+                    setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
+                    setIsLoaded(false);
                 }
                 else if (data.StatusCode === 401) {
+                    HandleLogout();
                     history("/login")
+                    setIsLoaded(false);
                 }
                 else if (data.StatusCode === 404) {
                     props.showAlert("Data not found!!", "danger")
+                    setIsLoaded(false);
                 }
                 else {
                     props.showAlert("Error occurred!!", "danger")
+                    setIsLoaded(false);
                 }
-                // else {
-                //   //  ErrorMessageHandle(data.StatusCode, props.showAlert);
-                // }
             });
     }
 
@@ -171,6 +205,7 @@ function EggSale(props) {
                     setCustomerDetails(data.Result);
                 }
                 else if (data.StatusCode === 401) {
+                    HandleLogout();
                     history("/login")
                 }
                 else if (data.StatusCode === 404) {
@@ -179,23 +214,14 @@ function EggSale(props) {
                 else {
                     props.showAlert("Error occurred!!", "danger")
                 }
-                // else {
-                //     //ErrorMessageHandle(data.StatusCode, props.showAlert);
-                // }
             });
     }
-
-    // const clickEditEggSale=()=>{
-
-    // }
 
     const deleteEggSale = (id) => {
         if (window.confirm('Are you sure?')) {
             fetch(variables.REACT_APP_API + 'EggSale/' + id, {
                 method: 'DELETE',
-                header: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
+                headers: {
                     'Authorization': localStorage.getItem('token')
                 }
             }).then(res => res.json())
@@ -205,6 +231,7 @@ function EggSale(props) {
                         props.showAlert("Successfully deleted", "info");
                     }
                     else if (result.StatusCode === 401) {
+                        HandleLogout();
                         history("/login")
                     }
                     else if (result.StatusCode === 404) {
@@ -221,17 +248,19 @@ function EggSale(props) {
         }
     }
 
-
-    // const dateForPicker = (dateString) => {
-    //     return moment(new Date(dateString)).format('YYYY-MM-DD')
-    // };
-
     let addCount = (num) => {
         setCount(num + 1);
     };
 
     const handleSubmitAdd = (e) => {
         e.preventDefault();
+        var form = e.target.closest('.needs-validation');
+        if (form.checkValidity() === false) {
+
+            e.stopPropagation();
+            setValidated(true);
+        }
+        else {
 
         fetch(variables.REACT_APP_API + 'EggSale/EggSaleAdd', {
             method: 'POST',
@@ -267,6 +296,7 @@ function EggSale(props) {
                     props.showAlert("Successfully added", "info")
                 }
                 else if (result.StatusCode === 401) {
+                    HandleLogout();
                     history("/login")
                 }
                 else if (result.StatusCode === 404) {
@@ -275,15 +305,11 @@ function EggSale(props) {
                 else {
                     props.showAlert("Error occurred!!", "danger")
                 }
-                // else {
-                //    // ErrorMessageHandle(result.StatusCode, props.showAlert);
-                // }
-
             },
                 (error) => {
                     props.showAlert("Error occurred!!", "danger")
                 });
-        //}
+        }
 
         setValidated(true);
     }
@@ -291,6 +317,12 @@ function EggSale(props) {
 
     const handleSubmitEdit = (e) => {
         e.preventDefault();
+        var form = e.target.closest('.needs-validation');
+        if (form.checkValidity() === false) {
+            e.stopPropagation();
+            setValidated(true);
+        }
+        else {
 
         fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleUpdate', {
             method: 'PUT',
@@ -326,6 +358,7 @@ function EggSale(props) {
                     props.showAlert("Successfully updated", "info")
                 }
                 else if (result.StatusCode === 401) {
+                    HandleLogout();
                     history("/login")
                 }
                 else if (result.StatusCode === 404) {
@@ -334,15 +367,12 @@ function EggSale(props) {
                 else {
                     props.showAlert("Error occurred!!", "danger")
                 }
-                // else {
-                //     //ErrorMessageHandle(result.StatusCode, props.showAlert)
-                // }
 
             },
                 (error) => {
                     props.showAlert("Error occurred!!", "danger")
                 });
-        //}
+        }
 
         setValidated(true);
     }
@@ -372,9 +402,56 @@ function EggSale(props) {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const itemsToDiaplay = eggsalelist && eggsalelist.length > 0 ? eggsalelist.slice(startIndex, endIndex) : [];
+    if (itemsToDiaplay.length === 0 && eggsalelist.length > 0) {
+        setCurrentPage(currentPage - 1);
+    }
+
+
+    const onDateFilterFromChange = (e) => {
+        setFilterFromDate(e.target.value);
+        getFilterData(e.target.value, filterToDate);
+    }
+
+
+    const getFilterData = (fromDate, toDate) => {
+        let _filterList = [];
+        if (fromDate !== "" && toDate !== "") {
+            _filterList = eggsalelistfilter.filter((c) => dateyyyymmdd(c.PurchaseDate) >= dateyyyymmdd(fromDate) && dateyyyymmdd(c.PurchaseDate) <= dateyyyymmdd(toDate));
+        }
+        else if (fromDate === "" && toDate !== "") {
+            _filterList = eggsalelistfilter.filter((c) => dateyyyymmdd(c.PurchaseDate) <= dateyyyymmdd(toDate));
+        }
+        else if (fromDate !== "" && toDate === "") {
+            _filterList = eggsalelistfilter.filter((c) => dateyyyymmdd(c.PurchaseDate) >= dateyyyymmdd(fromDate));
+        }
+        else {
+            _filterList = eggsalelistfilter;
+        }
+
+        setEggSaleList(_filterList);
+    }
+
+    const onDateFilterToChange = (e) => {
+        setFilterToDate(e.target.value);
+        getFilterData(filterFromDate, e.target.value);
+    }
+
+    const onDownloadExcel = () => {
+        const _list = eggsalelist.map((p) => {
+            return ({
+                Date: moment(p.Date).format('DD-MMM-YYYY'),
+                Quantity: p.Quantity, Rate: p.EggRate, TotalCost: p.TotalCost.toFixed(2), Discount: p.Discount.toFixed(2), FinalCost: p.FinalCost.toFixed(2),
+                Paid: p.Paid.toFixed(2), Due: p.Due.toFixed(2), Comments: p.Comments
+            });
+        });
+
+        downloadExcel(_list, "EggSale");
+    }
 
     return (
+
         <div>
+            {isloaded && <Loading />}
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
                 <h2>Welcome to Egg sale</h2>
             </div>
@@ -385,11 +462,30 @@ function EggSale(props) {
                     <p className="card-title">Email: {customerdetails.Email}</p>
                 </div>
             </div>
-            <div className="col" style={{ textAlign: 'right' }}>
-                <Button className="mr-2" variant="primary"
-                    style={{ marginRight: "17.5px" }}
-                    onClick={() => clickAddEggSale()}>Add</Button>
+            <div className="container" style={{ marginTop: '30px' }}>
+                <div className="row align-items-center">
+                    <div className="col">
+                        <p><strong>From</strong></p>
+                        <DateComponent date={null} onChange={onDateFilterFromChange} isRequired={false} value={filterFromDate} />
+                    </div>
+                    <div className="col">
+                        <p><strong>To</strong></p>
+                        <DateComponent date={null} onChange={onDateFilterToChange} isRequired={false} value={filterToDate} />
+                    </div>
+                </div>
             </div>
+            <div className="row">
+                <div className="col" style={{ textAlign: 'left', marginTop: '20px' }}>
+                    <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2' }} onClick={() => onDownloadExcel()} ></i>
+                </div>
+
+                <div className="col" style={{ textAlign: 'right' }}>
+                    <Button className="mr-2" variant="primary"
+                        style={{ marginRight: "17.5px" }}
+                        onClick={() => clickAddEggSale()}>Add</Button>
+                </div>
+            </div>
+
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
@@ -413,7 +509,7 @@ function EggSale(props) {
 
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
                             return (
-                                <tr align='center' key={p.Id}>
+                                !isloaded && <tr align='center' key={p.Id}>
 
                                     <td align='left'>{moment(p.PurchaseDate).format('DD-MMM-YYYY')}</td>
                                     <td align='left'>{p.Quantity}</td>
@@ -451,37 +547,39 @@ function EggSale(props) {
             </Table >
 
             {
+
                 eggsalelist && eggsalelist.length > variables.PAGE_PAGINATION_NO &&
-                <button
-                    onClick={handlePrevClick}
-                    disabled={preDisabled}
-                >
-                    Prev
-                </button>
-            }
-            {
+                <>
+                    <button
+                        onClick={handlePrevClick}
+                        disabled={preDisabled}
+                    >
+                        Prev
+                    </button>
 
-                Array.from({ length: totalPages }, (_, i) => {
-                    return (
-                        eggsalelist && eggsalelist.length > variables.PAGE_PAGINATION_NO &&
-                        <button
-                            onClick={() => handlePageChange(i + 1)}
-                            key={i}
-                            disabled={i + 1 === currentPage}
-                        >
-                            {i + 1}
-                        </button>
-                    )
-                })
-            }
+                    {
 
-            {eggsalelist && eggsalelist.length > variables.PAGE_PAGINATION_NO &&
-                <button
-                    onClick={handleNextClick}
-                    disabled={nextDisabled}
-                >
-                    Next
-                </button>
+                        Array.from({ length: totalPages }, (_, i) => {
+                            return (
+                                <button
+                                    onClick={() => handlePageChange(i + 1)}
+                                    key={i}
+                                    disabled={i + 1 === currentPage}
+                                >
+                                    {i + 1}
+                                </button>
+                            )
+                        })
+                    }
+
+
+                    <button
+                        onClick={handleNextClick}
+                        disabled={nextDisabled}
+                    >
+                        Next
+                    </button>
+                </>
             }
 
             <div className="container" id="exampleModal">
@@ -506,15 +604,15 @@ function EggSale(props) {
                                     <Form noValidate validated={validated} className="needs-validation">
                                         <Row className="mb-12">
                                             <Form.Group as={Col} controlId="PurchaseDate">
-                                                <Form.Label>Date</Form.Label>
+                                                <Form.Label>Date *</Form.Label>
                                                 <DateComponent date={null} onChange={purchaseDateChange} isRequired={true} value={eggsaledata.PurchaseDate} />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please select date
                                                 </Form.Control.Feedback>
                                             </Form.Group>
 
-                                            <InputField controlId="Quantity" label="Quantity"
-                                                type="number"
+                                            <InputField controlId="Quantity" label="Quantity *"
+                                                type="text"
                                                 value={eggsaledata.Quantity}
                                                 name="Quantity"
                                                 placeholder="Quantity"
@@ -524,8 +622,8 @@ function EggSale(props) {
                                                 onChange={quantityChange}
                                             />
 
-                                            <InputField controlId="EggRate" label="Egg rate"
-                                                type="number"
+                                            <InputField controlId="EggRate" label="Egg rate *"
+                                                type="text"
                                                 value={eggsaledata.EggRate}
                                                 name="EggRate"
                                                 placeholder="Rate"
@@ -539,7 +637,7 @@ function EggSale(props) {
                                         <Row className="mb-12">
 
 
-                                            <InputField controlId="TotalCost" label="Total cost"
+                                            <InputField controlId="TotalCost" label="Total cost *"
                                                 type="number"
                                                 value={eggsaledata.TotalCost !== "" ? eggsaledata.TotalCost.toFixed(2) : eggsaledata.TotalCost}
                                                 name="TotalCost"
@@ -550,7 +648,7 @@ function EggSale(props) {
                                             />
 
                                             <InputField controlId="Discount" label="Discount"
-                                                type="number"
+                                                type="text"
                                                 value={eggsaledata.Discount}
                                                 name="Discount"
                                                 placeholder="Discount"
@@ -560,7 +658,7 @@ function EggSale(props) {
                                                 onChange={discountChange}
                                             />
 
-                                            <InputField controlId="FinalCost" label="Final cost"
+                                            <InputField controlId="FinalCost" label="Final cost *"
                                                 type="number"
                                                 value={eggsaledata.FinalCost !== "" ? eggsaledata.FinalCost.toFixed(2) : eggsaledata.FinalCost}
                                                 name="FinalCost"
@@ -572,8 +670,8 @@ function EggSale(props) {
                                         </Row>
 
                                         <Row className="mb-12">
-                                            <InputField controlId="Paid" label="Paid"
-                                                type="number"
+                                            <InputField controlId="Paid" label="Paid *"
+                                                type="text"
                                                 value={eggsaledata.Paid}
                                                 name="Paid"
                                                 placeholder="Paid"
@@ -583,7 +681,7 @@ function EggSale(props) {
                                                 onChange={paidChange}
                                             />
 
-                                            <InputField controlId="Due" label="Due"
+                                            <InputField controlId="Due" label="Due *"
                                                 type="number"
                                                 value={eggsaledata.Due !== "" ? eggsaledata.Due.toFixed(2) : eggsaledata.Due}
                                                 name="Due"

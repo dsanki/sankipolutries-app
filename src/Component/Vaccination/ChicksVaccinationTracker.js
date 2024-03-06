@@ -5,7 +5,9 @@ import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
 import InputField from '../ReuseableComponent/InputField'
 import DateComponent from '../DateComponent';
-import { FetchSheds, CalculateAgeInWeeks, CalculateAgeInDays } from '../../Utility';
+import { FetchSheds, CalculateAgeInWeeks, CalculateAgeInDays, FetchShedLotMapList, dateyyyymmdd, downloadExcel, HandleLogout, NumberInputKeyDown, FetchShedsList, FetchLotById } from '../../Utility';
+//import { FetchUnit, FetchShedsList, FetchLots, FetchLotById  } from '../../Utility'
+import Loading from '../Loading/Loading'
 
 
 
@@ -26,37 +28,46 @@ function ChicksVaccinationTracker(props) {
     const [totalPages, setTotalPages] = useState(0);
     const [addModalShow, setAddModalShow] = useState(false);
     const [validated, setValidated] = useState(false);
+    const [isloaded, setIsLoaded] = useState(true);
+
+    const [vccFilter, setVccListFilter] = useState([]);
+    const [filterFromDate, setFilterFromDate] = useState("");
+    const [filterToDate, setFilterToDate] = useState("");
+    const [filterShed, setFilterShed] = useState();
+    const [vccDownload, setVccDownload] = useState([]);
+
+    useEffect((e) => {
+
+        if (localStorage.getItem('token')) {
+            fetchVaccinationRoute();
+            fetchVaccinationAgeList();
+            fetchVaccinationType();
+            fetchSheds();
+            fetchShedLotsMapList();
+            fetchVaccinationList();
+        }
+        else {
+            HandleLogout();
+            history("/login");
+        }
+    }, []);
+
+
 
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
 
-            //let jwtData = parseJwt(localStorage.getItem('token'));
-            // var base64Url = localStorage.getItem('token').split('.')[1];
-            // var base64 = base64Url.replace('-', '+').replace('_', '/');
-            // console.log(base64);
-            //VaccinationTrackerList();
-            fetchVaccinationRoute();
-            fetchVaccinationList();
-            fetchVaccinationAgeList();
-            fetchVaccinationType();
-            fetchSheds();
-            fetchShedLotMapList();
             fetchVaccinationTracker();
         }
         else {
-
-            history("/login")
+            HandleLogout();
+            history("/login");
         }
     }, [obj]);
 
-    // useEffect((e) => {
-    //     let _dd=FetchSheds();
-    //     console.log(_dd);
-    //     setShedList(_dd);
-    // },[]);
-
     const fetchVaccinationTracker = async () => {
+        setIsLoaded(true);
         fetch(variables.REACT_APP_API + 'VaccinationTracker/GetVaccinationTracker',
             {
                 method: 'GET',
@@ -70,8 +81,13 @@ function ChicksVaccinationTracker(props) {
             .then(data => {
                 if (data.StatusCode === 200) {
                     setVaccinationTrackerList(data.Result);
+                    setVccListFilter(data.Result);
+                    setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
+                    setVccDownload(data.Result);
+                    setIsLoaded(false);
                 }
                 else if (data.StatusCode === 401) {
+                    HandleLogout();
                     history("/login")
                 }
                 else if (data.StatusCode === 404) {
@@ -100,6 +116,7 @@ function ChicksVaccinationTracker(props) {
                     setVaccinationTypeList(data.Result);
                 }
                 else if (data.StatusCode === 401) {
+                    HandleLogout();
                     history("/login")
                 }
                 else if (data.StatusCode === 404) {
@@ -128,6 +145,7 @@ function ChicksVaccinationTracker(props) {
                     setVaccinationRouteList(data.Result);
                 }
                 else if (data.StatusCode === 401) {
+                    HandleLogout();
                     history("/login")
                 }
                 else if (data.StatusCode === 404) {
@@ -155,6 +173,7 @@ function ChicksVaccinationTracker(props) {
                     setVaccinationList(data.Result);
                 }
                 else if (data.StatusCode === 401) {
+                    HandleLogout();
                     history("/login")
                 }
                 else if (data.StatusCode === 404) {
@@ -182,6 +201,7 @@ function ChicksVaccinationTracker(props) {
                     setVaccinationAgeList(data.Result);
                 }
                 else if (data.StatusCode === 401) {
+                    HandleLogout();
                     history("/login")
                 }
                 else if (data.StatusCode === 404) {
@@ -193,22 +213,14 @@ function ChicksVaccinationTracker(props) {
             });
     }
 
-    const fetchSheds = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedList',
-            {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                }
-            })
-            .then(response => response.json())
+    const fetchSheds = () => {
+        FetchShedsList()
             .then(data => {
                 if (data.StatusCode === 200) {
                     setShedList(data.Result);
                 }
                 else if (data.StatusCode === 401) {
+                    HandleLogout();
                     history("/login")
                 }
                 else if (data.StatusCode === 404) {
@@ -221,22 +233,14 @@ function ChicksVaccinationTracker(props) {
     }
 
 
-    const fetchShedLotMapList = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedLotMapList',
-            {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                }
-            })
-            .then(response => response.json())
+    const fetchShedLotsMapList = () => {
+        FetchShedLotMapList()
             .then(data => {
                 if (data.StatusCode === 200) {
                     setShedLotMapList(data.Result);
                 }
                 else if (data.StatusCode === 401) {
+                    HandleLogout();
                     history("/login")
                 }
                 else if (data.StatusCode === 404) {
@@ -303,7 +307,7 @@ function ChicksVaccinationTracker(props) {
             modaltitle: "Edit Vaccination for Lot",
             Id: md.Id,
             ShedId: md.ShedId,
-            LotNo: md.LotNo,
+            LotNo: md.LotId,
             VaccinationID: md.VaccinationID,
             AgeID: md.AgeID,
             TypeID: md.TypeID,
@@ -355,18 +359,8 @@ function ChicksVaccinationTracker(props) {
         if (filterval.length > 0) {
             lotid = filterval[0].lotid;
             lotname = filterval[0].lotname;
-            fetch(variables.REACT_APP_API + 'ChicksMaster/' + filterval[0].lotid,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'Authorization': localStorage.getItem('token')
-                    }
-                })
-                .then(response => response.json())
+            FetchLotById(lotid)
                 .then(data => {
-                    //setLotDetails(data.Result);
                     totalbirds = data.Result.TotalChicks - (data.Result.Mortality + data.Result.TotalMortality + data.Result.TotalBirdSale);
                     weeks = CalculateAgeInWeeks(data.Result.Date);
                     days = CalculateAgeInDays(data.Result.Date);
@@ -377,9 +371,6 @@ function ChicksVaccinationTracker(props) {
             setVaccTrackerData({ ...vacctrackerdata, ShedId: shedid, LotNo: lotid, LotName: lotname, TotalBirds: totalbirds, AgeDays: days, AgeWeeks: weeks });
         }
     }
-
-
-
 
     const deleteVaccTracker = (id) => {
         if (window.confirm('Are you sure?')) {
@@ -437,9 +428,10 @@ function ChicksVaccinationTracker(props) {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const itemsToDiaplay = vaccinationtrackerlist.slice(startIndex, endIndex);
+    if (itemsToDiaplay.length === 0 && vaccinationtrackerlist.length > 0) {
+        setCurrentPage(currentPage - 1);
+    }
 
-
-    //
     const handleAddVccTracker = (e) => {
         e.preventDefault();
         var form = e.target.closest('.needs-validation');
@@ -474,6 +466,7 @@ function ChicksVaccinationTracker(props) {
                     if (result.StatusCode === 200) {
                         addCount(count);
                         setAddModalShow(false);
+                        setValidated(false);
                         props.showAlert("Successfully added", "info")
                     }
                     else if (result.StatusCode === 401) {
@@ -491,8 +484,6 @@ function ChicksVaccinationTracker(props) {
                         props.showAlert("Error occurred!!", "danger")
                     });
         }
-
-        setValidated(true);
     }
 
     const handleEditVccTracker = (e) => {
@@ -529,7 +520,8 @@ function ChicksVaccinationTracker(props) {
                     if (result.StatusCode === 200) {
                         addCount(count);
                         setAddModalShow(false);
-                        props.showAlert("Successfully added", "info")
+                        props.showAlert("Successfully added", "info");
+                        setValidated(false);
                     }
                     else if (result.StatusCode === 401) {
                         history("/login")
@@ -546,45 +538,126 @@ function ChicksVaccinationTracker(props) {
                         props.showAlert("Error occurred!!", "danger")
                     });
         }
-
-        setValidated(true);
     }
 
-    const deleteMaterials = () => {
-
+    const onDateFilterFromChange = (e) => {
+        setFilterFromDate(e.target.value);
+        getFilterData(e.target.value, filterToDate, filterShed);
     }
 
-    // const filterSupplierChange = (e) => {
 
-    //     if (e.target.value > 0) {
-    //         const _medd = rawmaterialListFilter.filter((c) => c.ClientId === parseInt(e.target.value));
-    //         setRawMaterialList(_medd);
-    //     }
-    //     else {
-    //         setRawMaterialList(rawmaterialListFilter);
-    //     }
-    // }
+    const getFilterData = (fromDate, toDate, shedid) => {
+        let _filterList = [];
+        if (fromDate !== "" && toDate !== "") {
+            _filterList = vccFilter.filter((c) => dateyyyymmdd(c.Date) >= dateyyyymmdd(fromDate) && dateyyyymmdd(c.Date) <= dateyyyymmdd(toDate));
+        }
+        else if (fromDate === "" && toDate !== "") {
+            _filterList = vccFilter.filter((c) => dateyyyymmdd(c.Date) <= dateyyyymmdd(toDate));
+        }
+        else if (fromDate !== "" && toDate === "") {
+            _filterList = vccFilter.filter((c) => dateyyyymmdd(c.Date) >= dateyyyymmdd(fromDate));
+        }
+        else {
+            _filterList = vccFilter;
+        }
+
+        if (shedid > 0) {
+            _filterList = _filterList.filter((c) => c.ShedId === parseInt(shedid));
+        }
+
+        setVccDownload(_filterList);
+        setVaccinationTrackerList(_filterList);
+    }
+
+    const onDateFilterToChange = (e) => {
+        setFilterToDate(e.target.value);
+        getFilterData(filterFromDate, e.target.value, filterShed);
+    }
+
+    const onShedFilterChange = (e) => {
+        setFilterShed(e.target.value);
+        getFilterData(filterFromDate, filterToDate, e.target.value)
+    }
+
+    let VccListDowanloadArr = [];
+    const onDownloadExcel = () => {
+        const vvv = vaccinationtrackerlist.map((p) => {
+            const filterByShedId = shedlotmaplist.filter((c) => c.shedid === p.ShedId);
+            const shedname = filterByShedId.length > 0 ? filterByShedId[0].shedname : "";
+
+            const filterByVccId = vaccinationlist.filter((c) => c.id === p.VaccinationID);
+            const vccname = filterByVccId.length > 0 ? filterByVccId[0].VaccinationName : "";
+
+            const filterByVccTypeId = vaccinationtypelist.filter((c) => c.id === p.TypeID);
+            const vcctypename = filterByVccTypeId.length > 0 ? filterByVccTypeId[0].TypeName : "";
+
+            const filterByVccAgeId = vaccinationagelist.filter((c) => c.id === p.AgeID);
+            const vccage = filterByVccAgeId.length > 0 ? filterByVccAgeId[0].Age : "";
+
+            const filterByVccRoute = vaccinationroutelist.filter((c) => c.id === p.RouteID);
+            const vccroute = filterByVccRoute.length > 0 ? filterByVccRoute[0].Route : "";
+            p.AgeDays = CalculateAgeInDays(p.LotDate);
+            p.AgeWeeks = CalculateAgeInWeeks(p.LotDate);
+
+            return ({
+                Date: moment(p.Date).format('DD-MMM-YYYY'),
+                ShedName: shedname, LotName: p.LotName, Vaccination: vccname, Age: vccage, Type: vcctypename,
+                Route: vccroute, Comments: p.Comments
+            });
+
+            // VccListDowanloadArr.push({
+            //     Date: moment(p.Date).format('DD-MMM-YYYY'),
+            //     ShedName: shedname, LotName: p.LotName, Vaccination: vccname, Age: vccage, Type: vcctypename,
+            //     Route: vccroute, Comments: p.Comments
+            // });
+        });
+
+        downloadExcel(vvv, "VaccinationTrackerList");
+    }
 
     return (
         <div>
+            {isloaded && <Loading />}
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '30px', marginBottom: '30px' }}>
-                <h2>Welcome to Vaccination Tracker Page</h2>
+                <h2>Vaccination Tracker</h2>
+            </div>
+            <div className="container" style={{ marginTop: '30px' }}>
+                <div className="row align-items-center">
+                    <div className="col">
+                        <p><strong>From</strong></p>
+                        <DateComponent date={null} onChange={onDateFilterFromChange} isRequired={false} value={filterFromDate} />
+                    </div>
+                    <div className="col">
+                        <p><strong>To</strong></p>
+                        <DateComponent date={null} onChange={onDateFilterToChange} isRequired={false} value={filterToDate} />
+                    </div>
+                    <div className="col">
+                        <p><strong>Shed</strong></p>
+                        <Form.Select aria-label="Default select example"
+                            onChange={onShedFilterChange}>
+                            <option selected value="">Choose...</option>
+                            {
+                                shedlist.map((item) => {
+                                    return (
+                                        <option
+                                            key={item.ShedId}
+                                            defaultValue={item.ShedId == null ? null : item.ShedId}
+                                            selected={item.ShedId === filterShed}
+                                            value={item.ShedId}
+                                        >{item.ShedName}</option>
+                                    );
+                                })
+                            }
+                        </Form.Select>
+                    </div>
+                </div>
             </div>
 
             <div className="row">
-                {/* <div className="col">
-        <p><strong>Supplier</strong></p>
-          <select className="form-select" aria-label="Default select example" onChange={filterSupplierChange}>
-            <option selected>--Select Supplier--</option>
-            {
-              clientlist.filter((c) => c.ClientType === 2 || c.ClientType === 3).map((item) => {
-                return (
-                  <option value={item.Id} key={item.Id}>{item.ClientName}</option>)
-              }
-              )};
-          </select>
-        </div> */}
-                <div className="col" style={{ textAlign: 'right' }}>
+                <div className="col" style={{ textAlign: 'left', marginTop: '20px' }}>
+                    <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2' }} onClick={() => onDownloadExcel()} ></i>
+                </div>
+                <div className="col" style={{ textAlign: 'right', marginTop: '20px' }}>
                     <Button className="mr-2 btn-primary btn-primary-custom" variant="primary"
                         style={{ marginRight: "17.5px" }}
                         onClick={() => clickAddVaccTracker()}>Add</Button>
@@ -628,8 +701,14 @@ function ChicksVaccinationTracker(props) {
                             p.AgeDays = CalculateAgeInDays(p.LotDate);
                             p.AgeWeeks = CalculateAgeInWeeks(p.LotDate);
 
+                            VccListDowanloadArr.push({
+                                Date: moment(p.Date).format('DD-MMM-YYYY'),
+                                ShedName: shedname, LotName: p.LotName, Vaccination: vccname, Age: vccage, Type: vcctypename,
+                                Route: vccroute, Comments: p.Comments
+                            });
+
                             return (
-                                <tr align='center' key={p.Id}>
+                                !isloaded && <tr align='center' key={p.Id}>
                                     <td align='left'>{moment(p.Date).format('DD-MMM-YYYY')}</td>
                                     <td align='left'>{shedname}</td>
                                     <td align='left'>{p.LotName}</td>
@@ -660,38 +739,35 @@ function ChicksVaccinationTracker(props) {
 
             {
                 vaccinationtrackerlist && vaccinationtrackerlist.length > variables.PAGE_PAGINATION_NO &&
-                <button
-                    onClick={handlePrevClick}
-                    disabled={preDisabled}
-                >
+                <>
+                    <button
+                        onClick={handlePrevClick}
+                        disabled={preDisabled}
+                    >
 
-                    Prev
-                </button>
-            }
-            {
-                vaccinationtrackerlist && vaccinationtrackerlist.length > variables.PAGE_PAGINATION_NO &&
+                        Prev
+                    </button>
+                    {
+                        Array.from({ length: totalPages }, (_, i) => {
+                            return (
+                                <button
+                                    onClick={() => handlePageChange(i + 1)}
+                                    key={i}
+                                    disabled={i + 1 === currentPage}
+                                >
+                                    {i + 1}
+                                </button>
+                            )
+                        })
+                    }
 
-                Array.from({ length: totalPages }, (_, i) => {
-                    return (
-                        <button
-                            onClick={() => handlePageChange(i + 1)}
-                            key={i}
-                            disabled={i + 1 === currentPage}
-                        >
-                            {i + 1}
-                        </button>
-                    )
-                })
-            }
-
-            {
-                vaccinationtrackerlist && vaccinationtrackerlist.length > variables.PAGE_PAGINATION_NO &&
-                <button
-                    onClick={handleNextClick}
-                    disabled={nextDisabled}
-                >
-                    Next
-                </button>
+                    <button
+                        onClick={handleNextClick}
+                        disabled={nextDisabled}
+                    >
+                        Next
+                    </button>
+                </>
             }
 
             <Modal
@@ -714,8 +790,8 @@ function ChicksVaccinationTracker(props) {
                                 <Form noValidate validated={validated} className="needs-validation">
                                     <Row className="mb-12">
                                         <Form.Group controlId="Date" as={Col} >
-                                            <Form.Label>Date</Form.Label>
-                                            <Form.Control type="text" name="LotId" hidden disabled value={vacctrackerdata.Id} />
+                                            <Form.Label>Date*</Form.Label>
+                                            <Form.Control type="text" name="Id" hidden disabled value={vacctrackerdata.Id} />
                                             <DateComponent date={null} onChange={onDateChange} isRequired={true} value={vacctrackerdata.Date} />
                                             <Form.Control.Feedback type="invalid">
                                                 Please select date
@@ -723,7 +799,7 @@ function ChicksVaccinationTracker(props) {
                                         </Form.Group>
 
                                         <Form.Group controlId="ShedId" as={Col} >
-                                            <Form.Label>Shed</Form.Label>
+                                            <Form.Label>Shed*</Form.Label>
                                             <Form.Select aria-label="Default select example"
                                                 onChange={onShedChange} required>
                                                 <option selected disabled value="">Choose...</option>
@@ -748,7 +824,7 @@ function ChicksVaccinationTracker(props) {
                                     <Row className="mb-12">
                                         <Form.Control type="text" name="LotNo" hidden disabled value={vacctrackerdata.LotNo} />
                                         <InputField controlId="LotName"
-                                            label="LotName"
+                                            label="Lot name*"
                                             type="text"
                                             value={vacctrackerdata.LotName}
                                             name="LotName"
@@ -782,7 +858,7 @@ function ChicksVaccinationTracker(props) {
                                     </Row>
                                     <Row className="mb-12">
                                         <Form.Group controlId="VaccinationID" as={Col} >
-                                            <Form.Label>Vaccination</Form.Label>
+                                            <Form.Label>Vaccination*</Form.Label>
                                             <Form.Select aria-label="Default select example"
                                                 onChange={onVaccinationChange} required>
                                                 <option selected disabled value="">Choose...</option>
@@ -805,7 +881,7 @@ function ChicksVaccinationTracker(props) {
                                         </Form.Group>
 
                                         <Form.Group controlId="AgeID" as={Col} >
-                                            <Form.Label>Age</Form.Label>
+                                            <Form.Label>Age*</Form.Label>
                                             <Form.Select aria-label="Default select example"
                                                 onChange={onAgeChange} required>
                                                 <option selected disabled value="">Choose...</option>
@@ -828,7 +904,7 @@ function ChicksVaccinationTracker(props) {
                                         </Form.Group>
 
                                         <Form.Group controlId="TypeID" as={Col} >
-                                            <Form.Label>Age</Form.Label>
+                                            <Form.Label>Type*</Form.Label>
                                             <Form.Select aria-label="Default select example"
                                                 onChange={onTypeChange} required>
                                                 <option selected disabled value="">Choose...</option>
@@ -850,15 +926,11 @@ function ChicksVaccinationTracker(props) {
                                             </Form.Control.Feedback>
                                         </Form.Group>
 
-
-
-
-
                                     </Row>
 
                                     <Row className="mb-12">
                                         <Form.Group controlId="RouteID" as={Col} >
-                                            <Form.Label>Route</Form.Label>
+                                            <Form.Label>Route*</Form.Label>
                                             <Form.Select aria-label="Default select example"
                                                 onChange={onRouteChange} required>
                                                 <option selected disabled value="">Choose...</option>

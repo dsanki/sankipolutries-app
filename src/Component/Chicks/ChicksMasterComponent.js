@@ -5,6 +5,7 @@ import Moment from 'moment';
 import { useNavigate } from 'react-router-dom'
 import DateComponent from '../DateComponent';
 import InputField from '../ReuseableComponent/InputField'
+import { FetchChicks, HandleLogout } from '../../Utility'
 
 function ChicksMasterComponent(props) {
     let history = useNavigate();
@@ -120,15 +121,15 @@ function ChicksMasterComponent(props) {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
 
-    useEffect((e) => {
+    // useEffect((e) => {
 
-        if (localStorage.getItem('token')) {
-            fetchChicks();
-        }
-        else {
-            history("/login")
-        }
-    }, [obj]);
+    //     if (localStorage.getItem('token')) {
+    //         fetchChicks();
+    //     }
+    //     else {
+    //         history("/login")
+    //     }
+    // }, [obj]);
 
     let addModalClose = () => {
         setAddModalShow(false);
@@ -139,17 +140,20 @@ function ChicksMasterComponent(props) {
         setCount(num + 1);
     };
 
+
+    useEffect((e) => {
+
+        if (localStorage.getItem('token')) {
+            fetchChicks();
+        }
+        else {
+            HandleLogout();
+            history("/login")
+        }
+    }, [obj]);
+
     const fetchChicks = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster',
-            {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                }
-            })
-            .then(response => response.json())
+        FetchChicks()
             .then(data => {
                 if (data.StatusCode === 200) {
                     setChicks(data.Result);
@@ -269,10 +273,10 @@ function ChicksMasterComponent(props) {
                         props.showAlert("Error occurred!!", "danger")
                     })
 
-                    setValidated(false);
+            setValidated(false);
         }
 
-       
+
     };
 
     const handleSubmitEdit = (e) => {
@@ -344,30 +348,28 @@ function ChicksMasterComponent(props) {
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
-                    <tr align='center' className="tr-custom">
-                        <th>Lot name</th>
-                        <th>Date</th>
-                        <th>Chicks</th>
-                        <th>Extra cks</th>
-                        <th>Total Cks</th>
-                        <th>Mortality</th>
-                        <th>Lamb</th>
-                        <th>Due cks</th>
-                        <th>Rate</th>
-                        <th>Total amt</th>
-                        <th>Paid</th>
-                        <th>Due</th>
-                        <th>Payment date</th>
-                        <th>Options</th>
+                    <tr className="tr-custom">
+                        <th align='left'>Lot name</th>
+                        <th  >Date</th>
+                        <th align='center' >Chicks</th>
+                        <th align='center' >Extra cks</th>
+                        <th align='center' >Total Cks</th>
+                        <th align='center' >Mortality</th>
+                        <th align='center'>Lamb</th>
+                        <th align='center'>Due cks</th>
+                        <th align='center'>Rate</th>
+                        <th align='center'>Total amt</th>
+                        <th align='center'>Paid</th>
+                        <th align='center'>Due</th>
+                        <th align='center'>Payment date</th>
+                        <th align='center'>Options</th>
                     </tr>
                 </thead>
                 <tbody>
-
                     {
-
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => (
                             <tr key={p.Id} align='center'>
-                                <td align=''>{p.LotName}</td>
+                                <td align='left'>{p.LotName}</td>
                                 <td align='center'>{Moment(p.Date).format('DD-MMM-YYYY')}</td>
                                 <td align='center'>{p.Chicks}</td>
                                 <td align='center'>{p.ExtraChicks}</td>
@@ -375,12 +377,11 @@ function ChicksMasterComponent(props) {
                                 <td align='center'>{p.Mortality}</td>
                                 <td align='center'>{p.LambChicks}</td>
                                 <td align='center'>{p.DueChicks}</td>
-                                <td>{p.Rate.toFixed(2)}</td>
-                                <td>{p.TotalAmount.toFixed(2)}</td>
-                                <td>{p.Paid.toFixed(2)}</td>
-                                <td>{p.Due.toFixed(2)}</td>
+                                <td align='center'>{p.Rate.toFixed(2)}</td>
+                                <td align='center'>{p.TotalAmount.toFixed(2)}</td>
+                                <td align='center'>{p.Paid.toFixed(2)}</td>
+                                <td align='center'>{p.Due.toFixed(2)}</td>
                                 <td align='center'>{Moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
-
                                 <td align='center'>
                                     {
                                         <ButtonToolbar>
@@ -392,8 +393,6 @@ function ChicksMasterComponent(props) {
                                         </ButtonToolbar>
                                     }
                                 </td>
-
-
                             </tr>
                         )) : <tr>
                             <td style={{ textAlign: "center" }} colSpan={14}>
@@ -413,7 +412,6 @@ function ChicksMasterComponent(props) {
                 </button>
             }
             {
-
                 Array.from({ length: totalPages }, (_, i) => {
                     return (
                         chicks && chicks.length > variables.PAGE_PAGINATION_NO &&

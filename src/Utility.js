@@ -113,11 +113,8 @@ export const FetchChicks = async () => {
   return data;
 }
 
-
-
-
 export const FetchLotById = async (id) => {
-  const response = fetch(variables.REACT_APP_API + 'ChicksMaster/' + id,
+  const response =await fetch(variables.REACT_APP_API + 'ChicksMaster/' + id,
     {
       method: 'GET',
       headers: {
