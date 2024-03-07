@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, Fragment } from 'react'
 import { variables } from '../../Variables';
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom'
@@ -6,8 +6,14 @@ import moment from 'moment';
 import { ErrorMessageHandle } from '../../Utility';
 import InputField from '../ReuseableComponent/InputField'
 import DateComponent from '../DateComponent';
-import { dateyyyymmdd, HandleLogout, downloadExcel } from './../../Utility'
+import { dateyyyymmdd, HandleLogout, downloadExcel, FetchCompanyDetails } from './../../Utility'
 import Loading from '../Loading/Loading'
+
+import ReactDOM from 'react-dom';
+ import { PDFViewer } from '@react-pdf/renderer';
+import InvoiceEggSale from '../Invoice/InvoiceEggSale';
+// import InvoiceData from '../../data/InvoiceData'
+
 
 function EggSale(props) {
 
@@ -19,10 +25,12 @@ function EggSale(props) {
     const obj = useMemo(() => ({ count }), [count]);
     const [validated, setValidated] = useState(false);
     const [addModalShow, setAddModalShow] = useState(false);
+    const [invoiceModalShow, setInvoiceModalShow] = useState(false);
     const [filterFromDate, setFilterFromDate] = useState("");
     const [filterToDate, setFilterToDate] = useState("");
     const [isloaded, setIsLoaded] = useState(true);
     const [eggsalelistfilter, setEggSaleListFilter] = useState([]);
+    const [companydetails, setCompanyDetails] = useState([]);
 
     const initialvalues = {
         modaltitle: "",
@@ -135,6 +143,7 @@ function EggSale(props) {
         if (localStorage.getItem('token')) {
             setEggSaletData({ ...eggsaledata, CustomerId: id });
             fetchCustomerDetails(id);
+            fetchCompanyDetails();
         }
         else {
             HandleLogout();
@@ -152,6 +161,30 @@ function EggSale(props) {
             history("/login")
         }
     }, [obj]);
+
+
+
+
+    const fetchCompanyDetails = async () => {
+        FetchCompanyDetails()
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setCompanyDetails(data.Result);
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found!!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                }
+            })
+    }
+
+
 
 
     const fetchEggSaleDetails = async (custid) => {
@@ -262,53 +295,53 @@ function EggSale(props) {
         }
         else {
 
-        fetch(variables.REACT_APP_API + 'EggSale/EggSaleAdd', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('token')
-            },
-            body: JSON.stringify({
-                Id: eggsaledata.Id,
-                CustomerId: eggsaledata.CustomerId,
-                Quantity: eggsaledata.Quantity,
-                PurchaseDate: eggsaledata.PurchaseDate,
-                EggRate: eggsaledata.EggRate,
-                TotalCost: eggsaledata.TotalCost,
-                Discount: eggsaledata.Discount,
-                FinalCost: eggsaledata.FinalCost,
-                Paid: eggsaledata.Paid,
-                Due: eggsaledata.Due,
-                Comments: eggsaledata.Comments,
-                CreatedOn: eggsaledata.CreatedOn,
-                CreatedBy: eggsaledata.CreatedBy,
-                ModifiedOn: eggsaledata.ModifiedOn,
-                ModifiedBy: eggsaledata.ModifiedBy
+            fetch(variables.REACT_APP_API + 'EggSale/EggSaleAdd', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                },
+                body: JSON.stringify({
+                    Id: eggsaledata.Id,
+                    CustomerId: eggsaledata.CustomerId,
+                    Quantity: eggsaledata.Quantity,
+                    PurchaseDate: eggsaledata.PurchaseDate,
+                    EggRate: eggsaledata.EggRate,
+                    TotalCost: eggsaledata.TotalCost,
+                    Discount: eggsaledata.Discount,
+                    FinalCost: eggsaledata.FinalCost,
+                    Paid: eggsaledata.Paid,
+                    Due: eggsaledata.Due,
+                    Comments: eggsaledata.Comments,
+                    CreatedOn: eggsaledata.CreatedOn,
+                    CreatedBy: eggsaledata.CreatedBy,
+                    ModifiedOn: eggsaledata.ModifiedOn,
+                    ModifiedBy: eggsaledata.ModifiedBy
 
-            })
-        }).then(res => res.json())
-            .then((result) => {
+                })
+            }).then(res => res.json())
+                .then((result) => {
 
-                if (result.StatusCode === 200) {
-                    addCount(count);
-                    setAddModalShow(false);
-                    props.showAlert("Successfully added", "info")
-                }
-                else if (result.StatusCode === 401) {
-                    HandleLogout();
-                    history("/login")
-                }
-                else if (result.StatusCode === 404) {
-                    props.showAlert("Data not found!!", "danger")
-                }
-                else {
-                    props.showAlert("Error occurred!!", "danger")
-                }
-            },
-                (error) => {
-                    props.showAlert("Error occurred!!", "danger")
-                });
+                    if (result.StatusCode === 200) {
+                        addCount(count);
+                        setAddModalShow(false);
+                        props.showAlert("Successfully added", "info")
+                    }
+                    else if (result.StatusCode === 401) {
+                        HandleLogout();
+                        history("/login")
+                    }
+                    else if (result.StatusCode === 404) {
+                        props.showAlert("Data not found!!", "danger")
+                    }
+                    else {
+                        props.showAlert("Error occurred!!", "danger")
+                    }
+                },
+                    (error) => {
+                        props.showAlert("Error occurred!!", "danger")
+                    });
         }
 
         setValidated(true);
@@ -324,54 +357,54 @@ function EggSale(props) {
         }
         else {
 
-        fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleUpdate', {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('token')
-            },
-            body: JSON.stringify({
-                Id: eggsaledata.Id,
-                CustomerId: eggsaledata.CustomerId,
-                Quantity: eggsaledata.Quantity,
-                PurchaseDate: eggsaledata.PurchaseDate,
-                EggRate: eggsaledata.EggRate,
-                TotalCost: eggsaledata.TotalCost,
-                Discount: eggsaledata.Discount,
-                FinalCost: eggsaledata.FinalCost,
-                Paid: eggsaledata.Paid,
-                Due: eggsaledata.Due,
-                Comments: eggsaledata.Comments,
-                CreatedOn: eggsaledata.CreatedOn,
-                CreatedBy: eggsaledata.CreatedBy,
-                ModifiedOn: eggsaledata.ModifiedOn,
-                ModifiedBy: eggsaledata.ModifiedBy
+            fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleUpdate', {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                },
+                body: JSON.stringify({
+                    Id: eggsaledata.Id,
+                    CustomerId: eggsaledata.CustomerId,
+                    Quantity: eggsaledata.Quantity,
+                    PurchaseDate: eggsaledata.PurchaseDate,
+                    EggRate: eggsaledata.EggRate,
+                    TotalCost: eggsaledata.TotalCost,
+                    Discount: eggsaledata.Discount,
+                    FinalCost: eggsaledata.FinalCost,
+                    Paid: eggsaledata.Paid,
+                    Due: eggsaledata.Due,
+                    Comments: eggsaledata.Comments,
+                    CreatedOn: eggsaledata.CreatedOn,
+                    CreatedBy: eggsaledata.CreatedBy,
+                    ModifiedOn: eggsaledata.ModifiedOn,
+                    ModifiedBy: eggsaledata.ModifiedBy
 
-            })
-        }).then(res => res.json())
-            .then((result) => {
-                if (result.StatusCode === 200) {
-                    addCount(count);
-                    setAddModalShow(false);
+                })
+            }).then(res => res.json())
+                .then((result) => {
+                    if (result.StatusCode === 200) {
+                        addCount(count);
+                        setAddModalShow(false);
 
-                    props.showAlert("Successfully updated", "info")
-                }
-                else if (result.StatusCode === 401) {
-                    HandleLogout();
-                    history("/login")
-                }
-                else if (result.StatusCode === 404) {
-                    props.showAlert("Data not found!!", "danger")
-                }
-                else {
-                    props.showAlert("Error occurred!!", "danger")
-                }
+                        props.showAlert("Successfully updated", "info")
+                    }
+                    else if (result.StatusCode === 401) {
+                        HandleLogout();
+                        history("/login")
+                    }
+                    else if (result.StatusCode === 404) {
+                        props.showAlert("Data not found!!", "danger")
+                    }
+                    else {
+                        props.showAlert("Error occurred!!", "danger")
+                    }
 
-            },
-                (error) => {
-                    props.showAlert("Error occurred!!", "danger")
-                });
+                },
+                    (error) => {
+                        props.showAlert("Error occurred!!", "danger")
+                    });
         }
 
         setValidated(true);
@@ -448,6 +481,27 @@ function EggSale(props) {
         downloadExcel(_list, "EggSale");
     }
 
+
+
+
+    const clickInvoice = (eggsale) => {
+
+        setEggSaletData({
+            Id: eggsale.Id,
+            CustomerId: eggsale.CustomerId,
+            Quantity: eggsale.Quantity,
+            PurchaseDate: eggsale.PurchaseDate,
+            EggRate: eggsale.EggRate,
+            TotalCost: eggsale.TotalCost,
+            Discount: eggsale.Discount,
+            FinalCost: eggsale.FinalCost,
+            Paid: eggsale.Paid,
+            Due: eggsale.Due
+        });
+
+        setInvoiceModalShow(true);
+    }
+
     return (
 
         <div>
@@ -489,7 +543,7 @@ function EggSale(props) {
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
-                    <tr align='left' className="tr-custom">
+                    <tr className="tr-custom" align='center'>
                         <th>Date</th>
                         <th>Quantity</th>
                         <th>Rate</th>
@@ -499,36 +553,37 @@ function EggSale(props) {
                         <th>Paid</th>
                         <th>Due</th>
                         <th>Comments</th>
+                        <th align='center'>Invoice</th>
                         <th>Options</th>
                     </tr>
                 </thead>
                 <tbody>
-
-
                     {
 
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
                             return (
                                 !isloaded && <tr align='center' key={p.Id}>
 
-                                    <td align='left'>{moment(p.PurchaseDate).format('DD-MMM-YYYY')}</td>
-                                    <td align='left'>{p.Quantity}</td>
-                                    <td align='left'>{p.EggRate}</td>
-                                    <td align='left'>{p.TotalCost.toFixed(2)}</td>
-                                    <td align='left'>{p.Discount.toFixed(2)}</td>
-                                    <td align='left'>{p.FinalCost.toFixed(2)}</td>
-                                    <td align='left'>{p.Paid.toFixed(2)}</td>
-                                    <td align='left'>{p.Due.toFixed(2)}</td>
+                                    <td align='center'>{moment(p.PurchaseDate).format('DD-MMM-YYYY')}</td>
+                                    <td align='center'>{p.Quantity}</td>
+                                    <td align='center'>{p.EggRate}</td>
+                                    <td align='center'>{p.TotalCost.toFixed(2)}</td>
+                                    <td align='center'>{p.Discount.toFixed(2)}</td>
+                                    <td align='center'>{p.FinalCost.toFixed(2)}</td>
+                                    <td align='center'>{p.Paid.toFixed(2)}</td>
+                                    <td align='center'>{p.Due.toFixed(2)}</td>
                                     <td align='left'>{p.Comments}</td>
-
+                                    <td>
+                                        <i className="fa-sharp fa-solid fa-receipt fa-beat" title='Invoice' style={{ color: '#086dba', marginLeft: '15px' }} onClick={() => clickInvoice(p)}></i>
+                                    </td>
                                     <td align='center'>
                                         {
                                             <ButtonToolbar>
 
-                                                <i className="fa-solid fa-pen-to-square" style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => clickEditEggSale(p)}></i>
+                                                <i className="fa-solid fa-pen-to-square" title='Edit' style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => clickEditEggSale(p)}></i>
 
                                                 {localStorage.getItem('isadmin') === 'true' &&
-                                                    <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteEggSale(p.Id)}></i>}
+                                                    <i className="fa-solid fa-trash" title='Delete' style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteEggSale(p.Id)}></i>}
 
 
 
@@ -583,6 +638,29 @@ function EggSale(props) {
             }
 
             <div className="container" id="exampleModal">
+                <Modal
+                    show={invoiceModalShow}
+                    size="lg"
+                    aria-labelledby="contained-modal-title-vcenter"
+                    centered
+                >
+                    <Modal.Header>
+                        <Modal.Title id="contained-modal-title-vcenter">
+                            {eggsaledata.modaltitle}
+                        </Modal.Title>
+                        <button type="button" class="btn-close" aria-label="Close" onClick={addModalClose}> </button>
+                    </Modal.Header>
+
+                    <Modal.Body>
+                        <Fragment>
+                            <PDFViewer width="900" height="900" className="app" >
+
+                                <InvoiceEggSale companydetails={companydetails} eggsaledata={eggsaledata} customerdetails={customerdetails} />
+                            </PDFViewer>
+                        </Fragment>
+                    </Modal.Body>
+                </Modal>
+
                 <Modal
                     show={addModalShow}
                     {...props}

@@ -177,6 +177,18 @@ export const FetchBirdSaleList = async () => {
   return data;
 }
 
+export const FetchCompanyDetails = async () => {
+  const response =await fetch(variables.REACT_APP_API + 'CompanyDetails/GetCompanyDetails',
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+  const data = await response.json();
+  return data;
+}
+
 
 
 // export function   FetchData() {
