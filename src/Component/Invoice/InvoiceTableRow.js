@@ -2,11 +2,11 @@ import React, { Fragment } from 'react';
 import { Text, View, StyleSheet } from '@react-pdf/renderer';
 import moment from 'moment';
 
-const borderColor = '#90e5fc'
+const borderColor = '#dee2e6'
 const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
-        borderBottomColor: '#bff0fd',
+        borderBottomColor: '#dee2e6',
         borderBottomWidth: 1,
         alignItems: 'center',
         height: 24,
@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     },
     date: {
         width: '40%',
-        textAlign: 'left',
+        textAlign: 'center',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         paddingLeft: 8,
@@ -23,14 +23,14 @@ const styles = StyleSheet.create({
         width: '20%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
-        textAlign: 'right',
+        textAlign: 'center',
         paddingRight: 8,
     },
     rate: {
         width: '20%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
-        textAlign: 'right',
+        textAlign: 'center',
         paddingRight: 8,
     },
     amount: {

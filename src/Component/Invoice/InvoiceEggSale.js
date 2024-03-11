@@ -20,6 +20,21 @@ const styles = StyleSheet.create({
         lineHeight: 1.5,
         flexDirection: 'column',
     },
+
+    compContainer: {
+        width: '50%',
+    },
+    rowComp: {
+        flexDirection: 'row',
+        marginTop: 25
+    },
+    row: {
+        flexDirection: 'row'
+    },
+    gap:
+    {
+        marginBottom: 30
+    }
     // logo: {
     //     width: 40,
     //     height: 40,
@@ -27,47 +42,63 @@ const styles = StyleSheet.create({
     //     marginRight: 'auto'
     // },
 
-//     container: {
-//         flexDirection: 'row',
-//         borderBottomColor: '#bff0fd',
-//         backgroundColor: '#bff0fd',
-//         borderBottomWidth: 1,
-//         alignItems: 'center',
-//         height: 24,
-//         textAlign: 'center',
-//         fontStyle: 'bold',
-//         flexGrow: 1,
-//     },
-//     date: {
-//         width: '40%',
-//         borderRightColor: borderColor,
-//         borderRightWidth: 1,
-//     },
-//     qty: {
-//         width: '20%',
-//         borderRightColor: borderColor,
-//         borderRightWidth: 1,
-//     },
-//     rate: {
-//         width: '20%',
-//         borderRightColor: borderColor,
-//         borderRightWidth: 1,
-//     },
-//     amount: {
-//         width: '20%'
-//     }
- });
+    //     container: {
+    //         flexDirection: 'row',
+    //         borderBottomColor: '#bff0fd',
+    //         backgroundColor: '#bff0fd',
+    //         borderBottomWidth: 1,
+    //         alignItems: 'center',
+    //         height: 24,
+    //         textAlign: 'center',
+    //         fontStyle: 'bold',
+    //         flexGrow: 1,
+    //     },
+    //     date: {
+    //         width: '40%',
+    //         borderRightColor: borderColor,
+    //         borderRightWidth: 1,
+    //     },
+    //     qty: {
+    //         width: '20%',
+    //         borderRightColor: borderColor,
+    //         borderRightWidth: 1,
+    //     },
+    //     rate: {
+    //         width: '20%',
+    //         borderRightColor: borderColor,
+    //         borderRightWidth: 1,
+    //     },
+    //     amount: {
+    //         width: '20%'
+    //     }
+});
 
 // Create Document Component
 const InvoiceEggSale = (props) => (
     <Document>
         <Page size="A4" style={styles.page}>
+            <InvoiceTitle title='Invoice' eggsaledata={props.eggsaledata} />
+            {/* <InvoiceNo invoice={props.eggsaledata} /> */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
+                <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
+                {/* <View>
+                    <Text style={{ width: 50, textAlign: 'center' }}>Hello</Text>
+                </View> */}
+                <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
+            </View>
             {/* <Image style={styles.logo} src={props.companydetails.CompanyLogo} /> */}
             {/* <Image style={styles.logo} src={logo} /> */}
-            <Company companydetails={props.companydetails}/>
-            <InvoiceTitle title='Invoice' />
-            <InvoiceNo invoice={props.eggsaledata} />
-            <BillTo customerdetails={props.customerdetails} />
+            <View style={styles.rowComp}>
+                <Company companydetails={props.companydetails} />
+                <BillTo customerdetails={props.customerdetails} />
+            </View>
+            <View style={styles.gap}></View>
+
+
+
+            {/* <BillTo customerdetails={props.customerdetails} /> */}
+
+
             <InvoiceItemsTable eggsaledata={props.eggsaledata} />
             <InvoiceThankYouMsg />
         </Page>

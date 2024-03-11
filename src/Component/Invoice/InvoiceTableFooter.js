@@ -1,12 +1,13 @@
 import React from 'react';
-import { Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Text, View, StyleSheet,Image, Svg  } from '@react-pdf/renderer';
+import rup from '../../image/rupee-sign-solid.png'
 // import { numberToWords } from "amount-to-words";
 
-const borderColor = '#90e5fc'
+const borderColor = '#dee2e6'
 const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
-        borderBottomColor: '#bff0fd',
+        borderBottomColor: '#dee2e6',
         borderBottomWidth: 1,
         alignItems: 'center',
         height: 24,
@@ -14,16 +15,22 @@ const styles = StyleSheet.create({
         fontStyle: 'bold',
     },
     description: {
-        width: '85%',
+        width: '80%',
         textAlign: 'right',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         paddingRight: 8,
+        fontFamily: 'Helvetica-Bold'
     },
     total: {
-        width: '15%',
+        width: '20%',
         textAlign: 'right',
-        paddingRight: 8,
+        paddingRight: 8
+    },
+
+    logoRupee: {
+        width: 9,
+        height: 9
     }
     
 
@@ -42,28 +49,28 @@ const InvoiceTableFooter = (props) => {
     //     .reduce((accumulator, currentValue) => accumulator + currentValue , 0)
     return (
         <>
-            <View style={styles.row}>
-                <Text style={styles.description}>Total</Text>
-                <Text style={styles.total}>{Number.parseFloat(props.eggsaledata.TotalCost).toFixed(2)}</Text>
+            <View style={styles.row}> 
+                <Text style={styles.description}>Total </Text> 
+                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.TotalCost).toFixed(2)}</Text>
 
             </View>
             <View style={styles.row}>
                 <Text style={styles.description}>Discount</Text>
-                <Text style={styles.total}>{Number.parseFloat(props.eggsaledata.Discount).toFixed(2)}</Text>
+                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.Discount).toFixed(2)}</Text>
 
             </View>
             <View style={styles.row}>
                 <Text style={styles.description}>Final Total</Text>
-                <Text style={styles.total}>{Number.parseFloat(props.eggsaledata.FinalCost).toFixed(2)}</Text>
+                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.FinalCost).toFixed(2)}</Text>
 
             </View>
             <View style={styles.row}>
                 <Text style={styles.description}>Paid</Text>
-                <Text style={styles.total}>{Number.parseFloat(props.eggsaledata.Paid).toFixed(2)}</Text>
+                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.Paid).toFixed(2)}</Text>
             </View>
             <View style={styles.row}>
-                <Text style={styles.description}>Due</Text>
-                <Text style={styles.total}>{Number.parseFloat(props.eggsaledata.Due).toFixed(2)}</Text>
+                <Text style={styles.description}>Balance</Text>
+                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.Due).toFixed(2)}</Text>
 
             </View>
 

@@ -1,37 +1,47 @@
 import React from 'react';
-import {Text, View, StyleSheet } from '@react-pdf/renderer';
+import {Text, View, StyleSheet, Font} from '@react-pdf/renderer';
 
-const borderColor = '#90e5fc'
+const borderColor = '#dee2e6'
+
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        borderBottomColor: '#bff0fd',
-        backgroundColor: '#bff0fd',
+        borderBottomColor: '#dee2e6',
+        backgroundColor: '#fff',
         borderBottomWidth: 1,
         alignItems: 'center',
         height: 24,
         textAlign: 'center',
         fontStyle: 'bold',
-        flexGrow: 1,
+        flexGrow: 1
     },
    
     date: {
         width: '40%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
+        textAlign: 'center',
+        fontFamily: 'Helvetica-Bold'
     },
     qty: {
         width: '20%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
+        textAlign: 'center',
+        fontFamily: 'Helvetica-Bold'
     },
     rate: {
         width: '20%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
+        textAlign: 'center',
+        fontFamily: 'Helvetica-Bold'
     },
     amount: {
-        width: '20%'
+        width: '20%',
+        textAlign: 'right',
+        marginRight:5,
+        fontFamily: 'Helvetica-Bold'
     },
   });
 

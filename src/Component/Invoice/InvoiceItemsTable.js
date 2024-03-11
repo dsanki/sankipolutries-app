@@ -13,16 +13,17 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         marginTop: 24,
         borderWidth: 1,
-        borderColor: '#bff0fd',
+        borderColor: '#dee2e6',
+        textAlign: 'center'
     },
 });
-
+//{Number.parseFloat(props.eggsaledata.TotalCost).toFixed(2)}
   const InvoiceItemsTable = (props) => (
     <View style={styles.tableContainer}>
         <InvoiceTableHeader />
         <InvoiceTableRow eggsaledata={props.eggsaledata} />
         {/* <InvoiceTableBlankSpace rowsCount={ tableRowsCount - props.invoice.items.length} /> */}
-        <InvoiceTableBlankSpace rowsCount={1} />
+        <InvoiceTableBlankSpace rowsCount={1} amountinwords={props.eggsaledata.AmountInWords} />
         <InvoiceTableFooter eggsaledata={props.eggsaledata} />
     </View>
   );
