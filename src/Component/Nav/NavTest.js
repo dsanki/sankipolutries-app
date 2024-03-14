@@ -65,6 +65,12 @@ function NavTest() {
                                             <a className={`nav-link ${location.pathname === "/vaccinationtracker" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/vaccinationtracker">Vaccination Tracker
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
+                                        <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/eggsaleinvoice" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/eggsaleinvoice">Vaccination Tracker
+                                                <span className="sr-only">(current)</span></a>
+                                        </li>
+
+                                        
 
                                         
                                     </ul>

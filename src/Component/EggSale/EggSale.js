@@ -8,10 +8,10 @@ import InputField from '../ReuseableComponent/InputField'
 import DateComponent from '../DateComponent';
 import {
     dateyyyymmdd, HandleLogout, downloadExcel,
-    FetchCompanyDetails, AmountInWords, ReplaceNonNumeric, Commarize
+    FetchCompanyDetails, AmountInWords, ReplaceNonNumeric, Commarize, FecthEggSaleInvoiceList
 } from './../../Utility'
-import Loading from '../Loading/Loading'
 
+import Loading from '../Loading/Loading'
 import ReactDOM from 'react-dom';
 import { PDFViewer } from '@react-pdf/renderer';
 import InvoiceEggSale from '../Invoice/InvoiceEggSale';
@@ -21,7 +21,7 @@ import InvoiceEggSale from '../Invoice/InvoiceEggSale';
 function EggSale(props) {
 
     let history = useNavigate();
-    const { id } = useParams();
+    const { uid } = useParams();
     const [eggsalelist, setEggSaleList] = useState([]);
     const [customerdetails, setCustomerDetails] = useState([]);
     const [count, setCount] = useState(0);
@@ -41,7 +41,7 @@ function EggSale(props) {
     const initialvalues = {
         modaltitle: "",
         Id: 0,
-        CustomerId: id,
+        CustomerId: uid,
         Quantity: "",
         PurchaseDate: "",
         EggRate: "",
@@ -64,49 +64,60 @@ function EggSale(props) {
         setValidated(false);
     };
 
-    const clickAddEggSale = () => {
-        setAddModalShow({ addModalShow: true });
-        setEggSaletData({
-            modaltitle: "Add Egg Sale",
-            Id: 0,
-            CustomerId: id,
-            Quantity: "",
-            PurchaseDate: "",
-            EggRate: "",
-            TotalCost: "",
-            Discount: "",
-            FinalCost: "",
-            Paid: "",
-            Due: "",
-            Comments: "",
-            CreatedOn: new Date(),
-            CreatedBy: localStorage.getItem("username"),
-            ModifiedOn: "",
-            ModifiedBy: ""
-        })
+   
+
+    const clickAddEggSale = (p) => {
+        history("/eggsalemodule/"+uid);
     }
 
-    const clickEditEggSale = (eggsale) => {
-        setAddModalShow({ addModalShow: true });
-        setEggSaletData({
-            modaltitle: "Edit Egg Sale",
-            Id: eggsale.Id,
-            CustomerId: eggsale.CustomerId,
-            Quantity: eggsale.Quantity,
-            PurchaseDate: eggsale.PurchaseDate,
-            EggRate: eggsale.EggRate,
-            TotalCost: eggsale.TotalCost,
-            Discount: eggsale.Discount,
-            FinalCost: eggsale.FinalCost,
-            Paid: eggsale.Paid,
-            Due: eggsale.Due,
-            Comments: eggsale.Comments,
-            CreatedOn: eggsale.CreatedOn,
-            CreatedBy: eggsale.CreatedBy,
-            ModifiedOn: new Date(),
-            ModifiedBy: localStorage.getItem("username")
-        })
+    // const clickAddEggSale = () => {
+    //     setAddModalShow({ addModalShow: true });
+    //     setEggSaletData({
+    //         modaltitle: "Add Egg Sale",
+    //         Id: 0,
+    //         CustomerId: id,
+    //         Quantity: "",
+    //         PurchaseDate: "",
+    //         EggRate: "",
+    //         TotalCost: "",
+    //         Discount: "",
+    //         FinalCost: "",
+    //         Paid: "",
+    //         Due: "",
+    //         Comments: "",
+    //         CreatedOn: new Date(),
+    //         CreatedBy: localStorage.getItem("username"),
+    //         ModifiedOn: "",
+    //         ModifiedBy: ""
+    //     })
+    // }
+
+    const clickEditEggSale = (p) => {
+        history("/eggsalemodule/"+uid+"/"+p.Id);
+       // history("/eggsalemodule?uid="+uid+"&invid="+p.Id);
     }
+
+    // const clickEditEggSale = (eggsale) => {
+    //     setAddModalShow({ addModalShow: true });
+    //     setEggSaletData({
+    //         modaltitle: "Edit Egg Sale",
+    //         Id: eggsale.Id,
+    //         CustomerId: eggsale.CustomerId,
+    //         Quantity: eggsale.Quantity,
+    //         PurchaseDate: eggsale.PurchaseDate,
+    //         EggRate: eggsale.EggRate,
+    //         TotalCost: eggsale.TotalCost,
+    //         Discount: eggsale.Discount,
+    //         FinalCost: eggsale.FinalCost,
+    //         Paid: eggsale.Paid,
+    //         Due: eggsale.Due,
+    //         Comments: eggsale.Comments,
+    //         CreatedOn: eggsale.CreatedOn,
+    //         CreatedBy: eggsale.CreatedBy,
+    //         ModifiedOn: new Date(),
+    //         ModifiedBy: localStorage.getItem("username")
+    //     })
+    // }
 
     const quantityChange = (e) => {
         const re = /^[0-9\b]+$/;
@@ -145,8 +156,8 @@ function EggSale(props) {
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
-            setEggSaletData({ ...eggsaledata, CustomerId: id });
-            fetchCustomerDetails(id);
+            setEggSaletData({ ...eggsaledata, CustomerId: uid });
+            fetchCustomerDetails(uid);
             fetchCompanyDetails();
         }
         else {
@@ -158,7 +169,10 @@ function EggSale(props) {
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
-            fetchEggSaleDetails(id);
+            fetchEggSaleDetails(uid);
+
+            
+
         }
         else {
             HandleLogout();
@@ -185,25 +199,79 @@ function EggSale(props) {
             })
     }
 
+//FecthEggSaleInvoiceList
+    // const fetchEggSaleDetails = async (custid) => {
+    //     setIsLoaded(true);
+    //     fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleDetailsByCustomerId?CustId=' + custid,
+    //         {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': localStorage.getItem('token')
+    //             }
+    //         })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             if (data.StatusCode === 200) {
+    //                 setEggSaleList(data.Result);
+    //                 setEggSaleListFilter(data.Result);
+    //                 setTotalPages(Math.ceil(data.Result.length / itemsPerPage));
+    //                 setIsLoaded(false);
+    //             }
+    //             else if (data.StatusCode === 401) {
+    //                 HandleLogout();
+    //                 history("/login")
+    //                 setIsLoaded(false);
+    //             }
+    //             else if (data.StatusCode === 404) {
+    //                 props.showAlert("Data not found!!", "danger")
+    //                 setIsLoaded(false);
+    //             }
+    //             else {
+    //                 props.showAlert("Error occurred!!", "danger")
+    //                 setIsLoaded(false);
+    //             }
+    //         });
+    // }
+
+    const[_totalquantity,_setTotalQuantity]=useState(0);
+    const[_totalcost,_setTotalCost]=useState(0);
+    const[_totaldiscount,_setTotalDiscount]=useState(0);
+    const[_finalcost,_setFinalCost]=useState(0);
+    const[_totalPaid,_setTotalPaid]=useState(0);
+    const[_totalDue,_setTotalDue]=useState(0);
 
     const fetchEggSaleDetails = async (custid) => {
         setIsLoaded(true);
-        fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleDetailsByCustomerId?CustId=' + custid,
-            {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                }
-            })
-            .then(response => response.json())
+        FecthEggSaleInvoiceList(custid)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setEggSaleList(data.Result);
                     setEggSaleListFilter(data.Result);
                     setTotalPages(Math.ceil(data.Result.length / itemsPerPage));
                     setIsLoaded(false);
+
+
+                    const { totalCost, totalQuantity, totalDiscount, totalFinalCost, totalPaid,totalDue } = data.Result.reduce((accumulator, item) => {
+                        accumulator.totalCost += item.TotalCost;
+                        accumulator.totalQuantity += parseInt(item.TotalQuantity);
+                        accumulator.totalDiscount += item.TotalDiscount;
+                        accumulator.totalFinalCost += item.FinalCostInvoice;
+                        accumulator.totalPaid += item.Paid;
+                        accumulator.totalDue += item.Due;
+                        return accumulator;
+                    }, { totalCost: 0, totalQuantity: 0, totalDiscount: 0, totalFinalCost: 0, totalPaid:0,totalDue:0 })
+        
+                    _setTotalQuantity(totalQuantity);
+                    _setTotalCost(totalCost);
+                    _setTotalDiscount(totalDiscount);
+                    _setFinalCost(totalFinalCost);
+                    _setTotalPaid(totalPaid);
+                    _setTotalDue(totalDue);
+
+
+
                 }
                 else if (data.StatusCode === 401) {
                     HandleLogout();
@@ -284,130 +352,136 @@ function EggSale(props) {
         setCount(num + 1);
     };
 
-    const handleSubmitAdd = (e) => {
-        e.preventDefault();
-        var form = e.target.closest('.needs-validation');
-        if (form.checkValidity() === false) {
+    // const handleSubmitAdd = (e) => {
+    //     e.preventDefault();
+    //     var form = e.target.closest('.needs-validation');
+    //     if (form.checkValidity() === false) {
 
-            e.stopPropagation();
-            setValidated(true);
-        }
-        else {
+    //         e.stopPropagation();
+    //         setValidated(true);
+    //     }
+    //     else {
 
-            fetch(variables.REACT_APP_API + 'EggSale/EggSaleAdd', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                },
-                body: JSON.stringify({
-                    Id: eggsaledata.Id,
-                    CustomerId: eggsaledata.CustomerId,
-                    Quantity: eggsaledata.Quantity,
-                    PurchaseDate: eggsaledata.PurchaseDate,
-                    EggRate: eggsaledata.EggRate,
-                    TotalCost: eggsaledata.TotalCost,
-                    Discount: eggsaledata.Discount,
-                    FinalCost: eggsaledata.FinalCost,
-                    Paid: eggsaledata.Paid,
-                    Due: eggsaledata.Due,
-                    Comments: eggsaledata.Comments,
-                    CreatedOn: eggsaledata.CreatedOn,
-                    CreatedBy: eggsaledata.CreatedBy,
-                    ModifiedOn: eggsaledata.ModifiedOn,
-                    ModifiedBy: eggsaledata.ModifiedBy
+    //         fetch(variables.REACT_APP_API + 'EggSale/EggSaleAdd', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': localStorage.getItem('token')
+    //             },
+    //             body: JSON.stringify({
+    //                 Id: eggsaledata.Id,
+    //                 CustomerId: eggsaledata.CustomerId,
+    //                 Quantity: eggsaledata.Quantity,
+    //                 PurchaseDate: eggsaledata.PurchaseDate,
+    //                 EggRate: eggsaledata.EggRate,
+    //                 TotalCost: eggsaledata.TotalCost,
+    //                 Discount: eggsaledata.Discount,
+    //                 FinalCost: eggsaledata.FinalCost,
+    //                 Paid: eggsaledata.Paid,
+    //                 Due: eggsaledata.Due,
+    //                 Comments: eggsaledata.Comments,
+    //                 CreatedOn: eggsaledata.CreatedOn,
+    //                 CreatedBy: eggsaledata.CreatedBy,
+    //                 ModifiedOn: eggsaledata.ModifiedOn,
+    //                 ModifiedBy: eggsaledata.ModifiedBy
 
-                })
-            }).then(res => res.json())
-                .then((result) => {
+    //             })
+    //         }).then(res => res.json())
+    //             .then((result) => {
 
-                    if (result.StatusCode === 200) {
-                        addCount(count);
-                        setAddModalShow(false);
-                        props.showAlert("Successfully added", "info")
-                    }
-                    else if (result.StatusCode === 401) {
-                        HandleLogout();
-                        history("/login")
-                    }
-                    else if (result.StatusCode === 404) {
-                        props.showAlert("Data not found!!", "danger")
-                    }
-                    else {
-                        props.showAlert("Error occurred!!", "danger")
-                    }
-                },
-                    (error) => {
-                        props.showAlert("Error occurred!!", "danger")
-                    });
-        }
+    //                 if (result.StatusCode === 200) {
+    //                     addCount(count);
+    //                     setAddModalShow(false);
+    //                     props.showAlert("Successfully added", "info")
+    //                 }
+    //                 else if (result.StatusCode === 401) {
+    //                     HandleLogout();
+    //                     history("/login")
+    //                 }
+    //                 else if (result.StatusCode === 404) {
+    //                     props.showAlert("Data not found!!", "danger")
+    //                 }
+    //                 else {
+    //                     props.showAlert("Error occurred!!", "danger")
+    //                 }
+    //             },
+    //                 (error) => {
+    //                     props.showAlert("Error occurred!!", "danger")
+    //                 });
+    //     }
 
-        setValidated(true);
-    }
+    //     setValidated(true);
+    // }
 
 
-    const handleSubmitEdit = (e) => {
-        e.preventDefault();
-        var form = e.target.closest('.needs-validation');
-        if (form.checkValidity() === false) {
-            e.stopPropagation();
-            setValidated(true);
-        }
-        else {
+ const handleSubmitAdd = (id) => {
+    history("/eggsalemodule?id="+id);
+ }
+const handleSubmitEdit = (id) => {
+    history("/eggsalemodule?id="+id);
+}
+    // const handleSubmitEdit = (e) => {
+    //     e.preventDefault();
+    //     var form = e.target.closest('.needs-validation');
+    //     if (form.checkValidity() === false) {
+    //         e.stopPropagation();
+    //         setValidated(true);
+    //     }
+    //     else {
 
-            fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleUpdate', {
-                method: 'PUT',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                },
-                body: JSON.stringify({
-                    Id: eggsaledata.Id,
-                    CustomerId: eggsaledata.CustomerId,
-                    Quantity: eggsaledata.Quantity,
-                    PurchaseDate: eggsaledata.PurchaseDate,
-                    EggRate: eggsaledata.EggRate,
-                    TotalCost: eggsaledata.TotalCost,
-                    Discount: eggsaledata.Discount,
-                    FinalCost: eggsaledata.FinalCost,
-                    Paid: eggsaledata.Paid,
-                    Due: eggsaledata.Due,
-                    Comments: eggsaledata.Comments,
-                    CreatedOn: eggsaledata.CreatedOn,
-                    CreatedBy: eggsaledata.CreatedBy,
-                    ModifiedOn: eggsaledata.ModifiedOn,
-                    ModifiedBy: eggsaledata.ModifiedBy
+    //         fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleUpdate', {
+    //             method: 'PUT',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': localStorage.getItem('token')
+    //             },
+    //             body: JSON.stringify({
+    //                 Id: eggsaledata.Id,
+    //                 CustomerId: eggsaledata.CustomerId,
+    //                 Quantity: eggsaledata.Quantity,
+    //                 PurchaseDate: eggsaledata.PurchaseDate,
+    //                 EggRate: eggsaledata.EggRate,
+    //                 TotalCost: eggsaledata.TotalCost,
+    //                 Discount: eggsaledata.Discount,
+    //                 FinalCost: eggsaledata.FinalCost,
+    //                 Paid: eggsaledata.Paid,
+    //                 Due: eggsaledata.Due,
+    //                 Comments: eggsaledata.Comments,
+    //                 CreatedOn: eggsaledata.CreatedOn,
+    //                 CreatedBy: eggsaledata.CreatedBy,
+    //                 ModifiedOn: eggsaledata.ModifiedOn,
+    //                 ModifiedBy: eggsaledata.ModifiedBy
 
-                })
-            }).then(res => res.json())
-                .then((result) => {
-                    if (result.StatusCode === 200) {
-                        addCount(count);
-                        setAddModalShow(false);
+    //             })
+    //         }).then(res => res.json())
+    //             .then((result) => {
+    //                 if (result.StatusCode === 200) {
+    //                     addCount(count);
+    //                     setAddModalShow(false);
 
-                        props.showAlert("Successfully updated", "info")
-                    }
-                    else if (result.StatusCode === 401) {
-                        HandleLogout();
-                        history("/login")
-                    }
-                    else if (result.StatusCode === 404) {
-                        props.showAlert("Data not found!!", "danger")
-                    }
-                    else {
-                        props.showAlert("Error occurred!!", "danger")
-                    }
+    //                     props.showAlert("Successfully updated", "info")
+    //                 }
+    //                 else if (result.StatusCode === 401) {
+    //                     HandleLogout();
+    //                     history("/login")
+    //                 }
+    //                 else if (result.StatusCode === 404) {
+    //                     props.showAlert("Data not found!!", "danger")
+    //                 }
+    //                 else {
+    //                     props.showAlert("Error occurred!!", "danger")
+    //                 }
 
-                },
-                    (error) => {
-                        props.showAlert("Error occurred!!", "danger")
-                    });
-        }
+    //             },
+    //                 (error) => {
+    //                     props.showAlert("Error occurred!!", "danger")
+    //                 });
+    //     }
 
-        setValidated(true);
-    }
+    //     setValidated(true);
+    // }
 
     const handlePageChange = (newPage) => {
         setCurrentPage(newPage)
@@ -562,7 +636,7 @@ function EggSale(props) {
                     <tr className="tr-custom" align='center'>
                         <th>Date</th>
                         <th>Quantity</th>
-                        <th>Rate (<span>&#8377;</span>)</th>
+                        {/* <th>Rate (<span>&#8377;</span>)</th> */}
                         <th>Total cost (<span>&#8377;</span>)</th>
                         <th>Discount (<span>&#8377;</span>)</th>
                         <th>Final cost (<span>&#8377;</span>)</th>
@@ -582,23 +656,24 @@ function EggSale(props) {
 
                                     <td align='center'>{moment(p.PurchaseDate).format('DD-MMM-YYYY')}</td>
                                     <td align='center'>{new Intl.NumberFormat('en-IN', {
-                                    }).format(p.Quantity.toFixed(2))}
+                                    }).format(p.TotalQuantity.toFixed(2))}
                                     </td>
-                                    <td align='center'>{p.EggRate}</td>
+                                    {/* <td align='center'>{p.EggRate}</td> */}
                                     <td align='center'> {new Intl.NumberFormat('en-IN', {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2
-                                    }).format(p.TotalCost.toFixed(2))}
+                                    }).format(parseFloat(p.TotalCost).toFixed(2))}
                                     </td>
                                     <td align='center'>{new Intl.NumberFormat('en-IN', {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2
-                                    }).format(p.Discount.toFixed(2))}</td>
+                                    }).format(parseFloat(parseFloat(p.TotalDiscount).toFixed(2)))}</td>
+
                                     <td align='center'>
                                         {new Intl.NumberFormat('en-IN', {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2
-                                        }).format(p.FinalCost.toFixed(2))}
+                                        }).format(parseFloat(p.FinalCostInvoice).toFixed(2))}
                                     </td>
                                     <td align='center'>{new Intl.NumberFormat('en-IN', {
                                         minimumFractionDigits: 2,
@@ -607,7 +682,7 @@ function EggSale(props) {
                                     <td align='center'>{new Intl.NumberFormat('en-IN', {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2
-                                    }).format(p.Due.toFixed(2))}</td>
+                                    }).format(parseFloat(p.Due).toFixed(2))}</td>
                                     <td align='left'>{p.Comments}</td>
                                     <td>
                                         <i className="fa-sharp fa-solid fa-receipt fa-beat" title='Invoice' style={{ color: '#086dba', marginLeft: '15px' }} onClick={() => clickInvoice(p)}></i>
@@ -635,6 +710,20 @@ function EggSale(props) {
                         </tr>
                     }
                 </tbody>
+                <tfoot style={{ backgroundColor: '#cccccc', fontWeight: 'bold' }}>
+                    <td align='center'>Total</td>
+                   
+                    <td align='center'>{_totalquantity}</td>
+                    <td align='center'>{parseFloat(_totalcost).toFixed(2)}</td>
+                   
+                    <td align='center'>{parseFloat(_totaldiscount).toFixed(2)}</td>
+                    <td align='center'>{parseFloat(_finalcost).toFixed(2)}</td>
+                    <td align='center'>{parseFloat(_totalPaid).toFixed(2)}</td>
+                    <td align='center'>{parseFloat(_totalDue).toFixed(2)}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tfoot>
             </Table >
 
             {

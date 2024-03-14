@@ -189,6 +189,44 @@ export const FetchCompanyDetails = async () => {
   return data;
 }
 
+export const FecthEggCategory = async () => {
+  const response =await fetch(variables.REACT_APP_API + 'EggSale/GetEggCategory',
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+  const data = await response.json();
+  return data;
+}
+
+export const FecthEggSaleInvoiceList = async (custid) => {
+  const response =await fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleInvoiceList?CustId='+custid,
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+  const data = await response.json();
+  return data;
+}
+
+export const FecthEggSaleInvoiceById = async (id) => {
+  const response =await fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleInvoiceById?id='+id,
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+  const data = await response.json();
+  return data;
+}
+
+
+
 
 
 // export function   FetchData() {

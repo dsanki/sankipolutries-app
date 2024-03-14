@@ -43,7 +43,11 @@ function EggDailyTracker(props) {
         FeedIntech: "",
         ProductionPercentage: "",
         AgeDays: "",
-        AgeWeeks: ""
+        AgeWeeks: "",
+        EggBig:"",
+        EggCp:"",
+        EggMcp:"",
+        EggLcp:""
     };
 
     const [eggdata, setEggData] = useState(initialvalues);
@@ -64,7 +68,11 @@ function EggDailyTracker(props) {
             ProductionPercentage: "",
             AgeDays: "",
             AgeWeeks: "",
-            LotName: ""
+            LotName: "",
+            EggBig:"",
+            EggCp:"",
+            EggMcp:"",
+            EggLcp:""
         })
     }
 
@@ -84,7 +92,11 @@ function EggDailyTracker(props) {
             ProductionPercentage: egg.ProductionPercentage,
             AgeDays: egg.AgeDays,
             AgeWeeks: egg.AgeWeeks,
-            LotName: egg.LotName
+            LotName: egg.LotName,
+            EggBig:egg.EggBig,
+            EggCp:egg.EggCp,
+            EggMcp:egg.EggMcp,
+            EggLcp:egg.EggLcp
         })
     }
 
@@ -102,6 +114,39 @@ function EggDailyTracker(props) {
     //         setEggDailyTrackerList(eggtrackerlistForFilter);
     //     }
     // }
+
+    const onEggBigChange = (e) => {
+        const re = /^[0-9\b]+$/;
+        let _total = e.target.value;
+        if (_total === '' || re.test(_total)) {
+            setEggData({ ...eggdata, EggBig: e.target.value});
+        }
+    }
+
+    const onEggCpChange = (e) => {
+        const re = /^[0-9\b]+$/;
+        let _total = e.target.value;
+        if (_total === '' || re.test(_total)) {
+            setEggData({ ...eggdata, EggCp: e.target.value});
+        }
+    }
+
+    const onEggLcpChange = (e) => {
+        const re = /^[0-9\b]+$/;
+        let _total = e.target.value;
+        if (_total === '' || re.test(_total)) {
+            setEggData({ ...eggdata, EggLcp: e.target.value});
+        }
+    }
+
+    const onEggMcpChange = (e) => {
+        const re = /^[0-9\b]+$/;
+        let _total = e.target.value;
+        if (_total === '' || re.test(_total)) {
+            setEggData({ ...eggdata, EggMcp: e.target.value});
+        }
+    }
+
 
     const onTotalEggsChange = (e) => {
         const re = /^[0-9\b]+$/;
@@ -345,7 +390,11 @@ function EggDailyTracker(props) {
                     BrokenEggs: eggdata.BrokenEggs,
                     OkEggs: eggdata.OkEggs,
                     FeedIntech: eggdata.FeedIntech,
-                    ProductionPercentage: eggdata.ProductionPercentage
+                    ProductionPercentage: eggdata.ProductionPercentage,
+                    EggBig:eggdata.EggBig,
+                    EggCp:eggdata.EggCp,
+                    EggMcp:eggdata.EggMcp,
+                    EggLcp:eggdata.EggLcp
 
                 })
             }).then(res => res.json())
@@ -402,7 +451,11 @@ function EggDailyTracker(props) {
                     BrokenEggs: eggdata.BrokenEggs,
                     OkEggs: eggdata.OkEggs,
                     FeedIntech: eggdata.FeedIntech,
-                    ProductionPercentage: eggdata.ProductionPercentage
+                    ProductionPercentage: eggdata.ProductionPercentage,
+                    EggBig:eggdata.EggBig,
+                    EggCp:eggdata.EggCp,
+                    EggMcp:eggdata.EggMcp,
+                    EggLcp:eggdata.EggLcp
                 })
             }).then(res => res.json())
                 .then((result) => {
@@ -533,7 +586,7 @@ function EggDailyTracker(props) {
                     <p><strong>Filter date</strong></p>
                     <DateComponent date={null} onChange={onDateFilterChange} isRequired={false} value={filterDate} />
                 </div> */}
-                <div className="col" style={{ textAlign: 'right' }}>
+                <div className="col" style={{ textAlign: 'right', marginTop: '20px' }}>
                     <Button className="mr-2" variant="primary"
                         style={{ marginRight: "17.5px" }}
                         onClick={() => clickAddEggProduction()}>Add</Button>
@@ -628,8 +681,12 @@ function EggDailyTracker(props) {
                     >
                         Next
                     </button>
+
+                   
                 </>
             }
+
+
 
             <Modal
                 show={addModalShow}
@@ -761,6 +818,56 @@ function EggDailyTracker(props) {
                                             errormessage="Please provide production %"
                                             required={true}
                                             disabled={true}
+                                        />
+                                    </Row>
+
+                                    <Row className="mb-12">
+                                        <InputField controlId="EggBig"
+                                            label="Big eggs"
+                                            type="text"
+                                            value={eggdata.EggBig}
+                                            name="EggBig"
+                                            placeholder="Big eggs"
+                                            errormessage="Please provide big eggs"
+                                            onChange={onEggBigChange}
+                                            required={false}
+                                            disabled={false}
+                                        />
+
+                                        <InputField controlId="EggCp"
+                                            label="Cp eggs"
+                                            type="text"
+                                            value={eggdata.EggCp}
+                                            name="EggCp"
+                                            placeholder="Cp eggs"
+                                            errormessage="Please provide Cp eggs"
+                                            onChange={onEggCpChange}
+                                            required={false}
+                                            disabled={false}
+                                        />
+
+                                        <InputField controlId="EggMcp"
+                                            label="Mcp eggs"
+                                            type="text"
+                                            value={eggdata.EggMcp}
+                                            name="EggMcp"
+                                            placeholder="Mcp eggs"
+                                            errormessage="Please provide Mcp eggs"
+                                            required={false}
+                                            disabled={false}
+                                            onChange={onEggMcpChange}
+                                        />
+
+                                        <InputField controlId="EggLcp"
+                                            label="Lcp eggs"
+                                            type="text"
+                                            value={eggdata.EggLcp}
+                                            name="EggLcp"
+                                            placeholder="Lcp eggs"
+                                            errormessage="Please provide Lcp eggs"
+                                            required={false}
+                                            disabled={false}
+                                            onChange={onEggLcpChange}
                                         />
                                     </Row>
 
