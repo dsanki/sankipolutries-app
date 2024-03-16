@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
 import InputField from '../ReuseableComponent/InputField'
 import DateComponent from '../DateComponent';
+import { FecthStockListById,HandleLogout } from './../../Utility'
 
 function Medicine(props) {
 
@@ -22,7 +23,7 @@ function Medicine(props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [addModalShow, setAddModalShow] = useState(false);
-
+  const[stocklist,setStockList]=useState([]);
 
   let addModalClose = () => {
     setAddModalShow(false);
@@ -127,8 +128,6 @@ function Medicine(props) {
   useEffect((e) => {
 
     if (localStorage.getItem('token')) {
-      fetchUnit();
-      fetchClient();
       fetchMedicineList();
     }
     else {
@@ -137,6 +136,41 @@ function Medicine(props) {
     }
   }, [obj]);
 
+
+  useEffect((e) => {
+
+    if (localStorage.getItem('token')) {
+      fetchUnit();
+      fetchClient();
+      fetchStockListById(variables.STOCK_CAT_MEDICINE)
+    }
+    else {
+
+      history("/login")
+    }
+  }, []);
+
+
+
+
+  const fetchStockListById = async (catid) => {
+    FecthStockListById(catid)
+        .then(data => {
+            if (data.StatusCode === 200) {
+              setStockList(data.Result);
+            }
+            else if (data.StatusCode === 401) {
+                HandleLogout();
+                history("/login")
+            }
+            else if (data.StatusCode === 404) {
+                props.showAlert("Data not found!!", "danger")
+            }
+            else {
+                props.showAlert("Error occurred!!", "danger")
+            }
+        })
+}
 
   const fetchMedicineList = async () => {
     fetch(variables.REACT_APP_API + 'Medicine/GetMedicine',
@@ -155,7 +189,8 @@ function Medicine(props) {
         setMedicineListForFilter(data.Result);
         }
         else if (data.StatusCode === 401) {
-          history("/login")
+          HandleLogout();
+                history("/login")
       }
       });
   }
@@ -178,7 +213,8 @@ function Medicine(props) {
           setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
       }
       else if (data.StatusCode === 401) {
-          history("/login")
+        HandleLogout();
+        history("/login")
       }
       });
   }
@@ -199,7 +235,8 @@ function Medicine(props) {
         setClientList(data.Result);
         }
         else if (data.StatusCode === 401) {
-          history("/login")
+          HandleLogout();
+                history("/login")
       }
       });
   }
@@ -232,7 +269,7 @@ function Medicine(props) {
       })
     }).then(res => res.json())
       .then((result) => {
-        if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
+        if (result.StatusCode === 200) {
           addCount(count);
           setAddModalShow(false);
 

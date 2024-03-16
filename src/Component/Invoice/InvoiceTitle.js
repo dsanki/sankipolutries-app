@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
 },
 logo: {
   width: 70,
-  height: 70,
+  height: 60,
   //marginBottom: 10
   // marginLeft: 'auto',
   // marginRight: 'auto'
@@ -52,7 +52,7 @@ const InvoiceTitle = (props) => (
     <Text style={styles.reportTitle}>{props.title}</Text>
     <Fragment style={styles.date}>
         <View style={styles.invoiceDateContainer}>
-          <Text style={{fontFamily: 'Helvetica-Bold'}}>{`Invoice No: ${leftFillNum(props.eggsaledata.Id, 5)}`}</Text><br/>
+          <Text style={{fontFamily: 'Helvetica-Bold'}}>{`Invoice No: ${props.eggsaledata.InvoiceNo}`}</Text><br/>
           <Text style={{fontFamily: 'Helvetica-Bold'}}>{`Date: ${moment(props.eggsaledata.PurchaseDate).format('DD/MM/YYYY')}`}</Text>
         </View >
        

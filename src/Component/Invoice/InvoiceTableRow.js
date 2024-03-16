@@ -12,32 +12,53 @@ const styles = StyleSheet.create({
         height: 24,
         fontStyle: 'bold',
     },
-    date: {
-        width: '40%',
+    cat: {
+        width: '10%',
         textAlign: 'center',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         paddingLeft: 8,
     },
     qty: {
-        width: '20%',
+        width: '15%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         textAlign: 'center',
         paddingRight: 8,
     },
     rate: {
-        width: '20%',
+        width: '10%',
+        borderRightColor: borderColor,
+        borderRightWidth: 1,
+        textAlign: 'center',
+        paddingRight: 8,
+    },
+    discnt: {
+        width: '15%',
+        borderRightColor: borderColor,
+        borderRightWidth: 1,
+        textAlign: 'center',
+        paddingRight: 8,
+    },
+    tdiscnt: {
+        width: '15%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         textAlign: 'center',
         paddingRight: 8,
     },
     amount: {
+        width: '15%',
+        textAlign: 'right',
+        paddingRight: 8,
+        borderRightColor: borderColor,
+        borderRightWidth: 1,
+    },
+    finalamount: {
         width: '20%',
         textAlign: 'right',
         paddingRight: 8,
-    },
+    }
 });
 
 
@@ -54,24 +75,29 @@ const styles = StyleSheet.create({
 // };
 
 const InvoiceTableRow = (props) => {
+    //eggsaledata,eggcategory
     return (
-        // <Fragment>
-        //     <View style={styles.row} key={item.sno.toString()}>
-        //         <Text style={styles.description}>{item.desc}</Text>
-        //         <Text style={styles.qty}>{item.qty}</Text>
-        //         <Text style={styles.rate}>{item.rate}</Text>
-        //         <Text style={styles.amount}>{(item.qty * item.rate).toFixed(2)}</Text>
-        //     </View>
-        // </Fragment>
 
         <Fragment>
-        <View style={styles.row} key={props.eggsaledata.Id}>
-        <Text style={styles.date}>{moment(props.eggsaledata.PurchaseDate).format('DD-MMM-YYYY')}</Text>
-            <Text style={styles.qty}>{props.eggsaledata.Quantity}</Text>
-            <Text style={styles.rate}>{props.eggsaledata.EggRate}</Text>
-            <Text style={styles.amount}>{Number.parseFloat(props.eggsaledata.TotalCost).toFixed(2)}</Text>
-        </View>
-    </Fragment>
+            {
+                 props.eggsaledata.map((p, i) => {
+                    let catname=props.eggcategory.filter(x=>x.Id===p.EggCategory);
+                    return(
+                    <View style={styles.row} key={p.Id}>
+                        <Text style={styles.cat}>{catname[0].EggCategoryName}</Text>
+                        <Text style={styles.qty}>{p.Quantity}</Text>
+                        <Text style={styles.rate}>{p.EggRate}</Text>
+                        <Text style={styles.amount}>{Number.parseFloat(p.TotalCost).toFixed(2)}</Text>
+                        <Text style={styles.discnt}>{Number.parseFloat(p.DiscountPerEgg).toFixed(2)}</Text>
+                        <Text style={styles.discnt}>{Number.parseFloat(p.TotalDiscount).toFixed(2)}</Text>
+                        <Text style={styles.finalamount}>{Number.parseFloat(p.FinalCost).toFixed(2)}</Text>
+                    </View>
+                    )
+                 })
+            }
+
+        </Fragment>
+
     )
 
 };

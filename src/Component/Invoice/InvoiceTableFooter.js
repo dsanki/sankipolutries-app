@@ -31,6 +31,16 @@ const styles = StyleSheet.create({
     logoRupee: {
         width: 9,
         height: 9
+    },
+    amountinwords: {
+        width: '100%',
+        textAlign: 'left',
+        borderRightColor: borderColor,
+        borderRightWidth: 1,
+        paddingRight: 10,
+        paddingLeft: 10,
+        fontFamily: 'Helvetica-Bold',
+        textTransform: 'capitalize',
     }
     
 
@@ -56,12 +66,17 @@ const InvoiceTableFooter = (props) => {
             </View>
             <View style={styles.row}>
                 <Text style={styles.description}>Discount</Text>
-                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.Discount).toFixed(2)}</Text>
+                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.TotalDiscount).toFixed(2)}</Text>
 
             </View>
             <View style={styles.row}>
                 <Text style={styles.description}>Final Total</Text>
-                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.FinalCost).toFixed(2)}</Text>
+                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.FinalCostInvoice).toFixed(2)}</Text>
+
+            </View>
+            <View style={styles.row}>
+                
+                <Text style={styles.amountinwords}>{`Amount in words: ${props.eggsaledata.AmountInWords}`}</Text>
 
             </View>
             <View style={styles.row}>

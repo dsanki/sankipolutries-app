@@ -99,7 +99,7 @@ const InvoiceEggSale = (props) => (
             {/* <BillTo customerdetails={props.customerdetails} /> */}
 
 
-            <InvoiceItemsTable eggsaledata={props.eggsaledata} />
+            <InvoiceItemsTable eggsaledata={props.eggsaledata} eggcategory={props.eggcategory} />
             <InvoiceThankYouMsg />
         </Page>
     </Document>

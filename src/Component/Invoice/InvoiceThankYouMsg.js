@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     Footer: {
         position: 'absolute',
         left: 0,
-        bottom: 100,
+        bottom: 40,
         right: 40,
         textAlign: 'right'
     }
@@ -44,19 +44,12 @@ const styles = StyleSheet.create({
 //     ctx.strokeStyle = color;
 //     ctx.strokeRect(x, y, w, h);
 // }
-
+const Square=()=>
+{
+    
+}
 const InvoiceThankYouMsg = () => (
-    // <Fragment style={styles.Footer}>
-    //     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 90 }}>
-    //         <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
-    //     </View>
-    //     <View style={styles.titleContainer}>
-    //         <Text style={styles.reportTitle}>Authorized Signature For</Text>
-    //     </View>
-    //     <View >
-    //         <Text style={styles.reportTitle}>SANKI POULTRIES</Text>
-    //     </View>
-    // </Fragment>
+    
     <>
 <View style={styles.Footer}>
 <Svg viewBox="-210 -05 200 100">

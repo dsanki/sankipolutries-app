@@ -435,8 +435,6 @@ function CustomerList(props) {
                                                 {localStorage.getItem('isadmin') === 'true' &&
                                                     <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteCustomer(p.ID)}></i>}
 
-
-
                                             </ButtonToolbar>
                                         }
                                     </td>

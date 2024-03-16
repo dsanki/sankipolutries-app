@@ -45,9 +45,10 @@ const InvoiceTableBlankSpace = (props) => {
     const blankRows = Array(props.rowsCount).fill(0)
     const rows = blankRows.map( (x, i) => 
         <View style={styles.row} key={`BR${i}`}>
-             <Text style={styles.amountinwords}>
+              <Text style={styles.amountinwords}></Text>
+             {/* <Text style={styles.amountinwords}>
              {`Amount in words: ${props.amountinwords}`}
-               </Text>
+               </Text> */}
             {/* <Text style={styles.description}>-</Text>
             <Text style={styles.qty}>-</Text>
             <Text style={styles.rate}>-</Text>

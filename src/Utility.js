@@ -225,6 +225,18 @@ export const FecthEggSaleInvoiceById = async (id) => {
   return data;
 }
 
+export const FecthStockListById = async (catid) => {
+  const response =await fetch(variables.REACT_APP_API + 'Stock/GetStockList?category='+catid,
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+  const data = await response.json();
+  return data;
+}
+
 
 
 
