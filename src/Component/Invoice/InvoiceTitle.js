@@ -2,7 +2,7 @@ import React, { Fragment } from 'react'
 import { Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import InvoiceNo from './InvoiceNo'
 import moment from 'moment';
-import logo from '../../image/logo4.png'
+import logo from '../../image/kalandi_logo.JPG'
 
 const styles = StyleSheet.create({
   row: {
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
 },
 logo: {
   width: 70,
-  height: 60,
+  height: 100,
   //marginBottom: 10
   // marginLeft: 'auto',
   // marginRight: 'auto'

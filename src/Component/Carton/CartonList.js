@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { variables } from './../../Variables'
-import {  Modal, Button, ButtonToolbar, Table, Row, Col, Form  } from 'react-bootstrap';
+import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
 import Moment from 'moment';
 import EditCarton from './EditCarton';
 import AddCarton from './AddCarton';
 import { useNavigate } from 'react-router-dom'
 import DateComponent from '../DateComponent';
 import InputField from '../ReuseableComponent/InputField'
+import Loading from '../Loading/Loading'
+import { HandleLogout, dateyyyymmdd, downloadExcel } from './../../Utility'
+import moment from 'moment';
+//
 
 const CartonList = (props) => {
     let history = useNavigate();
@@ -19,7 +23,8 @@ const CartonList = (props) => {
     const [addModalShow, setAddModalShow] = useState(false);
     const [count, setCount] = useState(0);
     const [validated, setValidated] = useState(false);
-
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [isloaded, setIsLoaded] = useState(true);
     //const [_quanTity, setquanTity] = useState(0);
     const initialvalues = {
         modaltitle: "",
@@ -31,7 +36,8 @@ const CartonList = (props) => {
         Payment: "",
         PaymentDate: "",
         UnloadingCharge: "",
-        ClientId: ""
+        ClientId: "",
+        ClientName: ""
     };
 
     const [cartonsdata, setCartonsData] = useState(initialvalues);
@@ -50,7 +56,8 @@ const CartonList = (props) => {
             Payment: "",
             PaymentDate: "",
             UnloadingCharge: "",
-            ClientId: ""
+            ClientId: "",
+            ClientName: ""
         })
     }
 
@@ -66,23 +73,18 @@ const CartonList = (props) => {
             Payment: cart.Payment,
             PaymentDate: cart.PaymentDate,
             UnloadingCharge: cart.UnloadingCharge,
-            ClientId: cart.ClientId
+            ClientId: cart.ClientId,
+            ClientName: cart.ClientName
         })
     }
 
-    // const [quanTity, billingDate, rate, totalAmount, payment, paymentDate, unloadingCharges, clientid] = useState();
-
-    //const APIURL = variables.REACT_APP_API + 'carton';
     const obj = useMemo(() => ({ count }), [count]);
-    // useEffect(() => {
-    //     fetchClient();
-    //     fetchCarton();
-    // }, [])
+    useEffect(() => {
+        fetchClient();
+    }, [])
 
     useEffect((e) => {
-
         if (localStorage.getItem('token')) {
-            fetchClient();
             fetchCarton();
         }
         else {
@@ -107,6 +109,7 @@ const CartonList = (props) => {
                     setClients(result.Result);
                 }
                 else if (result.StatusCode === 401) {
+                    HandleLogout();
                     history("/login")
                 }
                 else if (result.StatusCode === 404) {
@@ -118,6 +121,7 @@ const CartonList = (props) => {
             });
     }
     const fetchCarton = async () => {
+        setIsLoaded(true);
         await fetch(variables.REACT_APP_API + 'carton',
             {
                 method: 'GET',
@@ -133,16 +137,20 @@ const CartonList = (props) => {
                 if (result.StatusCode === 200) {
                     setCartons(result.Result);
                     setCount(result.Result.length);
-                    setTotalPages(Math.ceil(result.Result.length / variables.PAGE_PAGINATION_NO));
+                    setTotalPages(Math.ceil(result.Result.length / itemsPerPage));
+                    setIsLoaded(false);
                 }
                 else if (result.StatusCode === 401) {
+                    HandleLogout();
                     history("/login")
                 }
                 else if (result.StatusCode === 404) {
                     props.showAlert("Data not found!!", "danger")
+                    setIsLoaded(false);
                 }
                 else {
                     props.showAlert("Error occurred!!", "danger")
+                    setIsLoaded(false);
                 }
             });
     }
@@ -167,6 +175,7 @@ const CartonList = (props) => {
                         props.showAlert("Successfully deleted", "info")
                     }
                     else if (result.StatusCode === 401) {
+                        HandleLogout();
                         history("/login")
                     }
                     else if (result.StatusCode === 404) {
@@ -201,10 +210,15 @@ const CartonList = (props) => {
     const preDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages
 
-    const itemsPerPage = variables.PAGE_PAGINATION_NO;
+    // const itemsPerPage = variables.PAGE_PAGINATION_NO;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const itemsToDiaplay = cartons.slice(startIndex, endIndex);
+
+    const selectPaginationChange = (e) => {
+        setItemsPerPage(e.target.value);
+        addCount(count);
+    }
 
     let addModalClose = () => {
         setAddModalShow(false);
@@ -246,6 +260,13 @@ const CartonList = (props) => {
                         addCount(count);
                         setAddModalShow(false);
                         props.showAlert("Successfully added", "info")
+                    }
+                    else if (result.StatusCode === 401) {
+                        HandleLogout();
+                        history("/login")
+                    }
+                    else if (result.StatusCode === 404) {
+                        props.showAlert("Data not found!!", "danger")
                     }
                     else {
                         props.showAlert("Error occurred!!", "danger")
@@ -295,6 +316,13 @@ const CartonList = (props) => {
                         setAddModalShow(false);
                         props.showAlert("Successfully added", "info")
                     }
+                    else if (result.StatusCode === 401) {
+                        HandleLogout();
+                        history("/login")
+                    }
+                    else if (result.StatusCode === 404) {
+                        props.showAlert("Data not found!!", "danger")
+                    }
                     else {
                         props.showAlert("Error occurred!!", "danger")
                     }
@@ -317,8 +345,7 @@ const CartonList = (props) => {
     const quantityChange = (e) => {
         setCartonsData({ ...cartonsdata, Quantity: e.target.value, TotalAmount: (e.target.value * cartonsdata.Rate) });
     }
-    //TotalCost: e.target.value * eggsaledata.EggRate, FinalCost: (e.target.value * eggsaledata.EggRate) - eggsaledata.Discount
-    //TotalCost: e.target.value * eggsaledata.Quantity, FinalCost: (e.target.value * eggsaledata.Quantity) - eggsaledata.Discount
+
     const cartonsRateChange = (e) => {
         setCartonsData({ ...cartonsdata, Rate: e.target.value, TotalAmount: (e.target.value * cartonsdata.Quantity) });
     }
@@ -335,23 +362,53 @@ const CartonList = (props) => {
         setCartonsData({ ...cartonsdata, PaymentDate: e.target.value });
     }
 
+    const onDownloadExcel = () => {
+        const _list = cartons.map((p) => {
+            return ({
+                Date: moment(p.BillingDate).format('DD-MMM-YYYY'),
+                ClientName: p.ClientName,
+                Quantity: p.Quantity,
+                Rate: p.UnitPrice.toFixed(2),
+                TotalAmount: p.TotalAmount.toFixed(2),
+                Payment: p.Payment.toFixed(2),
+                UnloadingCharge: p.UnloadingCharge.toFixed(2),
+                PaymentDate: moment(p.PaymentDate).format('DD-MMM-YYYY')
+            });
+        });
 
-
-
+        downloadExcel(_list, "CartonList");
+    }
 
     return (
 
         <>
-
+            {isloaded && <Loading />}
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
                 <h2>Welcome to Carton List Page</h2>
             </div>
-            <div className="row">
+            {/* <div className="row">
                 <div className="col" style={{ textAlign: 'right' }}>
                     <Button className="mr-2" variant="primary"
                         style={{ marginRight: "17.5px" }}
                         onClick={() => clickAddCarton()}>Add</Button>
                 </div>
+            </div> */}
+
+            <div class="row">
+                <div class="col-md-9">  <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2' }} title='Download Egg Sale List' onClick={() => onDownloadExcel()} ></i></div>
+                <div class="col-md-3"> <div class="row"><div class="col-md-6" style={{ textAlign: 'right' }}> <Button className="mr-2" variant="primary"
+                    style={{ marginRight: "17.5px" }}
+                    onClick={() => clickAddCarton()}>Add</Button></div>
+
+                    <div class="col-md-6">
+                        <select className="form-select" aria-label="Default select example" style={{ width: "80px" }} onChange={selectPaginationChange}>
+                            <option selected value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                        </select></div></div></div>
             </div>
 
             {<Table className="mt-4" striped bordered hover size="sm">
@@ -371,11 +428,12 @@ const CartonList = (props) => {
                 <tbody>
                     {
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((carton) => {
+
                             const filterByClientId = clients.filter((c) => c.Id === carton.ClientId);
                             const filterByClientName = filterByClientId.length > 0 ? filterByClientId[0].ClientName : "";
-
+                            carton.ClientName = filterByClientName;
                             return (
-                                <tr key={carton.Id} align='left'>
+                                isloaded && <tr key={carton.Id} align='left'>
                                     <td align='left'>{carton.Quantity}</td>
                                     <td align='left'>{Moment(carton.BillingDate).format('DD-MMM-YYYY')}</td>
                                     <td>{filterByClientName}</td>
@@ -395,11 +453,11 @@ const CartonList = (props) => {
                                     </td>
                                 </tr>
                             )
-                        }) :  <tr>
-                        <td style={{ textAlign: "center" }} colSpan={14}>
-                            No Records
-                        </td>
-                    </tr>
+                        }) : <tr>
+                            <td style={{ textAlign: "center" }} colSpan={14}>
+                                No Records
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </Table >
@@ -408,43 +466,40 @@ const CartonList = (props) => {
 
             {
                 cartons && cartons.length > variables.PAGE_PAGINATION_NO &&
-                <button
-                    onClick={handlePrevClick}
-                    disabled={preDisabled}
-                >
-                    Prev
-                </button>
-            }
+                <>
+                    <button
+                        onClick={handlePrevClick}
+                        disabled={preDisabled}
+                    >
+                        Prev
+                    </button>
+                    {
+                        Array.from({ length: totalPages }, (_, i) => {
+                            return (
+                                <button
+                                    onClick={() => handlePageChange(i + 1)}
+                                    key={i}
+                                    disabled={i + 1 === currentPage}
+                                >
+                                    {i + 1}
+                                </button>
+                            )
+                        })
+                    }
 
-            {
-                cartons && cartons.length > variables.PAGE_PAGINATION_NO &&
-                Array.from({ length: totalPages }, (_, i) => {
-                    return (
-                        <button
-                            onClick={() => handlePageChange(i + 1)}
-                            key={i}
-                            disabled={i + 1 === currentPage}
-                        >
-                            {i + 1}
-                        </button>
-                    )
-                })
-            }
-
-            {
-                cartons && cartons.length > variables.PAGE_PAGINATION_NO &&
-                <button
-                    onClick={handleNextClick}
-                    disabled={nextDisabled}
-                >
-                    Next
-                </button>
+                    <button
+                        onClick={handleNextClick}
+                        disabled={nextDisabled}
+                    >
+                        Next
+                    </button>
+                </>
             }
 
             <div className="ContainerOverride">
 
                 <Modal
-                show={addModalShow}
+                    show={addModalShow}
                     {...props}
                     size="lg"
                     aria-labelledby="contained-modal-title-vcenter"
@@ -524,7 +579,7 @@ const CartonList = (props) => {
 
                                         <InputField controlId="TotalAmount" label="Total amount"
                                             type="number"
-                                            value={cartonsdata.TotalAmount!=="" ?cartonsdata.TotalAmount.toFixed(2):cartonsdata.TotalAmount}
+                                            value={cartonsdata.TotalAmount !== "" ? cartonsdata.TotalAmount.toFixed(2) : cartonsdata.TotalAmount}
                                             name="TotalAmount"
                                             placeholder="Total amount"
                                             errormessage="Please provide total amount"

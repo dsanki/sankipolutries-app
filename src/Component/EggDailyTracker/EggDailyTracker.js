@@ -533,7 +533,11 @@ function EggDailyTracker(props) {
             return ({
                 Date: moment(p.Date).format('DD-MMM-YYYY'),
                 ShedName: shedname, LotName: p.LotName, Birds: p.TotalBirds, Eggs: p.TotalEggs, BrokenEggs: p.BrokenEggs,
-                OKEggs: p.OkEggs, FeedIntech: p.FeedIntech, Age: AgeDays / AgeWeeks, ProductionPercentage: p.ProductionPercentage
+                OKEggs: p.OkEggs, 
+                EggBig:p.EggBig,
+                EggMcp:p.EggMcp, EggCp:p.EggCp,EggLcp:p.EggLcp,
+                FeedIntech: p.FeedIntech, Age: AgeDays / AgeWeeks, ProductionPercentage: p.ProductionPercentage, 
+               
             });
         });
 
@@ -599,11 +603,12 @@ function EggDailyTracker(props) {
                         <tr align='center' className="tr-custom">
                             <th>Date</th>
                             <th>Shed</th>
-                            <th>Lot </th>
+                            {/* <th>Lot </th> */}
                             <th>Birds</th>
                             <th>Eggs</th>
                             <th>Eggs B</th>
                             <th>Eggs OK</th>
+                            <th>Big/Cp/Mcp/Scp </th>
                             <th>FIntech</th>
                             <th>%</th>
                             <th>Options</th>
@@ -621,11 +626,12 @@ function EggDailyTracker(props) {
                                     !isloaded && <tr key={egg.id} align='center'>
                                         <td align='center'>{moment(egg.Date).format('DD-MMM-YYYY')}</td>
                                         <td>{shedname}</td>
-                                        <td>{egg.LotName}</td>
+                                        {/* <td>{egg.LotName}</td> */}
                                         <td>{egg.TotalBirds}</td>
                                         <td>{egg.TotalEggs}</td>
                                         <td>{egg.BrokenEggs}</td>
                                         <td>{egg.OkEggs}</td>
+                                        <td>{egg.EggBig}/{egg.EggCp}/{egg.EggMcp}/{egg.EggLcp}</td>
                                         <td>{egg.FeedIntech}</td>
                                         <td>{egg.ProductionPercentage}</td>
                                         <td align='center'>
@@ -859,12 +865,12 @@ function EggDailyTracker(props) {
                                         />
 
                                         <InputField controlId="EggLcp"
-                                            label="Lcp eggs"
+                                            label="Scp eggs"
                                             type="text"
                                             value={eggdata.EggLcp}
                                             name="EggLcp"
-                                            placeholder="Lcp eggs"
-                                            errormessage="Please provide Lcp eggs"
+                                            placeholder="Scp eggs"
+                                            errormessage="Please provide Scp eggs"
                                             required={false}
                                             disabled={false}
                                             onChange={onEggLcpChange}

@@ -628,7 +628,11 @@ function EggSaleModule(props) {
 
 
             <div class="row">
-                <div class="col-md-12" style={{ textAlign: 'right' }}> <Button className="mr-2" variant="primary"
+            <div class="col-md-6" style={{ textAlign: 'left' }}>
+                <h5 className="card-title">Customer Name: {customerdetails.FirstName + " " + customerdetails.LastName}</h5>
+                </div>
+
+                <div class="col-md-6" style={{ textAlign: 'right' }}> <Button className="mr-2" variant="primary"
                     style={{ marginRight: "17.5px" }}
                     onClick={() => clickAddEggSale()}>Add Item</Button></div>
 

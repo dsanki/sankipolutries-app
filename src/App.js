@@ -30,7 +30,7 @@ import ReactDOM from 'react-dom';
 import Invoice from './Component/Invoice/Invoice';
 import InvoiceData from './data/InvoiceData'
 import EggSaleInvoice from './Component/EggSale/EggSaleInvoice'
-
+import Stock from './Component/Stock/Stock';
 function App() {
 
 
@@ -104,7 +104,7 @@ function App() {
             <Route path="/eggsale/:uid" element={<EggSale showAlert={showAlert} />} />
             <Route path="/eggsalemodule/:uid/:invid" element={<EggSaleModule showAlert={showAlert} />} />
             <Route path="/eggsalemodule/:uid" element={<EggSaleModule showAlert={showAlert} />} />
-            
+            <Route path="/stock" element={<Stock showAlert={showAlert} />} />
           </Routes>
         </div>
 

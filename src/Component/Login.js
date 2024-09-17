@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { variables } from '../Variables';
 import { Modal, Button, Row, Col, Form } from 'react-bootstrap';
+import { cookie } from 'react-cookie'
 //import LoginContext from "../Context/LoginContext";
 
 function Login(props) {
@@ -38,7 +39,7 @@ function Login(props) {
                 localStorage.setItem('token', data.Token);
                 localStorage.setItem('username', data.UserName);
                 localStorage.setItem('isadmin', data.IsAdmin);
-    
+                //cookie.setCookie('UserProfile', JSON.stringify(userProfile), expireAt, getBaseURL());
     
                 history("/");
     

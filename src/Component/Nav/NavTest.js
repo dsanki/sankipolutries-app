@@ -131,6 +131,10 @@ function NavTest() {
                                             <a className={`nav-link ${location.pathname === "/medicine" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/medicine">Medicine
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
+                                        <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/stock" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/stock">Stock
+                                                <span className="sr-only">(current)</span></a>
+                                        </li>
                                     </ul>
                                 </li>
 
