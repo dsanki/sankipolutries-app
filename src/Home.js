@@ -1,6 +1,6 @@
 import React,{Component, useState} from 'react'
 import AliceCarousel from "react-alice-carousel";
-import img1 from './image/11.jpg';
+import img1 from './image/kp1.png';
 import img2 from './image/2.jpg';
 import img3 from './image/3.jpg';
 import img4 from './image/4.mp4';
@@ -22,7 +22,7 @@ import "react-alice-carousel/lib/alice-carousel.css";
 
 const items = [
   <div className="item">
-    <img src={img1} className="media"/>
+    <img src={img1} className="media" width="100%"/>
   </div>,
    <div className="item">
     <img src={img2} className="media" />

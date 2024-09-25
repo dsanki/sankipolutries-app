@@ -47,7 +47,8 @@ function EggDailyTracker(props) {
         EggBig:"",
         EggCp:"",
         EggMcp:"",
-        EggLcp:""
+        EggScp:"",
+        BirdWeight:""
     };
 
     const [eggdata, setEggData] = useState(initialvalues);
@@ -72,7 +73,8 @@ function EggDailyTracker(props) {
             EggBig:"",
             EggCp:"",
             EggMcp:"",
-            EggLcp:""
+            EggScp:"",
+            BirdWeight:""
         })
     }
 
@@ -96,7 +98,8 @@ function EggDailyTracker(props) {
             EggBig:egg.EggBig,
             EggCp:egg.EggCp,
             EggMcp:egg.EggMcp,
-            EggLcp:egg.EggLcp
+            EggScp:egg.EggScp,
+            BirdWeight:egg.BirdWeight
         })
     }
 
@@ -135,7 +138,7 @@ function EggDailyTracker(props) {
         const re = /^[0-9\b]+$/;
         let _total = e.target.value;
         if (_total === '' || re.test(_total)) {
-            setEggData({ ...eggdata, EggLcp: e.target.value});
+            setEggData({ ...eggdata, EggScp: e.target.value});
         }
     }
 
@@ -169,6 +172,14 @@ function EggDailyTracker(props) {
         const re = /^\d*\.?\d{0,2}$/
         if (e.target.value  === '' || re.test(e.target.value )) {
         setEggData({ ...eggdata, FeedIntech: e.target.value });
+        }
+    }
+
+
+    const onBirdWeightChange = (e) => {
+        const re = /^\d*\.?\d{0,2}$/
+        if (e.target.value  === '' || re.test(e.target.value )) {
+        setEggData({ ...eggdata, BirdWeight: e.target.value });
         }
     }
 
@@ -394,7 +405,8 @@ function EggDailyTracker(props) {
                     EggBig:eggdata.EggBig,
                     EggCp:eggdata.EggCp,
                     EggMcp:eggdata.EggMcp,
-                    EggLcp:eggdata.EggLcp
+                    EggScp:eggdata.EggScp,
+                    BirdWeight:eggdata.BirdWeight
 
                 })
             }).then(res => res.json())
@@ -455,7 +467,8 @@ function EggDailyTracker(props) {
                     EggBig:eggdata.EggBig,
                     EggCp:eggdata.EggCp,
                     EggMcp:eggdata.EggMcp,
-                    EggLcp:eggdata.EggLcp
+                    EggScp:eggdata.EggScp,
+                    BirdWeight:eggdata.BirdWeight
                 })
             }).then(res => res.json())
                 .then((result) => {
@@ -535,7 +548,7 @@ function EggDailyTracker(props) {
                 ShedName: shedname, LotName: p.LotName, Birds: p.TotalBirds, Eggs: p.TotalEggs, BrokenEggs: p.BrokenEggs,
                 OKEggs: p.OkEggs, 
                 EggBig:p.EggBig,
-                EggMcp:p.EggMcp, EggCp:p.EggCp,EggLcp:p.EggLcp,
+                EggMcp:p.EggMcp, EggCp:p.EggCp,EggScp:p.EggScp,
                 FeedIntech: p.FeedIntech, Age: AgeDays / AgeWeeks, ProductionPercentage: p.ProductionPercentage, 
                
             });
@@ -603,14 +616,14 @@ function EggDailyTracker(props) {
                         <tr align='center' className="tr-custom">
                             <th>Date</th>
                             <th>Shed</th>
-                            {/* <th>Lot </th> */}
                             <th>Birds</th>
                             <th>Eggs</th>
-                            <th>Eggs B</th>
-                            <th>Eggs OK</th>
+                            <th>Broken</th>
+                            <th>OK</th>
                             <th>Big/Cp/Mcp/Scp </th>
                             <th>FIntech</th>
                             <th>%</th>
+                            <th>Wt</th>
                             <th>Options</th>
                         </tr>
                     </thead>
@@ -626,14 +639,15 @@ function EggDailyTracker(props) {
                                     !isloaded && <tr key={egg.id} align='center'>
                                         <td align='center'>{moment(egg.Date).format('DD-MMM-YYYY')}</td>
                                         <td>{shedname}</td>
-                                        {/* <td>{egg.LotName}</td> */}
                                         <td>{egg.TotalBirds}</td>
                                         <td>{egg.TotalEggs}</td>
                                         <td>{egg.BrokenEggs}</td>
                                         <td>{egg.OkEggs}</td>
-                                        <td>{egg.EggBig}/{egg.EggCp}/{egg.EggMcp}/{egg.EggLcp}</td>
+
+                                        <td>{egg.EggBig}/{egg.EggCp}/{egg.EggMcp??0}/{egg.EggScp??0}</td>
                                         <td>{egg.FeedIntech}</td>
                                         <td>{egg.ProductionPercentage}</td>
+                                        <td>{egg.BirdWeight}</td>
                                         <td align='center'>
                                             {
                                                 <ButtonToolbar>
@@ -864,11 +878,11 @@ function EggDailyTracker(props) {
                                             onChange={onEggMcpChange}
                                         />
 
-                                        <InputField controlId="EggLcp"
+                                        <InputField controlId="EggScp"
                                             label="Scp eggs"
                                             type="text"
-                                            value={eggdata.EggLcp}
-                                            name="EggLcp"
+                                            value={eggdata.EggScp}
+                                            name="EggScp"
                                             placeholder="Scp eggs"
                                             errormessage="Please provide Scp eggs"
                                             required={false}
@@ -888,6 +902,18 @@ function EggDailyTracker(props) {
                                             required={true}
                                             disabled={false}
                                             onChange={onFeedIntechChange}
+                                        />
+
+                                    <InputField controlId="BirdWeight"
+                                            label="Bird weight"
+                                            type="text"
+                                            value={eggdata.BirdWeight}
+                                            name="BirdWeight"
+                                            placeholder="Bird weight"
+                                            errormessage="Please enter bird weight"
+                                            required={false}
+                                            disabled={false}
+                                            onChange={onBirdWeightChange}
                                         />
                                     </Row>
 

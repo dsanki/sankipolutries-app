@@ -14,9 +14,6 @@ function ShedLotMap(props) {
     const [count, setCount] = useState(0);
     const obj = useMemo(() => ({ count }), [count]);
 
-
-
-
     const initialvalues = {
         modaltitle: "",
         Id:0,

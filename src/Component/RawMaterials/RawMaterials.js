@@ -43,7 +43,9 @@ function RawMaterials(props) {
         Paid: "",
         Due: "",
         PaymentDate: "",
-        Comments: ""
+        Comments: "",
+        InvoiceDate:"",
+        InvoiceNo:""
 
     };
 
@@ -65,7 +67,9 @@ function RawMaterials(props) {
             Paid: "",
             Due: "",
             PaymentDate: "",
-            Comments: ""
+            Comments: "",
+            InvoiceDate:"",
+            InvoiceNo:""
         })
     }
 
@@ -85,8 +89,14 @@ function RawMaterials(props) {
             Paid: md.Paid,
             Due: md.Due,
             PaymentDate: md.PaymentDate,
-            Comments: md.Comments
+            Comments: md.Comments,
+            InvoiceDate:md.InvoiceDate,
+            InvoiceNo:md.InvoiceNo
         })
+    }
+
+    const invoiceDateChange = (e) => {
+        setMaterialsData({ ...materialsdata, InvoiceDate: e.target.value });
     }
 
     const billingDateChange = (e) => {
@@ -103,6 +113,10 @@ function RawMaterials(props) {
 
     const brokerChange = (e) => {
         setMaterialsData({ ...materialsdata, Broker: e.target.value });
+    }
+
+    const invoiceNoChange = (e) => {
+        setMaterialsData({ ...materialsdata, InvoiceNo: e.target.value });
     }
 
     const quantityChange = (e) => {
@@ -304,12 +318,15 @@ function RawMaterials(props) {
                     Paid: materialsdata.Paid,
                     Due: materialsdata.Due,
                     PaymentDate: materialsdata.PaymentDate,
-                    Comments: materialsdata.Comments
+                    Comments: materialsdata.Comments,
+                    InvoiceDate:materialsdata.InvoiceDate,
+                    InvoiceNo:materialsdata.InvoiceNo
 
                 })
             }).then(res => res.json())
                 .then((result) => {
                     if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
+
                         addCount(count);
                         setAddModalShow(false);
 
@@ -366,7 +383,9 @@ function RawMaterials(props) {
                     Paid: materialsdata.Paid,
                     Due: materialsdata.Due,
                     PaymentDate: materialsdata.PaymentDate,
-                    Comments: materialsdata.Comments
+                    Comments: materialsdata.Comments,
+                    InvoiceDate:materialsdata.InvoiceDate,
+                    InvoiceNo:materialsdata.InvoiceNo
 
                 })
             }).then(res => res.json())
@@ -576,19 +595,35 @@ function RawMaterials(props) {
                             <Col sm={12}>
                                 <div>
                                     <Form noValidate validated={validated} className="needs-validation">
+                                    <Row className="mb-12">
+                                            <Form.Group as={Col} controlId="InvoiceDate">
+                                                <Form.Label>Invoice Date</Form.Label>
+                                                <DateComponent date={null} onChange={invoiceDateChange} isRequired={true} 
+                                                value={materialsdata.InvoiceDate} />
+                                                <Form.Control.Feedback type="invalid">
+                                                    Please add invoice date
+                                                </Form.Control.Feedback>
+                                            </Form.Group>
+                                            <InputField controlId="InvoiceNo" label="Invoice no"
+                                                type="text"
+                                                value={materialsdata.InvoiceNo}
+                                                name="InvoiceNo"
+                                                placeholder="Invoice no"
+                                                errormessage="Please enter Invoice no"
+                                                onChange={invoiceNoChange}
+                                                required={true}
+                                                disabled={false}
+                                            />
+                                    </Row>
                                         <Row className="mb-12">
 
                                             <Form.Group as={Col} controlId="Date">
                                                 <Form.Label>Date</Form.Label>
-                                                <DateComponent date={null} onChange={billingDateChange} isRequired={true} value={materialsdata.BillingDate} />
+                                                <DateComponent date={null} onChange={billingDateChange} isRequired={true} 
+                                                value={materialsdata.BillingDate} />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please select date
                                                 </Form.Control.Feedback>
-                                                {/* <Form.Control
-                                                    type="date"
-                                                    value={materialsdata.BillingDate ? dateForPicker(materialsdata.BillingDate) : ''}
-                                                    onChange={billingDateChange}
-                                                /> */}
                                             </Form.Group>
                                         </Row>
                                         <Row className="mb-12">

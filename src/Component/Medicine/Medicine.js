@@ -52,7 +52,9 @@ function Medicine(props) {
     PaymentDate: "",
     ChequeRefNo: "",
     Comments: "",
-    GST: ""
+    GST: "",
+    InvoiceNo:"",
+    InvoiceDate:""
 
   };
 
@@ -76,7 +78,9 @@ function Medicine(props) {
       PaymentDate: "",
       ChequeRefNo: "",
       Comments: "",
-      GST: ""
+      GST: "",
+      InvoiceNo:"",
+      InvoiceDate:""
     })
   }
 
@@ -98,7 +102,9 @@ function Medicine(props) {
       PaymentDate: md.PaymentDate,
       ChequeRefNo: md.ChequeRefNo,
       Comments: md.Comments,
-      GST: md.GST
+      GST: md.GST,
+      InvoiceNo:md.InvoiceNo,
+      InvoiceDate:md.InvoiceDate
     })
   }
 
@@ -169,6 +175,14 @@ function Medicine(props) {
 
   const commentsChange = (e) => {
     setMedData({ ...meddata, Comments: e.target.value });
+  }
+
+  const invoiceDateChange = (e) => {
+    setMedData({ ...meddata, InvoiceDate: e.target.value });
+  }
+
+  const invoiceNoChange = (e) => {
+    setMedData({ ...meddata, InvoiceNo: e.target.value });
   }
 
   useEffect((e) => {
@@ -335,7 +349,9 @@ function Medicine(props) {
           ClientId: meddata.ClientId,
           PaymentDate: meddata.PaymentDate,
           ChequeRefNo: meddata.ChequeRefNo,
-          Comments: meddata.Comments
+          Comments: meddata.Comments,
+          InvoiceDate:meddata.InvoiceDate,
+          InvoiceNo:meddata.InvoiceNo
 
         })
       }).then(res => res.json())
@@ -398,7 +414,9 @@ function Medicine(props) {
           ClientId: meddata.ClientId,
           PaymentDate: meddata.PaymentDate,
           ChequeRefNo: meddata.ChequeRefNo,
-          Comments: meddata.Comments
+          Comments: meddata.Comments,
+          InvoiceDate:meddata.InvoiceDate,
+          InvoiceNo:meddata.InvoiceNo
 
         })
       }).then(res => res.json())
@@ -509,7 +527,9 @@ const onDownloadExcel = () => {
           Paid: p.Paid.toFixed(2), 
           Due: p.Due.toFixed(2), 
           PaymentDate: moment(p.PaymentDate).format('DD-MMM-YYYY'),
-          Comments: p.Comments
+          Comments: p.Comments,
+          InvoiceDate:p.InvoiceDate,
+          InvoiceNo:p.InvoiceNo
       });
   });
 
@@ -667,6 +687,25 @@ const onDownloadExcel = () => {
               <Col sm={12}>
                 <div>
                   <Form noValidate validated={validated} className="needs-validation">
+                  <Row className="mb-12">
+                        <Form.Group as={Col} controlId="InvoiceDate">
+                          <Form.Label>Invoice Date</Form.Label>
+                          <DateComponent date={null} onChange={invoiceDateChange} isRequired={true} value={meddata.InvoiceDate} />
+                          <Form.Control.Feedback type="invalid">
+                            Please select invoice date
+                          </Form.Control.Feedback>
+                        </Form.Group>
+
+                        <InputField controlId="UnitPrice" label="Invoice No"
+                          type="text"
+                          value={meddata.InvoiceNo}
+                          name="InvoiceNo"
+                          placeholder="Invoice No"
+                          errormessage="Please enter Invoice No"
+                          required={true}
+                          disabled={false}
+                      />
+                    </Row>
                     <Row className="mb-12">
 
                       <Form.Group as={Col} controlId="Date">
@@ -675,11 +714,7 @@ const onDownloadExcel = () => {
                         <Form.Control.Feedback type="invalid">
                           Please select date
                         </Form.Control.Feedback>
-                        {/* <Form.Control
-                          type="date"
-                          value={meddata.Date ? dateForPicker(meddata.Date) : ''}
-                          onChange={dateChange}
-                        /> */}
+                      
                       </Form.Group>
                       <Form.Group controlId="ClientId" as={Col} >
                         <Form.Label>Supplier</Form.Label>

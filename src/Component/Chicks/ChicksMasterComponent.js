@@ -28,7 +28,8 @@ function ChicksMasterComponent(props) {
         Paid: "",
         Due: "",
         PaymentDate: "",
-        LotName: ""
+        LotName: "",
+        IsActive:""
     };
 
     const [chicksdata, setChicksData] = useState(initialvalues);
@@ -50,7 +51,8 @@ function ChicksMasterComponent(props) {
             Paid: "",
             Due: "",
             PaymentDate: "",
-            LotName: ""
+            LotName: "",
+            IsActive:true
         })
     }
 
@@ -71,7 +73,8 @@ function ChicksMasterComponent(props) {
             Paid: chicks.Paid,
             Due: chicks.Due,
             PaymentDate: chicks.PaymentDate,
-            LotName: chicks.LotName
+            LotName: chicks.LotName,
+            IsActive:chicks.IsActive
         })
     }
 
@@ -89,6 +92,10 @@ function ChicksMasterComponent(props) {
 
     const dateChange = (e) => {
         setChicksData({ ...chicksdata, Date: e.target.value });
+    }
+
+    const isActiveChange = (e) => {
+        setChicksData({ ...chicksdata, IsActive: !chicksdata.IsActive });
     }
 
     const mortalityChange = (e) => {
@@ -255,7 +262,8 @@ function ChicksMasterComponent(props) {
                     Paid: chicksdata.Paid,
                     Due: chicksdata.Due,
                     PaymentDate: chicksdata.PaymentDate,
-                    LotName: chicksdata.LotName
+                    LotName: chicksdata.LotName,
+                    IsActive:chicksdata.IsActive
                 })
             })
                 .then(res => res.json())
@@ -309,7 +317,8 @@ function ChicksMasterComponent(props) {
                     Paid: chicksdata.Paid,
                     Due: chicksdata.Due,
                     PaymentDate: chicksdata.PaymentDate,
-                    LotName: chicksdata.LotName
+                    LotName: chicksdata.LotName,
+                    IsActive:chicksdata.IsActive
 
                 })
             }).then(res => res.json())
@@ -592,13 +601,26 @@ function ChicksMasterComponent(props) {
                                         />
                                     </Row>
                                     <Form.Group><br /></Form.Group>
+                                    <Row className="mb-12">
                                     <Form.Group controlId="PaymentDate" as={Row} className="mb-3">
-                                        <Form.Label column sm={3}>PaymentDate</Form.Label>
+                                        <Form.Label column sm={3}>Payment date</Form.Label>
                                         <Col sm={4}>
                                             <DateComponent date={null} isRequired={true} onChange={paymentDateChange} value={chicksdata.PaymentDate} />
                                         </Col>
-
+                                        <Col sm={4}>
+                                        <Form.Check 
+            type="checkbox"
+            id="chkIsActive"
+            label="Is Active"
+            onChange={isActiveChange}
+            value={chicksdata.IsActive}
+            checked={chicksdata.IsActive}
+          />
+           </Col>
                                     </Form.Group>
+                                   
+                                    
+      </Row>
 
                                     <Form.Group as={Col}>
                                         {chicksdata.Id <= 0 ?
