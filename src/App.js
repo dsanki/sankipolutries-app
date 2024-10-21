@@ -22,7 +22,7 @@ import Medicine from './Component/Medicine/Medicine';
 import CollapsibleExample from './Component/Nav/CollapsibleExample';
 import RawMaterials from './Component/RawMaterials/RawMaterials'
 import BirdSale from './Component/BirdSale/BirdSale'
-import NavTest from './Component/Nav/NavTest'
+import Navigation from './Component/Nav/Navigation'
 import NavSticky from './Component/Nav/NavSticky'
 import ChicksVaccinationTracker from './Component/Vaccination/ChicksVaccinationTracker'
 import ReactDOM from 'react-dom';
@@ -52,9 +52,9 @@ function App() {
     <>
 
       <div>
-        {
+        {/* {
           console.log(InvoiceData)
-        }
+        } */}
 
       </div>
 
@@ -75,7 +75,7 @@ function App() {
 
           {/* <NavComponent /> */}
           {/* <CollapsibleExample/> */}
-          <NavTest />
+          <Navigation />
           {/* <NavSticky/> */}
 
           <Alert alert={alert} />
@@ -90,13 +90,12 @@ function App() {
             <Route path="/eggdailytracker" element={<EggDailyTracker showAlert={showAlert} />} />
             <Route path="/mortalitylist" element={<MortalityList showAlert={showAlert} />} />
             <Route path="/customerlist" element={<CustomerList showAlert={showAlert} />} />
-            {/* <Route path="/eggsale" element={<EggSale showAlert={showAlert} />} /> */}
-            {/* <Route path="/eggsale/:uid" element={<EggSale showAlert={showAlert} />} />
-            <Route path="/eggsalemodule/:uid?/:invid?" element={<EggSaleModule showAlert={showAlert} />} /> */}
-            {/* <Route path="/eggsalemodule/:invid" element={<EggSaleModule showAlert={showAlert} />} /> */}
+           
             <Route path="/medicine" element={<Medicine showAlert={showAlert} />} />
             <Route path="/rawmaterials" element={<RawMaterials showAlert={showAlert} />} />
             <Route path="/birdsale" element={<BirdSale showAlert={showAlert} />} />
+            <Route path="/birdsale/:uid" element={<BirdSale showAlert={showAlert} />} />
+            <Route path="/birdsale/?:uid" element={<BirdSale showAlert={showAlert} />} />
             <Route path="/vaccinationtracker" element={<ChicksVaccinationTracker showAlert={showAlert} />} />
             <Route path="/login" element={<LoginComponent showAlert={showAlert} />} />
             {/* <Route path="/eggsaleinvoice/:id" element={<EggSaleInvoice showAlert={showAlert} />} /> */}
@@ -105,6 +104,7 @@ function App() {
             <Route path="/eggsalemodule/:uid/:invid" element={<EggSaleModule showAlert={showAlert} />} />
             <Route path="/eggsalemodule/:uid" element={<EggSaleModule showAlert={showAlert} />} />
             <Route path="/stock" element={<Stock showAlert={showAlert} />} />
+            
           </Routes>
         </div>
 

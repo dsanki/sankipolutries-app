@@ -77,7 +77,8 @@ const styles = StyleSheet.create({
 const InvoiceEggSale = (props) => (
     <Document>
         <Page size="A4" style={styles.page}>
-            <InvoiceTitle title='Invoice' eggsaledata={props.eggsaledata} />
+            <InvoiceTitle title='Invoice' eggsaledata={props.eggsaledata} 
+             invoiceno={props.eggsaledata.InvoiceNo} date={props.eggsaledata.PurchaseDate} />
             {/* <InvoiceNo invoice={props.eggsaledata} /> */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
                 <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />

@@ -49,31 +49,20 @@ const InvoiceTableFooter = (props) => {
         <>
             <View style={styles.row}> 
                 <Text style={styles.description}>Total </Text> 
-                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.TotalCost).toFixed(2)}</Text>
+                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.birdsaledata.TotalAmount).toFixed(2)}</Text>
 
             </View>
+            
             <View style={styles.row}>
-                <Text style={styles.description}>Discount</Text>
-                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.TotalDiscount).toFixed(2)}</Text>
-
-            </View>
-            <View style={styles.row}>
-                <Text style={styles.description}>Final Total</Text>
-                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.FinalCostInvoice).toFixed(2)}</Text>
-
-            </View>
-            <View style={styles.row}>
-                
-                <Text style={styles.amountinwords}>{`Amount in words: ${props.eggsaledata.AmountInWords}`}</Text>
-
+                <Text style={styles.amountinwords}>{`Amount in words: ${props.birdsaledata.AmountInWords}`}</Text>
             </View>
             <View style={styles.row}>
                 <Text style={styles.description}>Paid</Text>
-                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.Paid).toFixed(2)}</Text>
+                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.birdsaledata.Paid).toFixed(2)}</Text>
             </View>
             <View style={styles.row}>
                 <Text style={styles.description}>Balance</Text>
-                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.Due).toFixed(2)}</Text>
+                <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.birdsaledata.Due).toFixed(2)}</Text>
 
             </View>
             

@@ -639,12 +639,28 @@ function EggDailyTracker(props) {
                                     !isloaded && <tr key={egg.id} align='center'>
                                         <td align='center'>{moment(egg.Date).format('DD-MMM-YYYY')}</td>
                                         <td>{shedname}</td>
-                                        <td>{egg.TotalBirds}</td>
-                                        <td>{egg.TotalEggs}</td>
-                                        <td>{egg.BrokenEggs}</td>
-                                        <td>{egg.OkEggs}</td>
 
-                                        <td>{egg.EggBig}/{egg.EggCp}/{egg.EggMcp??0}/{egg.EggScp??0}</td>
+                                      
+
+
+                                        <td>
+                                        {new Intl.NumberFormat('en-IN', {
+                                    }).format(parseInt(egg.TotalBirds))}
+
+                                           </td>
+                                        <td> {new Intl.NumberFormat('en-IN', {
+                                    }).format(parseInt(egg.TotalEggs))}</td>
+                                        <td>
+                                        {new Intl.NumberFormat('en-IN', {
+                                    }).format(parseInt(egg.BrokenEggs))}</td>
+                                        <td> {new Intl.NumberFormat('en-IN', {
+                                    }).format(parseInt(egg.OkEggs))}</td>
+
+                                        <td>{egg.EggBig!=null? new Intl.NumberFormat('en-IN', {
+                                    }).format(parseInt(egg.EggBig)):0}/{egg.EggCp!=null? new Intl.NumberFormat('en-IN', {
+                                    }).format(parseInt(egg.EggCp)):0}/{egg.EggMcp!=null?new Intl.NumberFormat('en-IN', {
+                                    }).format(parseInt(egg.EggMcp)):0}/{ egg.EggScp!=null ? new Intl.NumberFormat('en-IN', {
+                                    }).format(parseInt(egg.EggScp)): 0 }</td>
                                         <td>{egg.FeedIntech}</td>
                                         <td>{egg.ProductionPercentage}</td>
                                         <td>{egg.BirdWeight}</td>

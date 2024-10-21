@@ -1,5 +1,12 @@
-body{font-family: 'Montserrat' sans-serif;
+body{
+	font-family: 'Montserrat' sans-serif;
 }
+
+body{
+	font-family: var(--bs-body-font-family);
+}
+
+
 
 @media only screen and (min-width:1200px){
 	.nav-item > .nav-link{padding: 5px 20px !important;

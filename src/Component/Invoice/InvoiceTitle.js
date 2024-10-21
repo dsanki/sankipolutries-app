@@ -52,8 +52,8 @@ const InvoiceTitle = (props) => (
     <Text style={styles.reportTitle}>{props.title}</Text>
     <Fragment style={styles.date}>
         <View style={styles.invoiceDateContainer}>
-          <Text style={{fontFamily: 'Helvetica-Bold'}}>{`Invoice No: ${props.eggsaledata.InvoiceNo}`}</Text><br/>
-          <Text style={{fontFamily: 'Helvetica-Bold'}}>{`Date: ${moment(props.eggsaledata.PurchaseDate).format('DD/MM/YYYY')}`}</Text>
+          <Text style={{fontFamily: 'Helvetica-Bold'}}>{`Invoice No: ${props.invoiceno}`}</Text><br/>
+          <Text style={{fontFamily: 'Helvetica-Bold'}}>{`Date: ${moment(props.date).format('DD/MM/YYYY')}`}</Text>
         </View >
        
     </Fragment>

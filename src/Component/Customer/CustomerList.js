@@ -409,8 +409,15 @@ function CustomerList(props) {
                             return (
                                 <tr align='center' key={p.ID}>
                                     <td align='left'>
-                                        <a href={`/eggsale/${p.ID}`}>{p.FirstName}
+                                        {
+                                            p.CustomerTypeId===4 ?  
+                                            <a href={`/birdsale/?uid=${p.ID}`}>{p.FirstName}
                                             <span className="sr-only">(current)</span></a>
+                                            : <a href={`/eggsale/${p.ID}`}>{p.FirstName}
+                                            <span className="sr-only">(current)</span></a>
+                                        }
+                                        {/* <a href={`/eggsale/${p.ID}`}>{p.FirstName}
+                                            <span className="sr-only">(current)</span></a> */}
 
                                     </td>
                                     <td align='left'>{p.MiddleName}</td>

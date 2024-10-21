@@ -165,8 +165,8 @@ export const downloadExcel = (data, name) => {
   }
 };
 
-export const FetchBirdSaleList = async () => {
-  const response =await fetch(variables.REACT_APP_API + 'BirdSale/GetBirdSale',
+export const FetchBirdSaleList = async (uid,id) => {
+  const response =await fetch(variables.REACT_APP_API + 'BirdSale/GetBirdSale?uid='+uid,
     {
       method: 'GET',
       headers: {

@@ -1,16 +1,28 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, Fragment } from 'react'
 import { variables } from '../../Variables';
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom'
+import { useNavigate,useParams, useLocation } from 'react-router-dom'
 import moment from 'moment';
 import DateComponent from '../DateComponent';
 import InputField from '../ReuseableComponent/InputField'
-import { FetchUnit, FetchShedsList, FetchLots, FetchLotById, FetchShedLotMapList, FetchBirdSaleList, dateyyyymmdd, downloadExcel, HandleLogout, NumberInputKeyDown } from '../../Utility'
+import { FetchUnit, FetchShedsList, FetchLots, FetchLotById, FetchShedLotMapList, FetchBirdSaleList, 
+    dateyyyymmdd, downloadExcel, HandleLogout, NumberInputKeyDown,FetchCompanyDetails,
+    AmountInWords,ReplaceNonNumeric,Commarize } from '../../Utility'
+    
 import Loading from '../Loading/Loading'
+
+import { PDFViewer } from '@react-pdf/renderer';
+import InvoiceBirdSale from './InvoiceBirdSale';
+
+
+
 function BirdSale(props) {
 
     let history = useNavigate();
-
+    //const { uid } = useParams();
+    const search = useLocation().search;
+    //const uid = new URLSearchParams(search).get('uid');
+    const [uid, setUid] = useState(new URLSearchParams(search).get('uid'));
     const [shedlist, setShedList] = useState([]);
     const [lots, setLots] = useState([]);
     const [shedlotmaplist, SetShedLotMapList] = useState([]);
@@ -24,15 +36,15 @@ function BirdSale(props) {
     const [addModalShow, setAddModalShow] = useState(false);
     const [_lotname, setLotName] = useState();
     const [_totalbirds, setTotalBirds] = useState();
-    
-
+    const [customerdetails, setCustomerDetails] = useState([]);
+    const [custname, setCustomerName] = useState([]);
     const [birdSaleListFilter, setBirdSaleListFilter] = useState([]);
     const [filterFromDate, setFilterFromDate] = useState("");
     const [filterToDate, setFilterToDate] = useState("");
     const [filterShed, setFilterShed] = useState();
     const [isloaded, setIsLoaded] = useState(true);
-
-
+    const [companydetails, setCompanyDetails] = useState([]);
+    const [invoiceModalShow, setInvoiceModalShow] = useState(false);
 
     let addModalClose = () => {
         setAddModalShow(false);
@@ -45,7 +57,7 @@ function BirdSale(props) {
         LotId: "",
         ShedId: "",
         Date: "",
-        CustomerName: "",
+        CustomerId: uid,
         BirdCount: "",
         TotalWeight: "",
         UnitId: "",
@@ -56,15 +68,15 @@ function BirdSale(props) {
         PaymentDate: "",
         Comments: "",
         LotName: "",
-        TotalBirdSale: ""
-
+        TotalBirdSale: "",
+        CustomerName:""
     };
 
     const downloadfields = [{
         Date: "",
         LotName: "",
         ShedName: "",
-        CustomerName: "",
+        CustomerId: uid,
         BirdCount: "",
         TotalBirdSale: "",
         TotalWeight: "",
@@ -74,7 +86,8 @@ function BirdSale(props) {
         Paid: "",
         Due: "",
         PaymentDate: "",
-        Comments: ""
+        Comments: "",
+        CustomerName:""
     }];
 
     const [birdsaledata, setBirdSaleData] = useState(initialvalues);
@@ -87,7 +100,7 @@ function BirdSale(props) {
             LotId: "",
             ShedId: "",
             Date: "",
-            CustomerName: "",
+            CustomerId: uid,
             BirdCount: "",
             TotalWeight: "",
             UnitId: "",
@@ -98,7 +111,8 @@ function BirdSale(props) {
             PaymentDate: "",
             Comments: "",
             LotName: "",
-            TotalBirdSale: ""
+            TotalBirdSale: "",
+            InvoiceNo:""
         })
     }
 
@@ -110,7 +124,7 @@ function BirdSale(props) {
             LotId: md.LotId,
             ShedId: md.ShedId,
             Date: md.Date,
-            CustomerName: md.CustomerName,
+            CustomerId: md.CustomerId,
             BirdCount: md.BirdCount,
             TotalWeight: md.TotalWeight,
             UnitId: md.UnitId,
@@ -121,7 +135,9 @@ function BirdSale(props) {
             PaymentDate: md.PaymentDate,
             Comments: md.Comments,
             LotName: md.LotName,
-            TotalBirdSale: md.TotalBirdSale
+            TotalBirdSale: md.TotalBirdSale,
+            InvoiceNo:md.InvoiceNo,
+            CustomerName:md.CustomerName
         })
     }
 
@@ -156,7 +172,7 @@ function BirdSale(props) {
     }
 
     const customerChange = (e) => {
-        setBirdSaleData({ ...birdsaledata, CustomerName: e.target.value });
+        setBirdSaleData({ ...birdsaledata, CustomerId: e.target.value });
     }
 
     const birdcountChange = (e) => {
@@ -165,7 +181,6 @@ function BirdSale(props) {
         if (e.target.value === '' || re.test(e.target.value)) {
             setBirdSaleData({ ...birdsaledata, BirdCount: e.target.value });
         }
-
     }
 
     const totalWeightChange = (e) => {
@@ -202,6 +217,25 @@ function BirdSale(props) {
     }
     }
 
+    const fetchCompanyDetails = async () => {
+        FetchCompanyDetails()
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setCompanyDetails(data.Result);
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found!!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                }
+            })
+    }
+
     // const totalAmountChange = (e) => {
     //     setBirdSaleData({
     //         ...birdsaledata,
@@ -230,6 +264,9 @@ function BirdSale(props) {
             fetchSheds();
             fetchLots();
             fetchShedLotsMapList();
+            fetchCustomerDetails(uid);
+            setBirdSaleData({ ...birdsaledata, CustomerId: uid });
+            fetchCompanyDetails();
         }
         else {
             HandleLogout();
@@ -240,7 +277,7 @@ function BirdSale(props) {
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
-            _birdSaleList();
+            _birdSaleList(uid);
         }
         else {
             HandleLogout();
@@ -313,9 +350,9 @@ function BirdSale(props) {
         }
     }
 
-    const _birdSaleList = () => {
+    const _birdSaleList = (uid) => {
         setIsLoaded(true);
-        FetchBirdSaleList()
+        FetchBirdSaleList(uid,null)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setBirdSaleList(data.Result);
@@ -363,7 +400,7 @@ function BirdSale(props) {
                     LotId: birdsaledata.LotId,
                     ShedId: birdsaledata.ShedId,
                     Date: birdsaledata.Date,
-                    CustomerName: birdsaledata.CustomerName,
+                    CustomerId: birdsaledata.CustomerId,
                     BirdCount: birdsaledata.BirdCount,
                     TotalWeight: birdsaledata.TotalWeight,
                     UnitId: birdsaledata.UnitId,
@@ -404,6 +441,32 @@ function BirdSale(props) {
         setCount(num + 1);
     };
 
+
+    const clickInvoice = (birdsaledata) => {
+
+        setBirdSaleData({
+                    Id: birdsaledata.Id,
+                    LotId: birdsaledata.LotId,
+                    ShedId: birdsaledata.ShedId,
+                    Date: birdsaledata.Date,
+                    CustomerId: birdsaledata.CustomerId,
+                    BirdCount: birdsaledata.BirdCount,
+                    TotalWeight: birdsaledata.TotalWeight,
+                    UnitId: birdsaledata.UnitId,
+                    Rate: birdsaledata.Rate,
+                    TotalAmount: birdsaledata.TotalAmount,
+                    Paid: birdsaledata.Paid,
+                    Due: birdsaledata.Due,
+                    PaymentDate: birdsaledata.PaymentDate,
+                    Comments: birdsaledata.Comments,
+                    AmountInWords: AmountInWords(birdsaledata.TotalAmount),
+                    InvoiceNo:birdsaledata.InvoiceNo
+            
+        });
+
+        setInvoiceModalShow(true);
+    }
+
     const handleSubmitAdd = (e) => {
         e.preventDefault();
         var form = e.target.closest('.needs-validation');
@@ -426,7 +489,7 @@ function BirdSale(props) {
                     LotId: birdsaledata.LotId,
                     ShedId: birdsaledata.ShedId,
                     Date: birdsaledata.Date,
-                    CustomerName: birdsaledata.CustomerName,
+                    CustomerId: birdsaledata.CustomerId,
                     BirdCount: birdsaledata.BirdCount,
                     TotalWeight: birdsaledata.TotalWeight,
                     UnitId: birdsaledata.UnitId,
@@ -486,8 +549,6 @@ function BirdSale(props) {
                 });
           }
     }
-
-
 
     const onDateFilterFromChange = (e) => {
         setFilterFromDate(e.target.value);
@@ -561,6 +622,46 @@ function BirdSale(props) {
         setCurrentPage(currentPage - 1);
     }
 
+    let addInvoiceModalClose = () => {
+        setInvoiceModalShow(false);
+    };
+
+    const fetchCustomerDetails = async (custid) => {
+        fetch(variables.REACT_APP_API + 'Customer/GetCustomerById?id=' + custid,
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setCustomerDetails(data.Result);
+                    if(data.Result.MiddleName!="" && data.Result.MiddleName!=null)
+                    {
+                        setCustomerName(data.Result.FirstName + " " + 
+                            data.Result.MiddleName + " " +data.Result.LastName);
+                    }
+                    else{
+                        setCustomerName(data.Result.FirstName + " " + data.Result.LastName);
+                    }
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found!!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                }
+            });
+    }
+
 
     return (
         <div>
@@ -617,7 +718,7 @@ function BirdSale(props) {
                     <tr align='left' className="tr-custom">
                         <th>Date</th>
                         <th>Shed</th>
-                        <th>Lot</th>
+                        {/* <th>Lot</th> */}
                         <th>Customer name</th>
                         <th>Bird count</th>
                         <th>Total weight</th>
@@ -627,6 +728,7 @@ function BirdSale(props) {
                         <th>Due</th>
                         <th>Payment date</th>
                         <th>Comments</th>
+                        <th>Invoice</th>
                         <th>Options</th>
                     </tr>
                 </thead>
@@ -647,16 +749,18 @@ function BirdSale(props) {
 
                             BirdSaleListDowanloadArr.push({
                                 Date: moment(p.Date).format('DD-MMM-YYYY'),
-                                ShedName: _shedname, LotName: _lotname, CustomerName: p.CustomerName, BirdCount: p.BirdCount, TotalWeight: p.TotalWeight + " " + _uname,
+                                ShedName: _shedname, LotName: _lotname, CustomerId: p.CustomerId, BirdCount: p.BirdCount, TotalWeight: p.TotalWeight + " " + _uname,
                                 Rate: p.Rate, TotalAmount: p.TotalAmount.toFixed(2), Paid: p.Paid.toFixed(2), Due: p.Due.toFixed(2), PaymentDate: moment(p.PaymentDate).format('DD-MMM-YYYY'),
-                                Comments: p.Comments
+                                Comments: p.Comments,CustomerName:p.CustomerName
                             });
+
+
 
                             return (
                                 !isloaded && <tr align='center' key={p.Id}>
                                     <td align='left'>{moment(p.Date).format('DD-MMM-YYYY')}</td>
                                     <td align='left'>{_shedname}</td>
-                                    <td align='left'>{_lotname}</td>
+                                    {/* <td align='left'>{_lotname}</td> */}
                                     <td align='left'>{p.CustomerName}</td>
                                     <td align='left'>{p.BirdCount}</td>
                                     <td align='left'>{p.TotalWeight + " " + _uname}</td>
@@ -666,6 +770,10 @@ function BirdSale(props) {
                                     <td align='left'>{p.Due.toFixed(2)}</td>
                                     <td align='left'>{moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
                                     <td align='left'>{p.Comments}</td>
+                                    <td>
+                                        <i className="fa-sharp fa-solid fa-receipt fa-beat" title='Invoice' 
+                                        style={{ color: '#086dba', marginLeft: '15px' }} onClick={() => clickInvoice(p)}></i>
+                                    </td>
                                     <td align='center'>
                                         {
                                             <ButtonToolbar>
@@ -718,7 +826,31 @@ function BirdSale(props) {
                 </>
             }
 
+            <div className="container" id="exampleModal">
+                <Modal
+                    show={invoiceModalShow}
+                    aria-labelledby="contained-modal-title-vcenter"
+                    centered
+                    size="xl"
+                >
+                    <Modal.Header>
+                        <Modal.Title id="contained-modal-title-vcenter">
+                            {birdsaledata.modaltitle}
+                        </Modal.Title>
+                        <button type="button" className="btn-close" aria-label="Close" 
+                        onClick={addInvoiceModalClose}> </button>
+                    </Modal.Header>
 
+                    <Modal.Body>
+                        <Fragment>
+                            <PDFViewer width="900" height="900" className="app" >
+                                <InvoiceBirdSale companydetails={companydetails} 
+                                birdsaledata={birdsaledata} customerdetails={customerdetails}/>
+                            </PDFViewer>
+                        </Fragment>
+                    </Modal.Body>
+                </Modal>
+            </div>
 
             <div className="ContainerOverride" id="exampleModal">
                 <Modal
@@ -742,7 +874,8 @@ function BirdSale(props) {
                                         <Row className="mb-3">
                                             <Form.Group as={Col} controlId="Date">
                                                 <Form.Label>Date*</Form.Label>
-                                                <DateComponent date={null} onChange={dateChange} isRequired={true} value={birdsaledata.Date} />
+                                                <DateComponent date={null} onChange={dateChange} isRequired={true} 
+                                                value={birdsaledata.Date} />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please select date
                                                 </Form.Control.Feedback>
@@ -786,16 +919,20 @@ function BirdSale(props) {
                                             />
                                         </Row>
                                         <Row className="mb-12">
+                                        <input type="hidden"  value={birdsaledata.CustomerId} name="name" />
+                                          
+                                           
                                             <InputField controlId="CustomerName"
                                                 label="Customer name*"
                                                 type="text"
-                                                value={birdsaledata.CustomerName}
+                                                value={custname}
                                                 name="CustomerName"
                                                 placeholder="Customer name"
                                                 errormessage="Please provide customer name"
                                                 required={true}
-                                                disabled={false}
-                                                onChange={customerChange}
+                                                disabled={true}
+                                                // onChange={customerChange}
+                                                
                                             />
 
                                             <InputField controlId="BirdCount"

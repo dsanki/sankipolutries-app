@@ -4,7 +4,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
 
-function NavTest() {
+function Navigation() {
 
     let history = useNavigate();
     const handleLogout = () => {
@@ -37,38 +37,81 @@ function NavTest() {
                         {
                         localStorage.getItem('token') !== null &&
                             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                                <li className={`nav-item ${location.pathname === "/" ? "active" : ""}`}>
+                                {/* <li className={`nav-item ${location.pathname === "/" ? "active" : ""}`}>
                                     <a className={`nav-link ${location.pathname === "/" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/">Home
                                         <span className="sr-only">(current)</span></a>
-                                </li>
-
+                                </li> */}
                                 <li className="nav-item dropdown">
-                                    <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={{ fontSize: '20px' }}>
-                                        Birds Module
+                                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" 
+                                    aria-expanded="false" style={{ fontSize: '20px' }}>
+                                        Purchase
                                     </a>
                                     <ul className="dropdown-menu">
                                         
                                         <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/chicksmaster" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/chicksmaster">Chicks Master
+                                            <a className={`nav-link ${location.pathname === "/chicksmaster" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/chicksmaster">Chicks
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
-                                       
+
                                         <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/mortalitylist" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/mortalitylist">Mortality Tracker
+                                            <a className={`nav-link ${location.pathname === "/carton" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/carton">Carton
+                                                <span className="sr-only">(current)</span></a>
+                                        </li>
+
+                                        <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/medicine" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/medicine">Medicine
+                                                <span className="sr-only">(current)</span></a>
+                                        </li>
+                                        <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/rawmaterials" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/rawmaterials">Raw materials
+                                                <span className="sr-only">(current)</span></a>
+                                        </li>
+                                        </ul>
+                                </li>
+
+                                <li className="nav-item dropdown">
+                                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={{ fontSize: '20px' }}>
+                                        Sales
+                                    </a>
+                                    <ul className="dropdown-menu">
+                                    <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/customerlist" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/customerlist">Egg Sales
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
                                         <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/birdsale" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/birdsale">Bird sale
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
+                                        </ul>
+                                        </li>
+
+                                <li className="nav-item dropdown">
+                                    <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={{ fontSize: '20px' }}>
+                                        Trackers
+                                    </a>
+                                    <ul className="dropdown-menu">
+                                    <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/eggdailytracker" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/eggdailytracker">Egg Daily Tracker
+                                                <span className="sr-only">(current)</span></a>
+                                        </li>
+                                        {/* <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/chicksmaster" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/chicksmaster">Chicks Master
+                                                <span className="sr-only">(current)</span></a>
+                                        </li> */}
+                                       
+                                        <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/mortalitylist" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/mortalitylist">Mortality Tracker
+                                                <span className="sr-only">(current)</span></a>
+                                        </li>
+                                       
                                         <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/vaccinationtracker" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/vaccinationtracker">Vaccination Tracker
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
-                                        <li className="nav-item">
+                                        {/* <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/eggsaleinvoice" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/eggsaleinvoice">Vaccination Tracker
                                                 <span className="sr-only">(current)</span></a>
-                                        </li>
+                                        </li> */}
 
                                         
 
@@ -76,15 +119,12 @@ function NavTest() {
                                     </ul>
                                 </li>
 
-                                <li className="nav-item dropdown">
+                                {/* <li className="nav-item dropdown">
                                     <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={{ fontSize: '20px' }}>
                                         Egg Module
                                     </a>
                                     <ul className="dropdown-menu">
-                                        <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/eggdailytracker" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/eggdailytracker">Egg Daily Tracker
-                                                <span className="sr-only">(current)</span></a>
-                                        </li>
+                                      
                                        
                                         <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/eggsale" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/eggsale">Egg sale
@@ -92,7 +132,7 @@ function NavTest() {
                                         </li>
                                        
                                     </ul>
-                                </li>
+                                </li> */}
 
 
                                 <li className="nav-item dropdown">
@@ -100,10 +140,7 @@ function NavTest() {
                                         Others Modules
                                     </a>
                                     <ul className="dropdown-menu">
-                                        <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/rawmaterials" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/rawmaterials">Raw materials
-                                                <span className="sr-only">(current)</span></a>
-                                        </li>
+                                       
                                         <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/clientlist" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/clientlist">Client Master
                                                 <span className="sr-only">(current)</span></a>
@@ -113,12 +150,12 @@ function NavTest() {
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
 
+                                       
+                                        <li><hr className="dropdown-divider" /></li>
                                         <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/carton" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/carton">Carton Master
+                                            <a className={`nav-link ${location.pathname === "/stock" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/stock">Stock
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
-                                        <li><hr className="dropdown-divider" /></li>
-                                       
 
                                         <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/customerlist" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/customerlist">Customers
@@ -127,14 +164,7 @@ function NavTest() {
 
 
 
-                                        <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/medicine" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/medicine">Medicine
-                                                <span className="sr-only">(current)</span></a>
-                                        </li>
-                                        <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/stock" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/stock">Stock
-                                                <span className="sr-only">(current)</span></a>
-                                        </li>
+                                        
                                     </ul>
                                 </li>
 
@@ -169,4 +199,4 @@ function NavTest() {
     )
 }
 
-export default NavTest
+export default Navigation
