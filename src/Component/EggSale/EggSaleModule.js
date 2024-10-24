@@ -8,7 +8,8 @@ import InputField from '../ReuseableComponent/InputField'
 import DateComponent from '../DateComponent';
 import {
     dateyyyymmdd, HandleLogout, downloadExcel,
-    FetchCompanyDetails, AmountInWords, ReplaceNonNumeric, Commarize, FecthEggCategory, FecthEggSaleInvoiceList, FecthEggSaleInvoiceById
+    FetchCompanyDetails, AmountInWords, ReplaceNonNumeric, Commarize, 
+    FecthEggCategory, FecthEggSaleInvoiceList, FecthEggSaleInvoiceById
 } from './../../Utility'
 import Loading from '../Loading/Loading'
 
@@ -53,7 +54,8 @@ function EggSaleModule(props) {
         Comments: "",
         EggSaleInvoiceId: 0,
         EggCategory: "",
-        tempid: 0
+        tempid: 0,
+        VehicleNo:""
 
     };
 
@@ -69,7 +71,8 @@ function EggSaleModule(props) {
         FinalCostInvoice: "",
         Paid: "",
         Due: "",
-        EggSale: [initialeggsalevalues]
+        EggSale: [initialeggsalevalues],
+        VehicleNo:""
 
     };
 
@@ -99,7 +102,8 @@ function EggSaleModule(props) {
             FinalCostInvoice: eggsaleinvdata.FinalCostInvoice,
             Paid: eggsaleinvdata.Paid,
             Due: eggsaleinvdata.Due,
-            EggSale: []
+            EggSale: [],
+            VehicleNo:eggsaleinvdata.VehicleNo
 
         })
     }
@@ -122,7 +126,8 @@ function EggSaleModule(props) {
             EggCategory: eggsale.EggCategory,
             TotalDiscount: eggsale.TotalDiscount,
             EggSaleInvoiceId: eggsale.EggSaleInvoiceId,
-            tempid: eggsale.tempid
+            tempid: eggsale.tempid,
+            VehicleNo:eggsale.VehicleNo
         })
     }
 
@@ -142,6 +147,10 @@ function EggSaleModule(props) {
     }
     const purchaseDateChange = (e) => {
         setEggSaleInvoiceData({ ...eggsaleinvdata, PurchaseDate: e.target.value });
+    }
+
+    const vehicleNoChange = (e) => {
+        setEggSaleInvoiceData({ ...eggsaleinvdata, VehicleNo: e.target.value });
     }
 
     const paidChange = (e) => {
@@ -228,7 +237,7 @@ function EggSaleModule(props) {
 
 
     const fetchEggCategory = async () => {
-        FecthEggCategory()
+        FecthEggCategory(process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setEggCategory(data.Result);
@@ -247,7 +256,7 @@ function EggSaleModule(props) {
     }
 
     const fetchCompanyDetails = async (invid) => {
-        FetchCompanyDetails(invid)
+        FetchCompanyDetails(invid, process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setCompanyDetails(data.Result);
@@ -266,7 +275,7 @@ function EggSaleModule(props) {
     }
 
     const fecthEggSaleInvoiceById = async (id) => {
-        FecthEggSaleInvoiceById(id)
+        FecthEggSaleInvoiceById(id, process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setEggSaleInvoiceData(data.Result[0]);
@@ -286,7 +295,7 @@ function EggSaleModule(props) {
     }
 
     const fetchCustomerDetails = async (custid) => {
-        fetch(variables.REACT_APP_API + 'Customer/GetCustomerById?id=' + custid,
+        fetch(process.env.REACT_APP_API + 'Customer/GetCustomerById?id=' + custid,
             {
                 method: 'GET',
                 headers: {
@@ -437,7 +446,7 @@ function EggSaleModule(props) {
 
     const preDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages;
-    // const itemsPerPage = variables.PAGE_PAGINATION_NO;
+    // const itemsPerPage = process.env.PAGE_PAGINATION_NO;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const itemsToDiaplay = eggsalelist && eggsalelist.length > 0 ? eggsalelist.slice(startIndex, endIndex) : [];
@@ -485,7 +494,7 @@ function EggSaleModule(props) {
         else {
 
 
-            fetch(variables.REACT_APP_API + 'EggSale/EggSaleInvoiceAdd', {
+            fetch(process.env.REACT_APP_API + 'EggSale/EggSaleInvoiceAdd', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -503,7 +512,8 @@ function EggSaleModule(props) {
                     FinalCostInvoice: eggsaleinvdata.FinalCostInvoice,
                     Paid: eggsaleinvdata.Paid,
                     Due: eggsaleinvdata.Due,
-                    EggSaleList: eggsalearr
+                    EggSaleList: eggsalearr,
+                    VehicleNo:eggsaleinvdata.VehicleNo
 
                 })
             }).then(res => res.json())
@@ -543,7 +553,7 @@ function EggSaleModule(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'EggSale/EggSaleInvoiceUpdate', {
+            fetch(process.env.REACT_APP_API + 'EggSale/EggSaleInvoiceUpdate', {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -561,7 +571,8 @@ function EggSaleModule(props) {
                     FinalCostInvoice: eggsaleinvdata.FinalCostInvoice,
                     Paid: eggsaleinvdata.Paid,
                     Due: eggsaleinvdata.Due,
-                    EggSaleList: eggsalearr
+                    EggSaleList: eggsalearr,
+                    VehicleNo:eggsaleinvdata.VehicleNo
 
                 })
             }).then(res => res.json())
@@ -761,25 +772,38 @@ function EggSaleModule(props) {
                             disabled={true}
                         />
                     </Row>
+                    <Row className="mb-12">
+                    <InputField controlId="VehicleNo" label="Vehicle no"
+                            type="text"
+                            value={eggsaleinvdata.VehicleNo}
+                            name="VehicleNo"
+                            placeholder="Vehicle no"
+                            errormessage="Please enter Vehicle no"
+                            required={false}
+                            disabled={false}
+                            onChange={vehicleNoChange}
+                        />
+                    </Row>
                     <Form.Group as={Col} style={{ textAlign: 'center' }}>
                         {eggsaleinvdata.Id <= 0 ?
-
-                            <Button variant="primary" type="submit" style={{ marginTop: "30px" }} className="btn-save-eggsale" onClick={clickSaveEggInvoiceDetails}>
+                            <Button variant="primary" type="submit" style={{ marginTop: "30px" }} 
+                            className="btn-save-eggsale" onClick={clickSaveEggInvoiceDetails}>
                                 Save
                             </Button>
                             : null
                         }
 
-                        {eggsaleinvdata.Id > 0 ?
-
-                            <Button variant="primary" type="submit" style={{ marginTop: "30px" }} className="btn-save-eggsale" onClick={clickUpdateEggInvoiceDetails}>
+                        {
+                        eggsaleinvdata.Id > 0 ?
+                            <Button variant="primary" type="submit" style={{ marginTop: "30px" }} 
+                            className="btn-save-eggsale" onClick={clickUpdateEggInvoiceDetails}>
                                 Update
                             </Button>
                             : null
                         }
 
-                        <Button variant="danger" style={{ marginTop: "30px", marginLeft: "10px" }} onClick={clickBack}>Back</Button>
-
+                        <Button variant="danger" style={{ marginTop: "30px", marginLeft: "10px" }} 
+                        onClick={clickBack}>Back</Button>
                     </Form.Group>
                 </Form>
             }

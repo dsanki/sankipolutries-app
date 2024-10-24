@@ -104,7 +104,7 @@ function MortalityList(props) {
     if (filterval.length > 0) {
       lotid = filterval[0].lotid;
       lotname = filterval[0].lotname;
-      fetch(variables.REACT_APP_API + 'ChicksMaster/' + filterval[0].lotid,
+      fetch(process.env.REACT_APP_API + 'ChicksMaster/' + filterval[0].lotid,
         {
           method: 'GET',
           headers: {
@@ -132,7 +132,7 @@ function MortalityList(props) {
   }
 
   const fetchSheds = async () => {
-    const _data = FetchShedsList()
+    const _data = FetchShedsList(process.env.REACT_APP_API)
       .then(data => {
         if (data.StatusCode === 200) {
           setShedList(data.Result);
@@ -149,7 +149,7 @@ function MortalityList(props) {
 
   const deleteMortality = (id) => {
     if (window.confirm('Are you sure?')) {
-      fetch(variables.REACT_APP_API + 'Mortality/' + id, {
+      fetch(process.env.REACT_APP_API + 'Mortality/' + id, {
         method: 'DELETE',
         headers: {
           'Accept': 'application/json',
@@ -180,7 +180,7 @@ function MortalityList(props) {
   }
 
   const fetchShedLotsMapList = async () => {
-    FetchShedLotMapList()
+    FetchShedLotMapList(process.env.REACT_APP_API)
       .then(data => {
         if (data.StatusCode === 200) {
           SetShedLotMapList(data.Result);
@@ -210,12 +210,12 @@ function MortalityList(props) {
 
   const fetchMortalityList = () => {
     setIsLoaded(true);
-    FetchMortalityList()
+    FetchMortalityList(process.env.REACT_APP_API)
       .then(data => {
         if (data.StatusCode === 200) {
           setMortalityList(data.Result);
           setMortalityListForFilter(data.Result);
-          setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
+          setTotalPages(Math.ceil(data.Result.length / process.env.REACT_APP_PAGE_PAGINATION_NO));
           setIsLoaded(false);
         }
         else if (data.StatusCode === 401) {
@@ -249,7 +249,7 @@ function MortalityList(props) {
   const preDisabled = currentPage === 1;
   const nextDisabled = currentPage === totalPages
 
-  const itemsPerPage = variables.PAGE_PAGINATION_NO;
+  const itemsPerPage = process.env.REACT_APP_PAGE_PAGINATION_NO;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   let itemsToDiaplay = mortalitylist.slice(startIndex, endIndex);
@@ -271,7 +271,7 @@ function MortalityList(props) {
     }
     else {
 
-      fetch(variables.REACT_APP_API + 'Mortality/MortalityAdd', {
+      fetch(process.env.REACT_APP_API + 'Mortality/MortalityAdd', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -326,7 +326,7 @@ function MortalityList(props) {
     }
     else {
 
-      fetch(variables.REACT_APP_API + 'Mortality/MortalityUpdate', {
+      fetch(process.env.REACT_APP_API + 'Mortality/MortalityUpdate', {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
@@ -522,7 +522,7 @@ function MortalityList(props) {
       </Table>
 
       {
-        mortalitylist && mortalitylist.length > variables.PAGE_PAGINATION_NO &&
+        mortalitylist && mortalitylist.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
         <>
           <button
             onClick={handlePrevClick}

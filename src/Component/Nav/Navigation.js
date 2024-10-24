@@ -16,7 +16,6 @@ function Navigation() {
 
     let location = useLocation();
     useEffect(() => {
-        //console.log(location.pathname);
     }, [location])
 
     return (
@@ -37,10 +36,7 @@ function Navigation() {
                         {
                         localStorage.getItem('token') !== null &&
                             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                                {/* <li className={`nav-item ${location.pathname === "/" ? "active" : ""}`}>
-                                    <a className={`nav-link ${location.pathname === "/" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/">Home
-                                        <span className="sr-only">(current)</span></a>
-                                </li> */}
+                              
                                 <li className="nav-item dropdown">
                                 <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" 
                                     aria-expanded="false" style={{ fontSize: '20px' }}>
@@ -53,7 +49,7 @@ function Navigation() {
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
 
-                                        <li className="nav-item">
+                                        {/* <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/carton" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/carton">Carton
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
@@ -65,9 +61,9 @@ function Navigation() {
                                         <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/rawmaterials" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/rawmaterials">Raw materials
                                                 <span className="sr-only">(current)</span></a>
-                                        </li>
+                                        </li> */}
                                         </ul>
-                                </li>
+                                </li> 
 
                                 <li className="nav-item dropdown">
                                 <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={{ fontSize: '20px' }}>
@@ -75,11 +71,11 @@ function Navigation() {
                                     </a>
                                     <ul className="dropdown-menu">
                                     <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/customerlist" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/customerlist">Egg Sales
+                                            <a className={`nav-link ${location.pathname === "/customerlist" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/customerlist?type=1">Egg Sales
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
                                         <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/birdsale" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/birdsale">Bird sale
+                                            <a className={`nav-link ${location.pathname === "/birdsale" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/customerlist?type=2">Bird sale
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
                                         </ul>
@@ -94,45 +90,19 @@ function Navigation() {
                                             <a className={`nav-link ${location.pathname === "/eggdailytracker" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/eggdailytracker">Egg Daily Tracker
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
-                                        {/* <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/chicksmaster" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/chicksmaster">Chicks Master
-                                                <span className="sr-only">(current)</span></a>
-                                        </li> */}
                                        
                                         <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/mortalitylist" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/mortalitylist">Mortality Tracker
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
                                        
-                                        <li className="nav-item">
+                                        {/* <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/vaccinationtracker" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/vaccinationtracker">Vaccination Tracker
                                                 <span className="sr-only">(current)</span></a>
-                                        </li>
-                                        {/* <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/eggsaleinvoice" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/eggsaleinvoice">Vaccination Tracker
-                                                <span className="sr-only">(current)</span></a>
                                         </li> */}
-
-                                        
-
                                         
                                     </ul>
                                 </li>
-
-                                {/* <li className="nav-item dropdown">
-                                    <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={{ fontSize: '20px' }}>
-                                        Egg Module
-                                    </a>
-                                    <ul className="dropdown-menu">
-                                      
-                                       
-                                        <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/eggsale" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/eggsale">Egg sale
-                                                <span className="sr-only">(current)</span></a>
-                                        </li>
-                                       
-                                    </ul>
-                                </li> */}
 
 
                                 <li className="nav-item dropdown">
@@ -141,21 +111,21 @@ function Navigation() {
                                     </a>
                                     <ul className="dropdown-menu">
                                        
-                                        <li className="nav-item">
+                                        {/* <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/clientlist" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/clientlist">Client Master
                                                 <span className="sr-only">(current)</span></a>
-                                        </li>
+                                        </li>*/}
                                         <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/shedlotmap" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/shedlotmap">Shed Lot Map
                                                 <span className="sr-only">(current)</span></a>
-                                        </li>
+                                        </li> 
 
                                        
-                                        <li><hr className="dropdown-divider" /></li>
+                                        {/* <li><hr className="dropdown-divider" /></li>
                                         <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/stock" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/stock">Stock
                                                 <span className="sr-only">(current)</span></a>
-                                        </li>
+                                        </li> */}
 
                                         <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/customerlist" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/customerlist">Customers
@@ -194,7 +164,7 @@ function Navigation() {
                 </div>
             </nav>
 
-            <Breadcrumbs/>
+            {/* <Breadcrumbs/> */}
         </div>
     )
 }

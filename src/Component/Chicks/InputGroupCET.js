@@ -15,7 +15,7 @@ function InputGroupCET(props) {
     useEffect(() => {
         const arrValues = Object.values(input_values);
         const inputTotals = arrValues.reduce((accum, curr) => (accum += curr), 0);
-        const _inputextraTotals = inputTotals * variables.FIVE_PERCENTAGE;
+        const _inputextraTotals = inputTotals * process.env.REACT_APP_FIVE_PERCENTAGE;
 
         set_extrachicks(_inputextraTotals);
         set_total(inputTotals + _inputextraTotals);

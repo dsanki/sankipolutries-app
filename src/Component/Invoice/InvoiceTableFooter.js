@@ -19,27 +19,45 @@ const styles = StyleSheet.create({
         borderRightColor: borderColor,
         borderRightWidth: 1,
         paddingRight: 8,
-        fontFamily: 'Helvetica-Bold'
+        fontFamily: 'Helvetica-Bold',
+        fontSize:10
     },
     total: {
         width: '20%',
         textAlign: 'right',
-        paddingRight: 8
+        paddingRight: 8,
+        fontSize:10
     },
 
     logoRupee: {
         width: 9,
         height: 9
     },
-    amountinwords: {
+
+    amountinwordslblarea: {
         width: '100%',
         textAlign: 'left',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         paddingRight: 10,
-        paddingLeft: 10,
+        paddingLeft: 10
+    },
+    amountinwordslbl: {
+        
         fontFamily: 'Helvetica-Bold',
+        fontSize:10
+    },
+
+    amountinwords: {
+        // width: '100%',
+        textAlign: 'left',
+       // borderRightColor: borderColor,
+        // borderRightWidth: 1,
+        // paddingRight: 10,
+        // paddingLeft: 10,
+        //fontFamily: 'Helvetica-Bold',
         textTransform: 'capitalize',
+        fontSize:10
     }
 });
 
@@ -47,7 +65,7 @@ const styles = StyleSheet.create({
 const InvoiceTableFooter = (props) => {
     return (
         <>
-            <View style={styles.row}> 
+            {/* <View style={styles.row}> 
                 <Text style={styles.description}>Total </Text> 
                 <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.TotalCost).toFixed(2)}</Text>
 
@@ -61,10 +79,11 @@ const InvoiceTableFooter = (props) => {
                 <Text style={styles.description}>Final Total</Text>
                 <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.eggsaledata.FinalCostInvoice).toFixed(2)}</Text>
 
-            </View>
+            </View> */}
             <View style={styles.row}>
                 
-                <Text style={styles.amountinwords}>{`Amount in words: ${props.eggsaledata.AmountInWords}`}</Text>
+               <Text style={styles.amountinwordslblarea}> <Text style={styles.amountinwordslbl}>Amount in words:</Text>
+               <Text style={styles.amountinwords}> {props.eggsaledata.AmountInWords}</Text></Text>
 
             </View>
             <View style={styles.row}>

@@ -22,7 +22,7 @@ function Login(props) {
         else
         {
             setValidated(true);
-            const response = await fetch(variables.REACT_APP_API + 'Login', {
+            const response = await fetch(process.env.REACT_APP_API + 'Login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

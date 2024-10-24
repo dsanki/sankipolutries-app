@@ -60,9 +60,9 @@ export const NumberInputKeyDown = (e) => {
   }
 };
 
-export const FetchMortalityList = async () => {
+export const FetchMortalityList = async (apiurl) => {
 
-  const response = await fetch(variables.REACT_APP_API + 'Mortality/GetMortalityShedLotMapList',
+  const response = await fetch(apiurl + 'Mortality/GetMortalityShedLotMapList',
     {
       method: 'GET',
       headers: {
@@ -74,8 +74,8 @@ export const FetchMortalityList = async () => {
   return data;
 }
 
-export const FetchShedsList = async () => {
-  const response = await fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedList',
+export const FetchShedsList = async (apiurl) => {
+  const response = await fetch(apiurl + 'ChicksMaster/GetShedList',
     {
       method: 'GET',
       headers: {
@@ -87,8 +87,8 @@ export const FetchShedsList = async () => {
   return data;
 }
 
-export const FetchShedLotMapList = async () => {
-  const response = await fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedLotMapList',
+export const FetchShedLotMapList = async (apiurl) => {
+  const response = await fetch(apiurl + 'ChicksMaster/GetShedLotMapList',
     {
       method: 'GET',
       headers: {
@@ -101,8 +101,8 @@ export const FetchShedLotMapList = async () => {
 }
 
 
-export const FetchChicks = async () => {
-  const response = await fetch(variables.REACT_APP_API + 'ChicksMaster',
+export const FetchChicks = async (apiurl) => {
+  const response = await fetch(apiurl + 'ChicksMaster',
     {
       method: 'GET',
       headers: {
@@ -113,8 +113,8 @@ export const FetchChicks = async () => {
   return data;
 }
 
-export const FetchLotById = async (id) => {
-  const response =await fetch(variables.REACT_APP_API + 'ChicksMaster/' + id,
+export const FetchLotById = async (id,apiurl) => {
+  const response =await fetch(process.env.REACT_APP_API + 'ChicksMaster/' + id,
     {
       method: 'GET',
       headers: {
@@ -125,8 +125,8 @@ export const FetchLotById = async (id) => {
   return data;
 }
 
-export const FetchUnit = async () => {
-  const response =await fetch(variables.REACT_APP_API + 'Unit',
+export const FetchUnit = async (apiurl) => {
+  const response =await fetch(process.env.REACT_APP_API + 'Unit',
     {
       method: 'GET',
       headers: {
@@ -138,8 +138,8 @@ export const FetchUnit = async () => {
   return data;
 }
 
-export const FetchLots = async () => {
-  const response = await fetch(variables.REACT_APP_API + 'ChicksMaster/GetLots',
+export const FetchLots = async (apiurl) => {
+  const response = await fetch(apiurl + 'ChicksMaster/GetLots',
     {
       method: 'GET',
       headers: {
@@ -165,8 +165,8 @@ export const downloadExcel = (data, name) => {
   }
 };
 
-export const FetchBirdSaleList = async (uid,id) => {
-  const response =await fetch(variables.REACT_APP_API + 'BirdSale/GetBirdSale?uid='+uid,
+export const FetchBirdSaleList = async (uid,id,apiurl) => {
+  const response =await fetch(apiurl + 'BirdSale/GetBirdSale?uid='+uid,
     {
       method: 'GET',
       headers: {
@@ -177,8 +177,8 @@ export const FetchBirdSaleList = async (uid,id) => {
   return data;
 }
 
-export const FetchCompanyDetails = async () => {
-  const response =await fetch(variables.REACT_APP_API + 'CompanyDetails/GetCompanyDetails',
+export const FetchCompanyDetails = async (apiurl) => {
+  const response =await fetch(apiurl + 'CompanyDetails/GetCompanyDetails',
     {
       method: 'GET',
       headers: {
@@ -189,8 +189,8 @@ export const FetchCompanyDetails = async () => {
   return data;
 }
 
-export const FecthEggCategory = async () => {
-  const response =await fetch(variables.REACT_APP_API + 'EggSale/GetEggCategory',
+export const FecthEggCategory = async (apiurl) => {
+  const response =await fetch(apiurl + 'EggSale/GetEggCategory',
     {
       method: 'GET',
       headers: {
@@ -201,8 +201,8 @@ export const FecthEggCategory = async () => {
   return data;
 }
 
-export const FecthEggSaleInvoiceList = async (custid) => {
-  const response =await fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleInvoiceList?CustId='+custid,
+export const FecthEggSaleInvoiceList = async (custid, apiurl) => {
+  const response =await fetch(apiurl + 'EggSale/GetEggSaleInvoiceList?CustId='+custid,
     {
       method: 'GET',
       headers: {
@@ -213,8 +213,8 @@ export const FecthEggSaleInvoiceList = async (custid) => {
   return data;
 }
 
-export const FecthEggSaleInvoiceById = async (id) => {
-  const response =await fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleInvoiceById?id='+id,
+export const FecthEggSaleInvoiceById = async (id, apiurl) => {
+  const response =await fetch(apiurl + 'EggSale/GetEggSaleInvoiceById?id='+id,
     {
       method: 'GET',
       headers: {
@@ -225,8 +225,8 @@ export const FecthEggSaleInvoiceById = async (id) => {
   return data;
 }
 
-export const FecthStockListById = async (catid) => {
-  const response =await fetch(variables.REACT_APP_API + 'Stock/GetStockList?category='+catid,
+export const FecthStockListById = async (catid, apiurl) => {
+  const response =await fetch(apiurl + 'Stock/GetStockList?category='+catid,
     {
       method: 'GET',
       headers: {

@@ -33,8 +33,14 @@ const styles = StyleSheet.create({
     },
     gap:
     {
-        marginBottom: 30
-    }
+        marginBottom: 10
+    },
+    sectionROW: {
+        margin: 10,
+        padding: 10,
+       // flexGrow: 1,
+        flexDirection: 'row'
+      }
     // logo: {
     //     width: 40,
     //     height: 40,
@@ -89,9 +95,10 @@ const InvoiceEggSale = (props) => (
             </View>
             {/* <Image style={styles.logo} src={props.companydetails.CompanyLogo} /> */}
             {/* <Image style={styles.logo} src={logo} /> */}
-            <View style={styles.rowComp}>
-                <Company companydetails={props.companydetails} />
-                <BillTo customerdetails={props.customerdetails} />
+            <View style={styles.sectionROW}>
+                <Company style={{marginTop:10}} companydetails={props.companydetails} />
+                <BillTo style={{marginTop:10}}  customerdetails={props.customerdetails}  
+                eggsaledata={props.eggsaledata} />
             </View>
             <View style={styles.gap}></View>
 

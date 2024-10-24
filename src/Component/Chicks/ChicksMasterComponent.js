@@ -29,7 +29,8 @@ function ChicksMasterComponent(props) {
         Due: "",
         PaymentDate: "",
         LotName: "",
-        IsActive:""
+        IsActive:"",
+        ExtraChicksPercentage:""
     };
 
     const [chicksdata, setChicksData] = useState(initialvalues);
@@ -52,7 +53,8 @@ function ChicksMasterComponent(props) {
             Due: "",
             PaymentDate: "",
             LotName: "",
-            IsActive:true
+            IsActive:true,
+            ExtraChicksPercentage:""
         })
     }
 
@@ -74,7 +76,8 @@ function ChicksMasterComponent(props) {
             Due: chicks.Due,
             PaymentDate: chicks.PaymentDate,
             LotName: chicks.LotName,
-            IsActive:chicks.IsActive
+            IsActive:chicks.IsActive,
+            ExtraChicksPercentage:chicks.ExtraChicksPercentage
         })
     }
 
@@ -83,10 +86,31 @@ function ChicksMasterComponent(props) {
     }
 
     const chicksChange = (e) => {
-        const _inputextraTotals = e.target.value * variables.FIVE_PERCENTAGE;
+
+        const percentage=chicksdata.ExtraChicksPercentage;
+        const _inputextraTotals = parseInt(e.target.value) * (parseInt(percentage)>0 ?percentage : 0)/100;
+
         setChicksData({
-            ...chicksdata, Chicks: e.target.value, ExtraChicks: _inputextraTotals, TotalChicks: parseInt(e.target.value) + parseInt(_inputextraTotals),
-            TotalAmount: e.target.value * chicksdata.Rate, Due: (e.target.value * chicksdata.Rate) - chicksdata.Paid
+            ...chicksdata, Chicks: parseInt(e.target.value), 
+            ExtraChicks:  parseInt(_inputextraTotals), 
+            TotalChicks: parseInt(parseInt(e.target.value) + _inputextraTotals),
+            TotalAmount: parseInt(e.target.value) * chicksdata.Rate, 
+            Due: (parseInt(e.target.value) * chicksdata.Rate) - chicksdata.Paid
+        });
+    }
+
+    const extraChicksPercentageChange = (e) => {
+        const percentage = e.target.value;
+        const _inputextraTotals = chicksdata.Chicks * ((percentage>0 ? percentage : 0)/100);
+
+        setChicksData({ 
+            ...chicksdata, ExtraChicksPercentage:percentage,
+            Chicks: chicksdata.Chicks, 
+            ExtraChicks:  parseInt(_inputextraTotals), 
+            TotalChicks: parseInt(chicksdata.Chicks) + parseInt(_inputextraTotals),
+            TotalAmount: chicksdata.Chicks * chicksdata.Rate, 
+            Due: (chicksdata.Chicks * chicksdata.Rate) - chicksdata.Paid
+            
         });
     }
 
@@ -102,6 +126,9 @@ function ChicksMasterComponent(props) {
         const mor = e.target.value === "" ? 0 : parseInt(e.target.value);
         setChicksData({ ...chicksdata, Mortality: e.target.value, DueChicks: mor + (chicksdata.LambChicks === "" ? 0 : parseInt(chicksdata.LambChicks)) });
     }
+
+
+    
 
     const lambChange = (e) => {
         const lamb = e.target.value === "" ? 0 : parseInt(e.target.value);
@@ -160,12 +187,13 @@ function ChicksMasterComponent(props) {
     }, [obj]);
 
     const fetchChicks = async () => {
-        FetchChicks()
+       
+        FetchChicks(process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setChicks(data.Result);
                     setCount(data.Result.length);
-                    setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
+                    setTotalPages(Math.ceil(data.Result.length / process.env.REACT_APP_PAGE_PAGINATION_NO));
                 }
                 else if (data.StatusCode === 401) {
                     history("/login")
@@ -176,7 +204,7 @@ function ChicksMasterComponent(props) {
 
     const deleteChicks = (id) => {
         if (window.confirm('Are you sure?')) {
-            fetch(variables.REACT_APP_API + 'ChicksMaster/' + id, {
+            fetch(process.env.REACT_APP_API + 'ChicksMaster/' + id, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
@@ -225,7 +253,7 @@ function ChicksMasterComponent(props) {
 
     const preDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages;
-    const itemsPerPage = variables.PAGE_PAGINATION_NO;
+    const itemsPerPage = process.env.REACT_APP_PAGE_PAGINATION_NO;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const itemsToDiaplay = chicks && chicks.length > 0 ? chicks.slice(startIndex, endIndex) : [];
@@ -241,7 +269,7 @@ function ChicksMasterComponent(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'ChicksMaster', {
+            fetch(process.env.REACT_APP_API + 'ChicksMaster', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -263,7 +291,8 @@ function ChicksMasterComponent(props) {
                     Due: chicksdata.Due,
                     PaymentDate: chicksdata.PaymentDate,
                     LotName: chicksdata.LotName,
-                    IsActive:chicksdata.IsActive
+                    IsActive:chicksdata.IsActive,
+                    ExtraChicksPercentage:chicksdata.ExtraChicksPercentage
                 })
             })
                 .then(res => res.json())
@@ -296,7 +325,7 @@ function ChicksMasterComponent(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'ChicksMaster', {
+            fetch(process.env.REACT_APP_API + 'ChicksMaster', {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -318,7 +347,8 @@ function ChicksMasterComponent(props) {
                     Due: chicksdata.Due,
                     PaymentDate: chicksdata.PaymentDate,
                     LotName: chicksdata.LotName,
-                    IsActive:chicksdata.IsActive
+                    IsActive:chicksdata.IsActive,
+                    ExtraChicksPercentage:chicksdata.ExtraChicksPercentage
 
                 })
             }).then(res => res.json())
@@ -361,6 +391,7 @@ function ChicksMasterComponent(props) {
                         <th align='left'>Lot name</th>
                         <th  >Date</th>
                         <th align='center' >Chicks</th>
+                        <th align='center' >Extra %</th>
                         <th align='center' >Extra cks</th>
                         <th align='center' >Total Cks</th>
                         <th align='center' >Mortality</th>
@@ -381,6 +412,7 @@ function ChicksMasterComponent(props) {
                                 <td align='left'>{p.LotName}</td>
                                 <td align='center'>{Moment(p.Date).format('DD-MMM-YYYY')}</td>
                                 <td align='center'>{p.Chicks}</td>
+                                <td align='center'>{p.ExtraChicksPercentage}</td>
                                 <td align='center'>{p.ExtraChicks}</td>
                                 <td align='center'>{p.TotalChicks}</td>
                                 <td align='center'>{p.Mortality}</td>
@@ -412,7 +444,7 @@ function ChicksMasterComponent(props) {
                 </tbody>
             </Table>
             {
-                chicks && chicks.length > variables.PAGE_PAGINATION_NO &&
+                chicks && chicks.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
                 <button
                     onClick={handlePrevClick}
                     disabled={preDisabled}
@@ -423,7 +455,7 @@ function ChicksMasterComponent(props) {
             {
                 Array.from({ length: totalPages }, (_, i) => {
                     return (
-                        chicks && chicks.length > variables.PAGE_PAGINATION_NO &&
+                        chicks && chicks.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
                         <button
                             onClick={() => handlePageChange(i + 1)}
                             key={i}
@@ -435,7 +467,7 @@ function ChicksMasterComponent(props) {
                 })
             }
 
-            {chicks && chicks.length > variables.PAGE_PAGINATION_NO &&
+            {chicks && chicks.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
                 <button
                     onClick={handleNextClick}
                     disabled={nextDisabled}
@@ -491,6 +523,20 @@ function ChicksMasterComponent(props) {
                                             required={true}
                                             disabled={false}
                                         />
+
+<InputField controlId="ExtraChicksPercentage"
+                                            label="Extra %"
+                                            type="number"
+                                            value={chicksdata.ExtraChicksPercentage}
+                                            name="ExtraChicksPercentage"
+                                            placeholder="Extra %"
+                                            errormessage="Please provide extra %"
+                                            onChange={extraChicksPercentageChange}
+                                            required={true}
+                                            disabled={false}
+                                        />
+
+
 
                                         <InputField controlId="ExtraChicks" label="Extra chicks"
                                             type="number"

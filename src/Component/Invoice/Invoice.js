@@ -19,8 +19,8 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
     },
     logo: {
-        width: 74,
-        height: 66,
+        width: 56,
+        height: 48,
         marginLeft: 'auto',
         marginRight: 'auto'
     }

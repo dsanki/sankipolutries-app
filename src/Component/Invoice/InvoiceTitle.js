@@ -2,7 +2,7 @@ import React, { Fragment } from 'react'
 import { Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import InvoiceNo from './InvoiceNo'
 import moment from 'moment';
-import logo from '../../image/kalandi_logo.JPG'
+import logo from '../../image/SPLogo1.png'
 
 const styles = StyleSheet.create({
   row: {
@@ -18,15 +18,15 @@ const styles = StyleSheet.create({
   reportTitle: {
     color: 'black',
     letterSpacing: 4,
-    fontSize: 30,
+    fontSize: 20,
     textAlign: 'center',
     textTransform: 'uppercase',
-    width: '70%',
+    width: '50%',
     fontFamily: 'Helvetica-Bold',
   },
 
   date: {
-    width: '30%',
+    width: '50%',
     textAlign: 'right',
     paddingLeft: 5,
   },
@@ -35,8 +35,8 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end'
 },
 logo: {
-  width: 70,
-  height: 100,
+  width: 80,
+  height: 80,
   //marginBottom: 10
   // marginLeft: 'auto',
   // marginRight: 'auto'
@@ -52,8 +52,10 @@ const InvoiceTitle = (props) => (
     <Text style={styles.reportTitle}>{props.title}</Text>
     <Fragment style={styles.date}>
         <View style={styles.invoiceDateContainer}>
-          <Text style={{fontFamily: 'Helvetica-Bold'}}>{`Invoice No: ${props.invoiceno}`}</Text><br/>
-          <Text style={{fontFamily: 'Helvetica-Bold'}}>{`Date: ${moment(props.date).format('DD/MM/YYYY')}`}</Text>
+        <Text><Text style={{fontFamily: 'Helvetica-Bold'}}>Invoice No:</Text><Text> {props.invoiceno}</Text></Text><br/>
+        <Text><Text style={{fontFamily: 'Helvetica-Bold'}}>Date: </Text><Text>{moment(props.date).format('DD/MM/YYYY')}</Text></Text>
+          {/* <Text style={{fontFamily: 'Helvetica-Bold'}}>{`Invoice No: ${props.invoiceno}`}</Text><br/>
+          <Text style={{fontFamily: 'Helvetica-Bold'}}>{`Date: ${moment(props.date).format('DD/MM/YYYY')}`}</Text> */}
         </View >
        
     </Fragment>

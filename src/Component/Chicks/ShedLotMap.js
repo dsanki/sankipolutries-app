@@ -56,7 +56,7 @@ function ShedLotMap(props) {
     }, [obj]);
 
     const fetchSheds = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedList',
+        fetch(process.env.REACT_APP_API + 'ChicksMaster/GetShedList',
             {
                 method: 'GET',
                 headers: {
@@ -74,7 +74,7 @@ function ShedLotMap(props) {
     }
 
     const fetchLots = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster/GetLots',
+        fetch(process.env.REACT_APP_API + 'ChicksMaster/GetLots',
             {
                 method: 'GET',
                 headers: {
@@ -88,7 +88,7 @@ function ShedLotMap(props) {
     }
 
     const fetchShedLotsMapList = async () => {
-        fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedLotMapList',
+        fetch(process.env.REACT_APP_API + 'ChicksMaster/GetShedLotMapList',
             {
                 method: 'GET',
                 headers: {
@@ -122,7 +122,7 @@ function ShedLotMap(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'ChicksMaster/LotShedMap', {
+            fetch(process.env.REACT_APP_API + 'ChicksMaster/LotShedMap', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -169,7 +169,7 @@ function ShedLotMap(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'ChicksMaster/LotShedMapUpdate', {
+            fetch(process.env.REACT_APP_API + 'ChicksMaster/LotShedMapUpdate', {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',

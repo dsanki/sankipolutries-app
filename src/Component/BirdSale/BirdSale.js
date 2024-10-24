@@ -357,7 +357,7 @@ function BirdSale(props) {
                 if (data.StatusCode === 200) {
                     setBirdSaleList(data.Result);
                     setBirdSaleListFilter(data.Result);
-                    setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
+                    setTotalPages(Math.ceil(data.Result.length / process.env.REACT_APP_PAGE_PAGINATION_NO));
                     setIsLoaded(false);
                 }
                 else if (data.StatusCode === 401) {
@@ -387,7 +387,7 @@ function BirdSale(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'BirdSale/UpdateBirdSale', {
+            fetch(process.env.REACT_APP_API + 'BirdSale/UpdateBirdSale', {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -477,7 +477,7 @@ function BirdSale(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'BirdSale/AddBirdSale', {
+            fetch(process.env.REACT_APP_API + 'BirdSale/AddBirdSale', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -523,7 +523,7 @@ function BirdSale(props) {
 
     const deleteBirdSale = (id) => {
         if (window.confirm('Are you sure?')) {
-            fetch(variables.REACT_APP_API + 'BirdSale/' + id, {
+            fetch(process.env.REACT_APP_API + 'BirdSale/' + id, {
               method: 'DELETE',
               headers: {
                 'Authorization': localStorage.getItem('token')
@@ -612,7 +612,7 @@ function BirdSale(props) {
     const preDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages
 
-    const itemsPerPage = variables.PAGE_PAGINATION_NO;
+    const itemsPerPage = process.env.REACT_APP_PAGE_PAGINATION_NO;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
 
@@ -627,7 +627,7 @@ function BirdSale(props) {
     };
 
     const fetchCustomerDetails = async (custid) => {
-        fetch(variables.REACT_APP_API + 'Customer/GetCustomerById?id=' + custid,
+        fetch(process.env.REACT_APP_API + 'Customer/GetCustomerById?id=' + custid,
             {
                 method: 'GET',
                 headers: {
@@ -794,7 +794,7 @@ function BirdSale(props) {
                 </tbody>
             </Table >
             {
-                birdSaleList && birdSaleList.length > variables.PAGE_PAGINATION_NO &&
+                birdSaleList && birdSaleList.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
                 <>
                     <button
                         onClick={handlePrevClick}

@@ -36,7 +36,32 @@ const styles = StyleSheet.create({
         bottom: 40,
         right: 40,
         textAlign: 'right'
+    },
+
+    FooterBankDetails:{
+        position: 'absolute',
+        left: 60,
+        bottom:190,
+        right: 60,
+        textAlign: 'left',
+        border:1,
+        borderColor:  '#dee2e6',
+        padding:5
+
+    },
+    bankdetails:
+    {
+        fontFamily: 'Helvetica-Bold'
+    },
+    client:{
+        position: 'absolute',
+        left: 60,
+        bottom: 40,
+        right: 40,
+        textAlign: 'left'
     }
+
+
 });
 
 
@@ -51,6 +76,14 @@ const Square=()=>
 const InvoiceThankYouMsg = () => (
     
     <>
+    
+<View style={styles.FooterBankDetails}>
+<Text style={{fontFamily: 'Helvetica-Bold'}}>Bank Details of Sanki Poultries:</Text>
+<Text><Text style={{fontFamily: 'Helvetica-Bold',fontSize: 10}}>Bank Name: </Text><Text>Canara Bank Pvt Ltd</Text></Text>
+<Text><Text style={{fontFamily: 'Helvetica-Bold', fontSize: 10}}>A/C No: </Text><Text>00000000</Text></Text>
+<Text><Text style={{fontFamily: 'Helvetica-Bold', fontSize: 10}}>Branch IFSC Code: </Text><Text>CANARA001</Text></Text>
+</View>
+<View  style={styles.client}><Text>Client Signature</Text></View>
 <View style={styles.Footer}>
 <Svg viewBox="-210 -05 200 100">
             <Rect

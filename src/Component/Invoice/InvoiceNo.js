@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end'
     },
     invoiceDate: {
-        fontSize: 12,
+        fontSize: 10,
         fontStyle: 'bold',
     },
     label: {

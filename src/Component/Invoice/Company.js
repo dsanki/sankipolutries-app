@@ -7,8 +7,8 @@ const styles = StyleSheet.create({
   headerContainer: {
     width: '50%',
     flexDirection: 'column',
-    justifyContent: 'flex-end',
-    marginTop: 20
+    justifyContent: 'flex-start',
+    marginTop: 10
   },
   company: {
     // marginTop: 20,
@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
 
     // color: '#61dafb',
     letterSpacing: 1,
-    fontSize: 18,
+    fontSize: 15,
     // textAlign: 'center',
     textTransform: 'uppercase',
     fontFamily: 'Helvetica-Bold'

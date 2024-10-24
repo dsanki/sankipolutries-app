@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, Fragment } from 'react'
 import { variables } from '../../Variables';
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams,useLocation } from 'react-router-dom'
 import moment from 'moment';
 import { ErrorMessageHandle } from '../../Utility';
 import InputField from '../ReuseableComponent/InputField'
@@ -21,7 +21,9 @@ import InvoiceEggSale from '../Invoice/InvoiceEggSale';
 function EggSale(props) {
 
     let history = useNavigate();
-    const { uid } = useParams();
+    //const { uid } = useParams();
+    const search = useLocation().search;
+    const [uid, setUid] = useState(new URLSearchParams(search).get('uid'));
     const [eggsalelist, setEggSaleList] = useState([]);
     const [customerdetails, setCustomerDetails] = useState([]);
     const [count, setCount] = useState(0);
@@ -37,21 +39,6 @@ function EggSale(props) {
     const [eggcategory, setEggCategory] = useState([]);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-
-    // const initialvalues = {
-    //     modaltitle: "",
-    //     Id: 0,
-    //     CustomerId: uid,
-    //     Quantity: "",
-    //     PurchaseDate: "",
-    //     EggRate: "",
-    //     TotalCost: "",
-    //     Discount: "",
-    //     FinalCost: "",
-    //     Paid: "",
-    //     Due: "",
-    //     Comments: ""
-    // };
     const initialvalues = {
     modaltitle: "",
     Id: 0,
@@ -64,7 +51,8 @@ function EggSale(props) {
     FinalCostInvoice: "",
     Paid: "",
     Due: "",
-    EggSale: []
+    EggSale: [],
+    VehicleNo:""
     }
 
     const [eggsaledata, setEggSaletData] = useState(initialvalues);
@@ -104,7 +92,7 @@ function EggSale(props) {
 
 
     const fetchEggCategory = async () => {
-        FecthEggCategory()
+        FecthEggCategory(process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setEggCategory(data.Result);
@@ -123,7 +111,7 @@ function EggSale(props) {
     }
 
     const fetchCompanyDetails = async () => {
-        FetchCompanyDetails()
+        FetchCompanyDetails(process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setCompanyDetails(data.Result);
@@ -141,42 +129,6 @@ function EggSale(props) {
             })
     }
 
-    //FecthEggSaleInvoiceList
-    // const fetchEggSaleDetails = async (custid) => {
-    //     setIsLoaded(true);
-    //     fetch(variables.REACT_APP_API + 'EggSale/GetEggSaleDetailsByCustomerId?CustId=' + custid,
-    //         {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Accept': 'application/json',
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': localStorage.getItem('token')
-    //             }
-    //         })
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             if (data.StatusCode === 200) {
-    //                 setEggSaleList(data.Result);
-    //                 setEggSaleListFilter(data.Result);
-    //                 setTotalPages(Math.ceil(data.Result.length / itemsPerPage));
-    //                 setIsLoaded(false);
-    //             }
-    //             else if (data.StatusCode === 401) {
-    //                 HandleLogout();
-    //                 history("/login")
-    //                 setIsLoaded(false);
-    //             }
-    //             else if (data.StatusCode === 404) {
-    //                 props.showAlert("Data not found!!", "danger")
-    //                 setIsLoaded(false);
-    //             }
-    //             else {
-    //                 props.showAlert("Error occurred!!", "danger")
-    //                 setIsLoaded(false);
-    //             }
-    //         });
-    // }
-
     const [_totalquantity, _setTotalQuantity] = useState(0);
     const [_totalcost, _setTotalCost] = useState(0);
     const [_totaldiscount, _setTotalDiscount] = useState(0);
@@ -186,7 +138,7 @@ function EggSale(props) {
 
     const fetchEggSaleDetails = async (custid) => {
         setIsLoaded(true);
-        FecthEggSaleInvoiceList(custid)
+        FecthEggSaleInvoiceList(custid, process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setEggSaleList(data.Result);
@@ -232,7 +184,7 @@ function EggSale(props) {
     }
 
     const fetchCustomerDetails = async (custid) => {
-        fetch(variables.REACT_APP_API + 'Customer/GetCustomerById?id=' + custid,
+        fetch(process.env.REACT_APP_API + 'Customer/GetCustomerById?id=' + custid,
             {
                 method: 'GET',
                 headers: {
@@ -261,7 +213,7 @@ function EggSale(props) {
 
     const deleteEggSale = (id) => {
         if (window.confirm('Are you sure?')) {
-            fetch(variables.REACT_APP_API + 'EggSale/' + id, {
+            fetch(process.env.REACT_APP_API + 'EggSale/' + id, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': localStorage.getItem('token')
@@ -323,7 +275,6 @@ function EggSale(props) {
 
     const preDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages;
-    // const itemsPerPage = variables.PAGE_PAGINATION_NO;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const itemsToDiaplay = eggsalelist && eggsalelist.length > 0 ? eggsalelist.slice(startIndex, endIndex) : [];
@@ -386,7 +337,8 @@ function EggSale(props) {
             Paid: eggsale.Paid,
             Due: eggsale.Due,
             AmountInWords: AmountInWords(eggsale.FinalCostInvoice),
-            EggSale:eggsale.EggSaleList
+            EggSale:eggsale.EggSaleList,
+            VehicleNo:eggsale.VehicleNo
         });
 
         setInvoiceModalShow(true);
@@ -414,6 +366,7 @@ function EggSale(props) {
                     <h5 className="card-title">Customer Name: {customerdetails.FirstName + " " + customerdetails.LastName}</h5>
                     <p className="card-title">Mobile no: {customerdetails.MobileNo}</p>
                     <p className="card-title">Email: {customerdetails.Email}</p>
+                    <p className="card-title">Address: {customerdetails.Address}</p>
                 </div>
             </div>
             <div className="container" style={{ marginTop: '30px', marginBottom: '15px' }}>
@@ -428,12 +381,7 @@ function EggSale(props) {
                     </div>
                 </div>
             </div>
-            {/* <div className="row">
-                <div className="col" style={{ textAlign: 'left', marginTop: '20px', marginLeft: '20px' }}>
-                  
-
-                </div>
-            </div> */}
+           
 
             <div class="row">
                 <div class="col-md-9">  <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2' }} title='Download Egg Sale List' onClick={() => onDownloadExcel()} ></i></div>
@@ -457,7 +405,6 @@ function EggSale(props) {
                     <tr className="tr-custom" align='center'>
                         <th>Date</th>
                         <th>Quantity</th>
-                        {/* <th>Rate (<span>&#8377;</span>)</th> */}
                         <th>Total cost (<span>&#8377;</span>)</th>
                         <th>Discount (<span>&#8377;</span>)</th>
                         <th>Final cost (<span>&#8377;</span>)</th>
@@ -479,7 +426,6 @@ function EggSale(props) {
                                     <td align='center'>{new Intl.NumberFormat('en-IN', {
                                     }).format(p.TotalQuantity.toFixed(2))}
                                     </td>
-                                    {/* <td align='center'>{p.EggRate}</td> */}
                                     <td align='center'> {new Intl.NumberFormat('en-IN', {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2

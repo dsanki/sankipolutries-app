@@ -20,8 +20,14 @@ function CustomerList(props) {
     const [totalPages, setTotalPages] = useState(0);
     const [addModalShow, setAddModalShow] = useState(false);
     const [photofilename, setPhotoFileName] = useState("annonymous.jpg");
+    const [filterCutomerType, setFilterCutomerType] = useState("");
+    const [filterCutomerName, setFilterCutomerName] = useState("");
+    const [customerListForFilter, setCustomerListForFilter] = useState([]);
 
-    //const [isCustomerTypeValid, setCustomerTypeValid] = useState(false);
+    //const search = useLocation().search;
+    //const [_type, setType] = useState(new URLSearchParams(search).get('type'));
+
+    
 
     let addModalClose = () => {
         setAddModalShow(false);
@@ -35,11 +41,12 @@ function CustomerList(props) {
         MiddleName: "",
         LastName: "",
         MobileNo: "",
-        DOB: "",
+        //DOB: "",
         CustomerTypeId: 0,
         Email: "",
         IsActive: true,
-        ProfileImageUrl: "annonymous.jpg"
+        ProfileImageUrl: "annonymous.jpg",
+        Address:""
     };
 
     const [custdata, setCustData] = useState(initialvalues);
@@ -53,11 +60,12 @@ function CustomerList(props) {
             MiddleName: "",
             LastName: "",
             MobileNo: "",
-            DOB: "",
+            //DOB: "",
             CustomerTypeId: "",
             Email: "",
             IsActive: true,
-            ProfileImageUrl: "annonymous.jpg"
+            ProfileImageUrl: "annonymous.jpg",
+            Address:""
         })
     }
 
@@ -70,11 +78,12 @@ function CustomerList(props) {
             MiddleName: customerData.MiddleName,
             LastName: customerData.LastName,
             MobileNo: customerData.MobileNo,
-            DOB: customerData.DOB,
+            //DOB: customerData.DOB,
             CustomerTypeId: customerData.CustomerTypeId,
             Email: customerData.Email,
             IsActive: customerData.IsActive,
-            ProfileImageUrl: customerData.ProfileImageUrl
+            ProfileImageUrl: customerData.ProfileImageUrl,
+            Address:customerData.Address
         })
     }
 
@@ -96,18 +105,24 @@ function CustomerList(props) {
         setCustData({ ...custdata, MobileNo: e.target.value });
     }
 
-    const dobChange = (e) => {
-        setCustData({ ...custdata, DOB: e.target.value });
-    }
+    // const dobChange = (e) => {
+    //     setCustData({ ...custdata, DOB: e.target.value });
+    // }
 
     const custTypeChange = (e) => {
         setCustData({ ...custdata, CustomerTypeId: e.target.value });
     }
 
+    const addresschange = (e) => {
+        setCustData({ ...custdata, Address: e.target.value });
+    }
+
+    
+
     const deleteCustomer = (id) => {
 
         if (window.confirm('Are you sure?')) {
-            fetch(variables.REACT_APP_API + 'Customer/' + id, {
+            fetch(process.env.REACT_APP_API + 'Customer/' + id, {
                 method: 'DELETE',
                 header: {
                     'Accept': 'application/json',
@@ -150,7 +165,7 @@ function CustomerList(props) {
     }, [obj]);
 
     const fetchCustomer = async () => {
-        fetch(variables.REACT_APP_API + 'Customer/GetCustomer',
+        fetch(process.env.REACT_APP_API + 'Customer/GetCustomer',
             {
                 method: 'GET',
                 headers: {
@@ -162,8 +177,10 @@ function CustomerList(props) {
             .then(response => response.json())
             .then(data => {
                 if (data.StatusCode === 200) {
+                   // _filterList = _filterList.filter((c) => c.CustomerTypeId == custType);
                     setCustomerList(data.Result);
-                    setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
+                    setCustomerListForFilter(data.Result);
+                    setTotalPages(Math.ceil(data.Result.length / process.env.REACT_APP_PAGE_PAGINATION_NO));
                 }
                 else if (data.StatusCode === 401) {
                     history("/login")
@@ -178,7 +195,7 @@ function CustomerList(props) {
     }
 
     const fetchCutomerTypes = async () => {
-        fetch(variables.REACT_APP_API + 'ProductType/GetProductType',
+        fetch(process.env.REACT_APP_API + 'ProductType/GetProductType',
             {
                 method: 'GET',
                 headers: {
@@ -208,7 +225,7 @@ function CustomerList(props) {
         e.preventDefault();
         const formData = new FormData();
         formData.append("file", e.target.files[0], e.target.files[0].name);
-        fetch(variables.REACT_APP_API + 'Customer/SaveProfileImage', {
+        fetch(process.env.REACT_APP_API + 'Customer/SaveProfileImage', {
             method: 'POST',
             headers: {
                 'Authorization': localStorage.getItem('token')
@@ -241,7 +258,7 @@ function CustomerList(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'Customer/UpdateCustomer', {
+            fetch(process.env.REACT_APP_API + 'Customer/UpdateCustomer', {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -254,11 +271,12 @@ function CustomerList(props) {
                     MiddleName: custdata.MiddleName,
                     LastName: custdata.LastName,
                     MobileNo: custdata.MobileNo,
-                    DOB: custdata.DOB,
+                    //DOB: custdata.DOB,
                     CustomerTypeId: custdata.CustomerTypeId,
                     Email: custdata.Email,
                     IsActive: custdata.IsActive,
-                    ProfileImageUrl: custdata.ProfileImageUrl
+                    ProfileImageUrl: custdata.ProfileImageUrl,
+                    Address:custdata.Address
 
                 })
             }).then(res => res.json())
@@ -304,7 +322,7 @@ function CustomerList(props) {
             e.stopPropagation();
         }
         else {
-            fetch(variables.REACT_APP_API + 'Customer/AddCustomer', {
+            fetch(process.env.REACT_APP_API + 'Customer/AddCustomer', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -317,11 +335,12 @@ function CustomerList(props) {
                     MiddleName: custdata.MiddleName,
                     LastName: custdata.LastName,
                     MobileNo: custdata.MobileNo,
-                    DOB: custdata.DOB,
+                   // DOB: custdata.DOB,
                     CustomerTypeId: custdata.CustomerTypeId,
                     Email: custdata.Email,
                     IsActive: custdata.IsActive,
-                    ProfileImageUrl: custdata.ProfileImageUrl
+                    ProfileImageUrl: custdata.ProfileImageUrl,
+                    Address:custdata.Address
 
                 })
             }).then(res => res.json())
@@ -364,10 +383,41 @@ function CustomerList(props) {
     const preDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages
 
-    const itemsPerPage = variables.PAGE_PAGINATION_NO;
+    const itemsPerPage = process.env.REACT_APP_PAGE_PAGINATION_NO;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const itemsToDiaplay = customerlist.slice(startIndex, endIndex);
+
+
+    const onCustomerTypeChange = (e) => {
+        setFilterCutomerType(e.target.value);
+        getFilterCustomerListData(filterCutomerName,e.target.value);
+    }
+
+    const customerNameSearch = (e) => {
+        setFilterCutomerName(e.target.value);
+        getFilterCustomerListData(e.target.value,filterCutomerType);
+    }
+
+    const getFilterCustomerListData = (custname, custType) => {
+        let _filterList = [];
+        if (custname !== "") {
+            _filterList = customerListForFilter.filter(((c) => c.FirstName
+            .toLowerCase().includes(custname.toLowerCase()) || 
+            c.LastName.toLowerCase().includes(custname.toLowerCase())) 
+            );
+        }
+        else {
+            _filterList = customerListForFilter;
+        }
+
+        if (custType > 0) {
+            _filterList = _filterList.filter((c) => c.CustomerTypeId == custType);
+        }
+        setCustomerList(_filterList);
+    }
+
+
 
 
     return (
@@ -375,8 +425,46 @@ function CustomerList(props) {
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
                 <h2>Welcome to Customer List  page</h2>
             </div>
+            <div className="container" style={{ marginTop: '10px' }}>
+                <div className="row align-items-center">
+                    <div className="col">
+                        <InputField  label="Customer name"
+                                                type="text"
+                                                value={filterCutomerName}
+                                                name="CustomerName"
+                                                placeholder="Search customer"
+                                                onChange={customerNameSearch}
+                                                required={false}
+                                                disabled={false}
+                                            />
+                    </div>
+                   
+                    <div className="col">
+                        
+                    <label class="form-label">Customer Type</label>
+                        
+                        <Form.Select aria-label="Default select example"
+                            onChange={onCustomerTypeChange}>
+                            <option selected value="">Choose...</option>
+                            {
+                                producttypes.map((item) => {
+                                    return (
+                                        <option
+                                            key={item.ProductId}
+                                            defaultValue={item.ProductId == null ? null : item.ProductId}
+                                            selected={item.ProductId === filterCutomerType}
+                                            value={item.ProductId}
+                                        >{item.ProductName}</option>
+                                       
+                                    );
+                                })
+                            }
+                        </Form.Select>
+                    </div>
+                </div>
+            </div>
             <div className="row">
-                <div className="col" style={{ textAlign: 'right' }}>
+                <div className="col" style={{ textAlign: 'right', marginTop: '20px'  }}>
                     <Button className="mr-2" variant="primary"
                         style={{ marginRight: "17.5px" }}
                         onClick={() => clickAddCustomer()}>Add</Button>
@@ -387,13 +475,11 @@ function CustomerList(props) {
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
                     <tr align='left' className="tr-custom">
-                        <th>First name</th>
-                        <th>Middle name</th>
-                        <th>Last name</th>
+                        <th>Name</th>
                         <th>Mobile no</th>
                         <th>Customer type</th>
                         <th>Email</th>
-                        <th>DOB</th>
+                        <th>Address</th>
                         <th>Options</th>
                     </tr>
                 </thead>
@@ -406,26 +492,31 @@ function CustomerList(props) {
                             //console.log(itemsToDiaplay.length);
                             const ctype = producttypes.filter((c) => c.ProductId === p.CustomerTypeId);
                             const cname = ctype.length > 0 ? ctype[0].ProductName : "";
+                            let fullname=(p.MiddleName!="" && p.MiddleName!=null) ? p.FirstName+" "+p.MiddleName+" "+p.LastName: 
+                            p.FirstName+" "+p.LastName;
                             return (
                                 <tr align='center' key={p.ID}>
                                     <td align='left'>
                                         {
+
+
                                             p.CustomerTypeId===4 ?  
-                                            <a href={`/birdsale/?uid=${p.ID}`}>{p.FirstName}
+                                            <a href={`/birdsale/?uid=${p.ID}`}>{fullname}
                                             <span className="sr-only">(current)</span></a>
-                                            : <a href={`/eggsale/${p.ID}`}>{p.FirstName}
+                                            : <a href={`/eggsale/?uid=${p.ID}`}>{fullname}
                                             <span className="sr-only">(current)</span></a>
                                         }
                                         {/* <a href={`/eggsale/${p.ID}`}>{p.FirstName}
                                             <span className="sr-only">(current)</span></a> */}
 
                                     </td>
-                                    <td align='left'>{p.MiddleName}</td>
-                                    <td align='left'>{p.LastName}</td>
+                                    {/* <td align='left'>{p.MiddleName}</td>
+                                    <td align='left'>{p.LastName}</td> */}
                                     <td align='left'>{p.MobileNo}</td>
                                     <td align='left'>{cname}</td>
                                     <td align='left'>{p.Email}</td>
-                                    <td align='left'>{moment(p.DOB).format('DD-MMM-YYYY')}</td>
+                                    <td align='left'>{p.Address}</td>
+                                    {/* <td align='left'>{moment(p.DOB).format('DD-MMM-YYYY')}</td> */}
                                     {/* <td>
                                         <ButtonToolbar>
                                             <Button className="mr-2" variant="primary"
@@ -455,34 +546,39 @@ function CustomerList(props) {
                     }
                 </tbody>
             </Table >
-
-            <button
-                onClick={handlePrevClick}
-                disabled={preDisabled}
-            >
-                Prev
-            </button>
             {
-                Array.from({ length: totalPages }, (_, i) => {
-                    return (
-                        <button
-                            onClick={() => handlePageChange(i + 1)}
-                            key={i}
-                            disabled={i + 1 === currentPage}
-                        >
-                            {i + 1}
-                        </button>
-                    )
-                })
+ customerlist && customerlist.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
+ <>
+ <button
+     onClick={handlePrevClick}
+     disabled={preDisabled}
+ >
+     Prev
+ </button>
+ {
+     Array.from({ length: totalPages }, (_, i) => {
+         return (
+             <button
+                 onClick={() => handlePageChange(i + 1)}
+                 key={i}
+                 disabled={i + 1 === currentPage}
+             >
+                 {i + 1}
+             </button>
+         )
+     })
+ }
+
+
+ <button
+     onClick={handleNextClick}
+     disabled={nextDisabled}
+ >
+     Next
+ </button>
+ </>
             }
-
-
-            <button
-                onClick={handleNextClick}
-                disabled={nextDisabled}
-            >
-                Next
-            </button>
+           
 
             <div className="ContainerOverride" id="exampleModal">
                 <Modal
@@ -549,7 +645,7 @@ function CustomerList(props) {
                                                 placeholder="Email"
                                                 errormessage="Please enter email"
                                                 onChange={emailChange}
-                                                required={true}
+                                                required={false}
                                                 disabled={false}
                                             />
 
@@ -589,17 +685,29 @@ function CustomerList(props) {
                                                 </Form.Control.Feedback>
                                             </Form.Group>
                                         </Row>
+                                        <Row className="mb-12">
+                                        <InputField controlId="Address" label="Address"
+                                                type="text"
+                                                value={custdata.Address}
+                                                name="Address"
+                                                placeholder="Address"
+                                                errormessage="Please enter Address"
+                                                onChange={addresschange}
+                                                required={true}
+                                                disabled={false}
+                                            />
+                                            </Row>
 
-                                        <Row className="mb-3">
+                                        {/* <Row className="mb-3">
                                             <Form.Group as={Col} controlId="DOB">
                                                 <Form.Label>DOB</Form.Label>
-                                                <DateComponent date={null} onChange={dobChange} isRequired={true} value={custdata.DOB} />
+                                                <DateComponent date={null} onChange={dobChange} isRequired={false} value={custdata.DOB} />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please select DOB
                                                 </Form.Control.Feedback>
                                             </Form.Group>
 
-                                        </Row>
+                                        </Row> */}
                                         <Row className="mb-12">
                                             <Form.Group as={Col} controlId="ProfileImageUrl">
                                                 <Form.Label>Customer photo</Form.Label>
@@ -609,7 +717,7 @@ function CustomerList(props) {
                                                 </Form.Control.Feedback>
                                             </Form.Group>
                                             <Form.Group as={Col} controlId="ProfileImageUrl">
-                                                <img width="250px" height="250px" src={variables.PHOTO_URL + custdata.ProfileImageUrl} />
+                                                <img width="250px" height="250px" src={process.env.REACT_APP_PHOTO_URL + custdata.ProfileImageUrl} />
                                             </Form.Group>
                                         </Row>
 
