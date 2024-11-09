@@ -96,9 +96,9 @@ const InvoiceEggSale = (props) => (
             {/* <Image style={styles.logo} src={props.companydetails.CompanyLogo} /> */}
             {/* <Image style={styles.logo} src={logo} /> */}
             <View style={styles.sectionROW}>
-                <Company style={{marginTop:10}} companydetails={props.companydetails} />
-                <BillTo style={{marginTop:10}}  customerdetails={props.customerdetails}  
-                eggsaledata={props.eggsaledata} />
+                <Company style={{marginTop:8}} companydetails={props.companydetails} />
+                <BillTo style={{marginTop:8}}  customerdetails={props.customerdetails}  
+                vehicle={props.eggsaledata} />
             </View>
             <View style={styles.gap}></View>
 
@@ -107,8 +107,10 @@ const InvoiceEggSale = (props) => (
             {/* <BillTo customerdetails={props.customerdetails} /> */}
 
 
-            <InvoiceItemsTable eggsaledata={props.eggsaledata} eggcategory={props.eggcategory} />
-            <InvoiceThankYouMsg />
+            <InvoiceItemsTable eggsaledata={props.eggsaledata} 
+            eggcategory={props.eggcategory} />
+            
+            <InvoiceThankYouMsg bankdetails={props.bankdetails}/>
         </Page>
     </Document>
 );

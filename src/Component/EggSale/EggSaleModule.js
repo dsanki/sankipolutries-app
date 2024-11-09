@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import moment from 'moment';
 import { ErrorMessageHandle } from '../../Utility';
 import InputField from '../ReuseableComponent/InputField'
+import PaymentControl from '../ReuseableComponent/PaymentControl'
 import DateComponent from '../DateComponent';
 import {
     dateyyyymmdd, HandleLogout, downloadExcel,
@@ -23,6 +24,13 @@ function EggSaleModule(props) {
 
     let history = useNavigate();
     const { uid, invid } = useParams();
+    // const search = useLocation().search;
+    // const [_uid, setUid] = useState(new URLSearchParams(search).get('uid'));
+    // const [_invid, setInvid] = useState(new URLSearchParams(search).get('invid'));
+
+// console.log(_uid);
+// console.log(_invid);
+
     const [eggsalelist, setEggSaleList] = useState([]);
     const [customerdetails, setCustomerDetails] = useState([]);
     const [count, setCount] = useState(0);
@@ -42,6 +50,18 @@ function EggSaleModule(props) {
     const objupdate = useMemo(() => ({ ucount }), [ucount]);
 
     const [tmpidcount, setTempIdCount] = useState(0);
+
+    const [additionalCharge, setAdditionalCharge] = useState(0);
+
+    const _bankdetails={
+        BankName:"",
+        AccountNo:"",
+        IfscCode:"",
+        BranchName:""
+
+    }
+
+    const [bankdetails, setBankDetails] = useState(_bankdetails);
     const initialeggsalevalues = {
 
         Id: 0,
@@ -55,8 +75,9 @@ function EggSaleModule(props) {
         EggSaleInvoiceId: 0,
         EggCategory: "",
         tempid: 0,
-        VehicleNo:""
-
+        EggPack:"",
+        EggLose:""
+       
     };
 
     const initialeggsaleinvoicevalues = {
@@ -72,7 +93,14 @@ function EggSaleModule(props) {
         Paid: "",
         Due: "",
         EggSale: [initialeggsalevalues],
-        VehicleNo:""
+        VehicleNo:"",
+        AdditionalCharge:"",
+        Cash:"",
+        PhonePay:"",
+        NetBanking:"",
+        UPI:"",
+        Cheque:"",
+        Advance:"",
 
     };
 
@@ -103,7 +131,15 @@ function EggSaleModule(props) {
             Paid: eggsaleinvdata.Paid,
             Due: eggsaleinvdata.Due,
             EggSale: [],
-            VehicleNo:eggsaleinvdata.VehicleNo
+            VehicleNo:eggsaleinvdata.VehicleNo,
+            AdditionalCharge:eggsaleinvdata.AdditionalCharge,
+
+            Cash:eggsaleinvdata.Cash,
+            PhonePay:eggsaleinvdata.PhonePay,
+            NetBanking:eggsaleinvdata.NetBanking,
+            UPI:eggsaleinvdata.UPI,
+            Cheque:eggsaleinvdata.Cheque,
+            Advance:eggsaleinvdata.Advance
 
         })
     }
@@ -127,7 +163,9 @@ function EggSaleModule(props) {
             TotalDiscount: eggsale.TotalDiscount,
             EggSaleInvoiceId: eggsale.EggSaleInvoiceId,
             tempid: eggsale.tempid,
-            VehicleNo:eggsale.VehicleNo
+            EggPack:eggsale.EggPack,
+            EggLose:eggsale.EggLose
+          
         })
     }
 
@@ -142,6 +180,8 @@ function EggSaleModule(props) {
         }
     }
 
+    
+
     const eggCategoryChange = (e) => {
         setEggSaletData({ ...eggsaledata, EggCategory: e.target.value });
     }
@@ -153,10 +193,26 @@ function EggSaleModule(props) {
         setEggSaleInvoiceData({ ...eggsaleinvdata, VehicleNo: e.target.value });
     }
 
+    const additionalChargeChange = (e) => {
+        let addch=parseFloat(e.target.value||0);
+       
+        setEggSaleInvoiceData({ ...eggsaleinvdata, AdditionalCharge: e.target.value,
+
+            Due:(parseFloat(eggsaleinvdata.TotalCost||0)-parseFloat(eggsaleinvdata.TotalDiscount))+addch,
+            //Due:parseFloat(eggsaleinvdata.Due||0)+addch,
+            //FinalCostInvoice:(e.target.value * eggsaledata.EggRate) - (e.target.value * eggsaledata.DiscountPerEgg)
+            FinalCostInvoice:(parseFloat(eggsaleinvdata.TotalCost||0)-parseFloat(eggsaleinvdata.TotalDiscount))+addch
+        });
+
+        //setAdditionalCharge(addch);
+    }
+   
+
     const paidChange = (e) => {
         const re = /^\d*\.?\d{0,2}$/
         if (e.target.value === '' || re.test(e.target.value)) {
-            setEggSaleInvoiceData({ ...eggsaleinvdata, Paid: e.target.value, Due: (eggsaleinvdata.FinalCostInvoice - e.target.value) });
+            setEggSaleInvoiceData({ ...eggsaleinvdata, Paid: e.target.value, 
+                Due: (eggsaleinvdata.FinalCostInvoice - e.target.value) });
         }
     }
     const eggRateChange = (e) => {
@@ -176,6 +232,36 @@ function EggSaleModule(props) {
         }
     }
 
+  
+
+    const eggpackChange = (e) => {
+        const re = /^[0-9\b]+$/;
+        if (e.target.value === '' || re.test(e.target.value)) {
+            let totalquantity=(parseInt(e.target.value||0)*210)+ (parseInt(eggsaledata.EggLose||0));
+            setEggSaletData({
+                ...eggsaledata,EggPack:e.target.value,
+                 Quantity: totalquantity, 
+                 TotalCost:totalquantity * eggsaledata.EggRate,
+                TotalDiscount: totalquantity * eggsaledata.DiscountPerEgg,
+                FinalCost: (totalquantity * eggsaledata.EggRate) - (totalquantity * eggsaledata.DiscountPerEgg)
+            });
+        }
+    }
+
+    const eggloseChange = (e) => {
+        const re = /^[0-9\b]+$/;
+        if (e.target.value === '' || re.test(e.target.value)) {
+            let totalquantity=(parseInt(e.target.value||0))+ (parseInt(eggsaledata.EggPack||0)*210);
+            setEggSaletData({
+                ...eggsaledata,EggLose:e.target.value,
+                 Quantity: totalquantity, 
+                 TotalCost:totalquantity * eggsaledata.EggRate,
+                TotalDiscount: totalquantity * eggsaledata.DiscountPerEgg,
+                FinalCost: (totalquantity * eggsaledata.EggRate) - (totalquantity * eggsaledata.DiscountPerEgg)
+            });
+        }
+    }
+
     // const paidChange = (e) => {
     //     const re = /^\d*\.?\d{0,2}$/
     //     if (e.target.value === '' || re.test(e.target.value)) {
@@ -187,6 +273,109 @@ function EggSaleModule(props) {
         setEggSaletData({ ...eggsaledata, Comments: e.target.value });
     }
 
+    const cashChange = (e) => {
+        const re = /^\d*\.?\d{0,2}$/
+        
+        if (e.target.value === '' || re.test(e.target.value)) {
+            let cashamt=parseFloat(e.target.value||0);
+            setEggSaleInvoiceData({ ...eggsaleinvdata, Cash:e.target.value, 
+                Paid: (cashamt+parseFloat(eggsaleinvdata.PhonePay||0)+
+                parseFloat(eggsaleinvdata.NetBanking||0)+parseFloat(eggsaleinvdata.UPI||0)
+                +parseFloat(eggsaleinvdata.Cheque||0)), 
+                Due: (eggsaleinvdata.FinalCostInvoice - 
+                    (cashamt+ parseFloat(eggsaleinvdata.PhonePay||0)+
+                parseFloat(eggsaleinvdata.NetBanking||0)+parseFloat(eggsaleinvdata.UPI||0)
+                +parseFloat(eggsaleinvdata.Cheque||0))
+                ) });
+        }
+    }
+
+    const phonePayChange = (e) => {
+        const re = /^\d*\.?\d{0,2}$/
+        
+        if (e.target.value === '' || re.test(e.target.value)) {
+            let phpayamt=parseFloat(e.target.value||0);
+        //setEggSaleInvoiceData({ ...eggsaleinvdata, VehicleNo: e.target.value });
+
+        setEggSaleInvoiceData({ ...eggsaleinvdata, PhonePay:e.target.value, 
+            Paid: (phpayamt+parseFloat(eggsaleinvdata.Cash||0)+
+            parseFloat(eggsaleinvdata.NetBanking||0)+parseFloat(eggsaleinvdata.UPI||0)
+            +parseFloat(eggsaleinvdata.Cheque||0)), 
+            Due: (eggsaleinvdata.FinalCostInvoice - 
+                (phpayamt+ parseFloat(eggsaleinvdata.Cash||0)+
+            parseFloat(eggsaleinvdata.NetBanking||0)+parseFloat(eggsaleinvdata.UPI||0)
+            +parseFloat(eggsaleinvdata.Cheque||0))
+            ) });
+    }
+}
+
+    const netBankingChange = (e) => {
+        const re = /^\d*\.?\d{0,2}$/
+
+        if (e.target.value === '' || re.test(e.target.value)) {
+            let nbamt=parseFloat(e.target.value||0);
+
+            setEggSaleInvoiceData({ ...eggsaleinvdata, NetBanking:e.target.value, 
+                Paid: (nbamt+parseFloat(eggsaleinvdata.Cash||0)+
+                parseFloat(eggsaleinvdata.PhonePay||0)+parseFloat(eggsaleinvdata.UPI||0)
+                +parseFloat(eggsaleinvdata.Cheque||0)), 
+                Due: (eggsaleinvdata.FinalCostInvoice - 
+                    (nbamt+ parseFloat(eggsaleinvdata.Cash||0)+
+                parseFloat(eggsaleinvdata.PhonePay||0)+parseFloat(eggsaleinvdata.UPI||0)
+                +parseFloat(eggsaleinvdata.Cheque||0))
+                ) });
+            }
+}
+
+const advanceChange = (e) => {
+    const re = /^\d*\.?\d{0,2}$/
+    if (e.target.value === '' || re.test(e.target.value)) {
+        setEggSaleInvoiceData({ ...eggsaleinvdata, Advance: e.target.value});
+    }
+}
+
+    const upiChange = (e) => {
+        const re = /^\d*\.?\d{0,2}$/
+
+        if (e.target.value === '' || re.test(e.target.value)) {
+            let upiamt=parseFloat(e.target.value||0);
+
+            setEggSaleInvoiceData({ ...eggsaleinvdata, UPI:e.target.value, 
+                Paid: (upiamt+parseFloat(eggsaleinvdata.Cash||0)+
+                parseFloat(eggsaleinvdata.PhonePay||0)+parseFloat(eggsaleinvdata.NetBanking||0)
+                +parseFloat(eggsaleinvdata.Cheque||0)), 
+                Due: (eggsaleinvdata.FinalCostInvoice - 
+                    (upiamt+ parseFloat(eggsaleinvdata.Cash||0)+
+                parseFloat(eggsaleinvdata.PhonePay||0)+parseFloat(eggsaleinvdata.NetBanking||0)
+                +parseFloat(eggsaleinvdata.Cheque||0))
+                ) });
+            }
+}
+
+    const chequeChange = (e) => {
+        const re = /^\d*\.?\d{0,2}$/
+
+        if (e.target.value === '' || re.test(e.target.value)) {
+            let chqamt=parseFloat(e.target.value||0);
+
+            setEggSaleInvoiceData({ ...eggsaleinvdata, Cheque:e.target.value, 
+                Paid: (chqamt+parseFloat(eggsaleinvdata.Cash||0)+
+                parseFloat(eggsaleinvdata.PhonePay||0)+parseFloat(eggsaleinvdata.NetBanking||0)
+                +parseFloat(eggsaleinvdata.UPI||0)), 
+                Due: (eggsaleinvdata.FinalCostInvoice - 
+                    (chqamt+ parseFloat(eggsaleinvdata.Cash||0)+
+                parseFloat(eggsaleinvdata.PhonePay||0)+parseFloat(eggsaleinvdata.NetBanking||0)
+                +parseFloat(eggsaleinvdata.UPI||0))
+                ) });
+            }
+    }
+
+
+
+
+
+
+
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
@@ -194,6 +383,11 @@ function EggSaleModule(props) {
             fetchCustomerDetails(uid);
             fetchCompanyDetails();
             fetchEggCategory();
+            setBankDetails({ ...bankdetails, BankName: process.env.REACT_APP_BANK_NAME,
+                AccountNo:process.env.REACT_APP_ACCOUNT_NO,
+                IfscCode: process.env.REACT_APP_IFSC_CODE,
+                BranchName:process.env.REACT_APP_BRANCH_NAME
+             })
         }
         else {
             HandleLogout();
@@ -227,7 +421,7 @@ function EggSaleModule(props) {
                 return accumulator;
             }, { totalCost: 0, totalQuantity: 0, totalDiscount: 0, totalFinalCost: 0 })
 
-            setEggSaleInvoiceData({ ...eggsaleinvdata, TotalQuantity: totalQuantity, TotalCost: totalCost, TotalDiscount: totalDiscount, FinalCostInvoice: totalFinalCost });
+            setEggSaleInvoiceData({ ...eggsaleinvdata, TotalQuantity: totalQuantity, TotalCost: totalCost, TotalDiscount: totalDiscount, FinalCostInvoice: totalFinalCost,Due:totalFinalCost });
         }
         else {
             HandleLogout();
@@ -367,7 +561,9 @@ function EggSaleModule(props) {
                 FinalCost: eggsaledata.FinalCost,
                 EggSaleInvoiceId: eggsaledata.EggSaleInvoiceId,
                 Comments: eggsaledata.Comments,
-                tempid: tmpidcount + 1
+                tempid: tmpidcount + 1,
+                EggPack:eggsaledata.EggPack,
+                EggLose:eggsaledata.EggLose
             };
 
             setTempIdCount(tmpidcount);
@@ -402,7 +598,9 @@ function EggSaleModule(props) {
                 FinalCost: eggsaledata.FinalCost,
                 EggSaleInvoiceId: eggsaledata.EggSaleInvoiceId,
                 Comments: eggsaledata.Comments,
-                tempid: tmpidcount
+                tempid: tmpidcount,
+                EggPack:eggsaledata.EggPack,
+                EggLose:eggsaledata.EggLose
             };
 
             if (eggsaledata.Id > 0) {
@@ -509,18 +707,25 @@ function EggSaleModule(props) {
                     PurchaseDate: eggsaleinvdata.PurchaseDate,
                     TotalCost: eggsaleinvdata.TotalCost,
                     TotalDiscount: eggsaleinvdata.TotalDiscount,
-                    FinalCostInvoice: eggsaleinvdata.FinalCostInvoice,
+                    FinalCostInvoice: Math.round(eggsaleinvdata.FinalCostInvoice),
                     Paid: eggsaleinvdata.Paid,
-                    Due: eggsaleinvdata.Due,
+                    Due: Math.round(eggsaleinvdata.Due),
                     EggSaleList: eggsalearr,
-                    VehicleNo:eggsaleinvdata.VehicleNo
+                    VehicleNo:eggsaleinvdata.VehicleNo,
+                    AdditionalCharge:eggsaleinvdata.AdditionalCharge,
+                    Cash:eggsaleinvdata.Cash,
+                    PhonePay:eggsaleinvdata.PhonePay,
+                    NetBanking:eggsaleinvdata.NetBanking,
+                    UPI:eggsaleinvdata.UPI,
+                    Cheque:eggsaleinvdata.Cheque,
+                    Advance:eggsaleinvdata.Advance
 
                 })
             }).then(res => res.json())
                 .then((result) => {
 
                     if (result.StatusCode === 200) {
-                        history("/eggsale/" + uid);
+                        history("/eggsale/?uid=" + uid);
                     }
                     else if (result.StatusCode === 401) {
                         HandleLogout();
@@ -540,7 +745,7 @@ function EggSaleModule(props) {
     }
 
     const clickBack = () => {
-        history("/eggsale/" + uid);
+        history("/eggsale/?uid=" + uid);
     }
 
     const clickUpdateEggInvoiceDetails = (e) => {
@@ -568,18 +773,25 @@ function EggSaleModule(props) {
                     PurchaseDate: eggsaleinvdata.PurchaseDate,
                     TotalCost: eggsaleinvdata.TotalCost,
                     TotalDiscount: eggsaleinvdata.TotalDiscount,
-                    FinalCostInvoice: eggsaleinvdata.FinalCostInvoice,
+                    FinalCostInvoice: Math.round(eggsaleinvdata.FinalCostInvoice),
                     Paid: eggsaleinvdata.Paid,
-                    Due: eggsaleinvdata.Due,
+                    Due: Math.round(eggsaleinvdata.Due),
                     EggSaleList: eggsalearr,
-                    VehicleNo:eggsaleinvdata.VehicleNo
+                    VehicleNo:eggsaleinvdata.VehicleNo,
+                    AdditionalCharge:eggsaleinvdata.AdditionalCharge,
+                    Cash:eggsaleinvdata.Cash,
+                    PhonePay:eggsaleinvdata.PhonePay,
+                    NetBanking:eggsaleinvdata.NetBanking,
+                    UPI:eggsaleinvdata.UPI,
+                    Cheque:eggsaleinvdata.Cheque,
+                    Advance:eggsaleinvdata.Advance
 
                 })
             }).then(res => res.json())
                 .then((result) => {
 
                     if (result.StatusCode === 200) {
-                        history("/eggsale/" + uid);
+                        history("/eggsale/?uid=" +uid);
                         props.showAlert("Successfully updated!!", "info")
                     }
                     else if (result.StatusCode === 401) {
@@ -673,14 +885,23 @@ function EggSaleModule(props) {
                             const catname = filterByCategorydId.length > 0 ? filterByCategorydId[0].EggCategoryName : "";
 
                             return (
-                                <tr align='center' key={i}>
+                                <tr align='center' key={i} style={{fontSize:14}} >
                                     <td align='center'>{catname}</td>
                                     <td align='center'>{p.EggRate}</td>
-                                    <td align='center'>{p.Quantity}
+                                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                                    }).format(parseInt(p.Quantity))}
                                     </td>
 
-                                    <td align='center'> {p.TotalCost !== "" ? parseFloat(p.TotalCost).toFixed(2) : p.TotalCost}
-                                    </td>
+
+                                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }).format(parseFloat(parseFloat(p.TotalCost).toFixed(2)))}</td>
+
+
+
+                                    {/* <td align='center'> {p.TotalCost !== "" ?  parseFloat(p.TotalCost).toFixed(2) : p.TotalCost}
+                                    </td> */}
 
                                     <td align='center'>{p.DiscountPerEgg}</td>
 
@@ -715,14 +936,34 @@ function EggSaleModule(props) {
                     }
                 </tbody>
                 {
-                    eggsalearr.length > 0 && <tfoot style={{ backgroundColor: '#cccccc', fontWeight: 'bold' }}>
+                    eggsalearr.length > 0 && <tfoot style={{ backgroundColor: '#cccccc', fontWeight: 'bold', fontSize:14 }}>
                         <td align='center'>Total</td>
                         <td align='center'>-</td>
-                        <td align='center'>{eggsaleinvdata.TotalQuantity >= 0 ? eggsaleinvdata.TotalQuantity : eggsaleinvdata.TotalQuantity}</td>
-                        <td align='center'>{parseFloat(eggsaleinvdata.TotalCost).toFixed(2)}</td>
+                        <td align='center'>{eggsaleinvdata.TotalQuantity >= 0 ? new Intl.NumberFormat('en-IN', {
+                                    }).format(parseInt(eggsaleinvdata.TotalQuantity)) : eggsaleinvdata.TotalQuantity}</td>
+                      
+                      <td align='center'>{new Intl.NumberFormat('en-IN', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }).format(parseFloat(parseFloat(eggsaleinvdata.TotalCost).toFixed(2)))}</td>
+                      
+                      
+                        {/* <td align='center'>{parseFloat(eggsaleinvdata.TotalCost).toFixed(2)}</td> */}
                         <td align='center'>-</td>
-                        <td align='center'>{eggsaleinvdata.TotalDiscount}</td>
-                        <td align='center'>{parseFloat(eggsaleinvdata.FinalCostInvoice).toFixed(2)}</td>
+
+                        <td align='center'>{new Intl.NumberFormat('en-IN', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }).format(parseFloat(parseFloat(eggsaleinvdata.TotalDiscount).toFixed(2)))}</td>
+                        {/* <td align='center'>{eggsaleinvdata.TotalDiscount}</td> */}
+
+                        <td align='center'>{new Intl.NumberFormat('en-IN', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }).format(parseFloat(Math.round(parseFloat(eggsaleinvdata.FinalCostInvoice)).toFixed(2)))}</td>
+
+
+                        {/* <td align='center'>{ parseFloat(Math.round(parseFloat(eggsaleinvdata.FinalCostInvoice))- parseFloat(additionalCharge)).toFixed(2)}</td> */}
                         <td></td>
                         <td></td>
                     </tfoot>
@@ -735,15 +976,39 @@ function EggSaleModule(props) {
                     <Row className="mb-12">
 
                         <Form.Group as={Col} controlId="PurchaseDate">
-                            <Form.Label>Purchase Date *</Form.Label>
-                            <DateComponent date={null} onChange={purchaseDateChange} isRequired={true} value={eggsaleinvdata.PurchaseDate} />
+                            <Form.Label style={{fontSize:13}}>Purchase Date *</Form.Label>
+                            <DateComponent date={null} onChange={purchaseDateChange} 
+                            isRequired={true} value={eggsaleinvdata.PurchaseDate} />
                             <Form.Control.Feedback type="invalid">
                                 Please select date
                             </Form.Control.Feedback>
                         </Form.Group>
-                        <InputField controlId="FinalCostInvoice" label="Final cost *"
+
+                        <InputField controlId="AdditionalCharge" label="Additional charge"
                             type="number"
-                            value={eggsaleinvdata.FinalCostInvoice >= 0 ? parseFloat(eggsaleinvdata.FinalCostInvoice).toFixed(2) : eggsaleinvdata.FinalCostInvoice}
+                            value={eggsaleinvdata.AdditionalCharge}
+                            name="AdditionalCharge"
+                            placeholder="Additional charge"
+                            errormessage="Please enter Additional charge"
+                            required={false}
+                            disabled={false}
+                            onChange={additionalChargeChange}
+                        />
+
+                           
+
+                    <InputField controlId="FinalCostInvoice" label="Final cost *"
+                            type="number"
+
+                            // new Intl.NumberFormat('en-IN', {
+                            //     minimumFractionDigits: 2,
+                            //     maximumFractionDigits: 2
+                            // }).format(parseFloat(parseFloat(
+                            //     Math.round(parseFloat(eggsaleinvdata.FinalCostInvoice))
+                            //     +(additionalCharge==""?0: parseFloat(additionalCharge))).toFixed(2)))
+                            value= {
+                                parseFloat(Math.round(parseFloat(eggsaleinvdata.FinalCostInvoice))).toFixed(2)
+                            }
                             name="FinalCostInvoice"
                             placeholder="Final cost"
                             errormessage="Please enter final cost"
@@ -751,7 +1016,21 @@ function EggSaleModule(props) {
                             disabled={true}
                         />
 
-                        <InputField controlId="Paid" label="Paid *"
+                        {/* <InputField controlId="FinalCostInvoice" label="Final cost *"
+                            type="number"
+                            value={eggsaleinvdata.FinalCostInvoice >= 0 ? 
+                                Math.round(parseFloat(eggsaleinvdata.FinalCostInvoice)).toFixed(2) 
+                                : eggsaleinvdata.FinalCostInvoice}
+                            name="FinalCostInvoice"
+                            placeholder="Final cost"
+                            errormessage="Please enter final cost"
+                            required={true}
+                            disabled={true}
+                        /> */}
+                        </Row>
+                        <Row>
+
+                        {/* <InputField controlId="Paid" label="Paid *"
                             type="text"
                             value={eggsaleinvdata.Paid}
                             name="Paid"
@@ -760,16 +1039,87 @@ function EggSaleModule(props) {
                             required={true}
                             disabled={false}
                             onChange={paidChange}
+                        /> */}
+
+                        <InputField controlId="Cash" label="Cash "
+                            type="text"
+                            value={eggsaleinvdata.Cash}
+                            name="Cash"
+                            placeholder="Cash"
+                            errormessage="Please enter amount"
+                            required={false}
+                            disabled={false}
+                            onChange={cashChange}
                         />
+                           <InputField controlId="PhonePay" label="Phone Pay"
+                            type="text"
+                            value={eggsaleinvdata.PhonePay}
+                            name="PhonePay"
+                            placeholder="PhonePay"
+                            errormessage="Please enter amount"
+                            required={false}
+                            disabled={false}
+                            onChange={phonePayChange}
+                        />  
+
+                        <InputField controlId="NetBanking" label="Net Banking Pay"
+                            type="text"
+                            value={eggsaleinvdata.NetBanking}
+                            name="NetBanking"
+                            placeholder="NetBanking"
+                            errormessage="Please enter amount"
+                            required={false}
+                            disabled={false}
+                            onChange={netBankingChange}
+                        />   
+
+                          <InputField controlId="UPI" label="UPI"
+                            type="text"
+                            value={eggsaleinvdata.UPI}
+                            name="UPI"
+                            placeholder="UPI"
+                            errormessage="Please enter amount"
+                            required={false}
+                            disabled={false}
+                            onChange={upiChange}
+                        />    
+
+                        <InputField controlId="Cheque" label="Cheque"
+                            type="text"
+                            value={eggsaleinvdata.Cheque}
+                            name="Cheque"
+                            placeholder="Cheque"
+                            errormessage="Please enter amount"
+                            required={false}
+                            disabled={false}
+                            onChange={chequeChange}
+                        />    
+                        </Row>
+                        <Row>
 
                         <InputField controlId="Due" label="Due *"
                             type="number"
-                            value={eggsaleinvdata.Due >= 0 ? parseFloat(eggsaleinvdata.Due).toFixed(2) : eggsaleinvdata.Due}
+                            value={parseFloat(Math.round(parseFloat(eggsaleinvdata.Due||0)
+                                ).toFixed(2))
+                                }
                             name="Due"
                             placeholder="Due"
                             errormessage="Please enter due amount"
                             required={true}
                             disabled={true}
+
+                        />
+
+<InputField controlId="Advance" label="Advance"
+                            type="number"
+                            value={eggsaleinvdata.Advance}
+                            name="Advance"
+                            placeholder="Advance"
+                            errormessage="Please enter amount"
+                            required={false}
+                            disabled={false}
+                            onChange={advanceChange}
+                            
                         />
                     </Row>
                     <Row className="mb-12">
@@ -783,7 +1133,10 @@ function EggSaleModule(props) {
                             disabled={false}
                             onChange={vehicleNoChange}
                         />
+
+
                     </Row>
+                    {/* <PaymentControl/> */}
                     <Form.Group as={Col} style={{ textAlign: 'center' }}>
                         {eggsaleinvdata.Id <= 0 ?
                             <Button variant="primary" type="submit" style={{ marginTop: "30px" }} 
@@ -864,7 +1217,9 @@ function EggSaleModule(props) {
                         <Fragment>
                             <PDFViewer width="900" height="900" className="app" >
 
-                                <InvoiceEggSale companydetails={companydetails} eggsaledata={eggsaledata} customerdetails={customerdetails} />
+                                <InvoiceEggSale companydetails={companydetails} 
+                                eggsaledata={eggsaledata} 
+                                customerdetails={customerdetails} bankdetails={bankdetails} />
                             </PDFViewer>
                         </Fragment>
                     </Modal.Body>
@@ -912,6 +1267,41 @@ function EggSaleModule(props) {
                                                     Please select egg category
                                                 </Form.Control.Feedback>
                                             </Form.Group>
+                                            <InputField controlId="EggPack" label="Egg Pack"
+                                                type="number"
+                                                value={eggsaledata.EggPack}
+                                                name="EggPack"
+                                                placeholder="EggPack"
+                                                errormessage="Please enter no of Egg Pack"
+                                                required={false}
+                                                disabled={false}
+                                                onChange={eggpackChange}
+                                            />
+
+                                            <InputField controlId="EggLose" label="Egg Lose"
+                                                type="number"
+                                                value={eggsaledata.EggLose}
+                                                name="EggLose"
+                                                placeholder="EggLose"
+                                                errormessage="Please enter no of Egg Lose"
+                                                required={false}
+                                                disabled={false}
+                                                onChange={eggloseChange}
+                                            />
+
+                                            </Row>
+
+                                            <Row>
+                                            <InputField controlId="Quantity" label="Quantity *"
+                                                type="text"
+                                                value={eggsaledata.Quantity}
+                                                name="Quantity"
+                                                placeholder="Quantity"
+                                                errormessage="Please enter quantity"
+                                                required={false}
+                                                disabled={true}
+                                                onChange={quantityChange}
+                                            />
 
                                             <InputField controlId="EggRate" label="Egg rate *"
                                                 type="text"
@@ -922,17 +1312,6 @@ function EggSaleModule(props) {
                                                 required={true}
                                                 disabled={false}
                                                 onChange={eggRateChange}
-                                            />
-
-                                            <InputField controlId="Quantity" label="Quantity *"
-                                                type="text"
-                                                value={eggsaledata.Quantity}
-                                                name="Quantity"
-                                                placeholder="Quantity"
-                                                errormessage="Please enter quantity"
-                                                required={true}
-                                                disabled={false}
-                                                onChange={quantityChange}
                                             />
                                             <InputField controlId="DiscountPerEgg" label="Discount/Egg"
                                                 type="text"

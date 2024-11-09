@@ -49,11 +49,11 @@ const InvoiceBirdSale = (props) => (
             </View>
             <View style={styles.rowComp}>
                 <Company companydetails={props.companydetails} />
-                <BillTo customerdetails={props.customerdetails} />
+                <BillTo customerdetails={props.customerdetails} vehicle={props.birdsaledata.VehicleNo} />
             </View>
             <View style={styles.gap}></View>
             <InvoiceItemsTable birdsaledata={props.birdsaledata} />
-            <InvoiceThankYouMsg />
+            <InvoiceThankYouMsg bankdetails={props.bankdetails}/>
         </Page>
     </Document>
 );

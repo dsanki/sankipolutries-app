@@ -85,7 +85,7 @@ function ClientList(props) {
     }, [obj]);
 
     const fetchClient = async () => {
-        await fetch(variables.REACT_APP_API + 'client',
+        await fetch(process.env.REACT_APP_API + 'client',
             {
                 method: 'GET',
                 headers: {
@@ -99,7 +99,7 @@ function ClientList(props) {
                 if (data.StatusCode === 200) {
                     setClients(data.Result);
                     setCount(data.Result.length);
-                    setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
+                    setTotalPages(Math.ceil(data.Result.length / process.env.REACT_APP_PAGE_PAGINATION_NO));
                 }
                 else if (data.StatusCode === 401) {
                     history("/login")
@@ -115,7 +115,7 @@ function ClientList(props) {
     }
 
     const fetchProductType = async () => {
-        await fetch(variables.REACT_APP_API + 'ProductType/GetProductType',
+        await fetch(process.env.REACT_APP_API + 'ProductType/GetProductType',
             {
                 method: 'GET',
                 headers: {
@@ -144,7 +144,7 @@ function ClientList(props) {
 
     const deleteClient = (clientid) => {
         if (window.confirm('Are you sure?')) {
-            fetch(variables.REACT_APP_API + 'Client/' + clientid, {
+            fetch(process.env.REACT_APP_API + 'Client/' + clientid, {
                 method: 'DELETE',
                 header: {
                     'Accept': 'application/json',
@@ -193,7 +193,7 @@ function ClientList(props) {
 
     const preDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages;
-    const itemsPerPage = variables.PAGE_PAGINATION_NO;
+    const itemsPerPage = process.env.REACT_APP_PAGE_PAGINATION_NO;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const itemsToDiaplay = clients && clients.length > 0 ? clients.slice(startIndex, endIndex) : [];
@@ -209,7 +209,7 @@ function ClientList(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'Client', {
+            fetch(process.env.REACT_APP_API + 'Client', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -258,7 +258,7 @@ function ClientList(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'Client', {
+            fetch(process.env.REACT_APP_API + 'Client', {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -353,7 +353,7 @@ function ClientList(props) {
 
 
             {
-                clients && clients.length > variables.PAGE_PAGINATION_NO &&
+                clients && clients.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
                 <button
                     onClick={handlePrevClick}
                     disabled={preDisabled}
@@ -365,7 +365,7 @@ function ClientList(props) {
 
                 Array.from({ length: totalPages }, (_, i) => {
                     return (
-                        clients && clients.length > variables.PAGE_PAGINATION_NO &&
+                        clients && clients.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
                         <button
                             onClick={() => handlePageChange(i + 1)}
                             key={i}
@@ -377,7 +377,7 @@ function ClientList(props) {
                 })
             }
 
-            {clients && clients.length > variables.PAGE_PAGINATION_NO &&
+            {clients && clients.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
                 <button
                     onClick={handleNextClick}
                     disabled={nextDisabled}

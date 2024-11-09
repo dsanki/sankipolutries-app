@@ -7,7 +7,7 @@ import DateComponent from '../DateComponent';
 import InputField from '../ReuseableComponent/InputField'
 import { FetchUnit, FetchShedsList, FetchLots, FetchLotById, FetchShedLotMapList, FetchBirdSaleList, 
     dateyyyymmdd, downloadExcel, HandleLogout, NumberInputKeyDown,FetchCompanyDetails,
-    AmountInWords,ReplaceNonNumeric,Commarize } from '../../Utility'
+    AmountInWords,ReplaceNonNumeric,Commarize,ConvertNumberToWords } from '../../Utility'
     
 import Loading from '../Loading/Loading'
 
@@ -45,6 +45,8 @@ function BirdSale(props) {
     const [isloaded, setIsLoaded] = useState(true);
     const [companydetails, setCompanyDetails] = useState([]);
     const [invoiceModalShow, setInvoiceModalShow] = useState(false);
+    const [_unitname, setUnitName] = useState();
+
 
     let addModalClose = () => {
         setAddModalShow(false);
@@ -69,7 +71,9 @@ function BirdSale(props) {
         Comments: "",
         LotName: "",
         TotalBirdSale: "",
-        CustomerName:""
+        CustomerName:"",
+        VehicleNo:"",
+        UnitName:_unitname
     };
 
     const downloadfields = [{
@@ -87,7 +91,9 @@ function BirdSale(props) {
         Due: "",
         PaymentDate: "",
         Comments: "",
-        CustomerName:""
+        CustomerName:"",
+        VehicleNo:"",
+        UnitName:""
     }];
 
     const [birdsaledata, setBirdSaleData] = useState(initialvalues);
@@ -112,9 +118,26 @@ function BirdSale(props) {
             Comments: "",
             LotName: "",
             TotalBirdSale: "",
-            InvoiceNo:""
+            InvoiceNo:"",
+            VehicleNo:"",
+            UnitName:"",
+            AdditionalCharge:"",
+            Cash:"",
+            PhonePay:"",
+            NetBanking:"",
+            UPI:"",
+            Cheque:""
         })
     }
+
+    const _bankdetails={
+        BankName:"",
+        AccountNo:"",
+        IfscCode:""
+
+    }
+
+    const [bankdetails, setBankDetails] = useState(_bankdetails);
 
     const clickEditBirdSale = (md) => {
         setAddModalShow({ addModalShow: true });
@@ -137,12 +160,24 @@ function BirdSale(props) {
             LotName: md.LotName,
             TotalBirdSale: md.TotalBirdSale,
             InvoiceNo:md.InvoiceNo,
-            CustomerName:md.CustomerName
+            CustomerName:md.CustomerName,
+            VehicleNo:md.VehicleNo,
+            UnitName:md.UnitName,
+            AdditionalCharge:md.AdditionalCharge,
+            Cash:md.Cash,
+            PhonePay:md.PhonePay,
+            NetBanking:md.NetBanking,
+            UPI:md.UPI,
+            Cheque:md.Cheque
         })
     }
 
     const lotChange = (e) => {
         setBirdSaleData({ ...birdsaledata, LotId: e.target.value });
+    }
+
+    const vehicleNoChange = (e) => {
+        setBirdSaleData({ ...birdsaledata, VehicleNo: e.target.value });
     }
 
     const shedChange = (e) => {
@@ -187,8 +222,10 @@ function BirdSale(props) {
         const re = /^\d*\.?\d{0,2}$/
         let totalwt = e.target.value;
         if (totalwt === '' || re.test(totalwt)) {
-        let totalamt = totalwt * birdsaledata.Rate;
-        let due = totalamt - birdsaledata.Paid
+        let totalamt = (parseFloat(totalwt||0) * parseFloat(birdsaledata.Rate||0)) +(parseFloat(birdsaledata.AdditionalCharge||0));
+        let due = totalamt - (parseFloat(birdsaledata.Cash||0)+parseFloat(birdsaledata.PhonePay||0)
+        +parseFloat(birdsaledata.NetBanking||0)+parseFloat(birdsaledata.Cheque||0)
+        +parseFloat(birdsaledata.UPI||0))
         setBirdSaleData({
             ...birdsaledata,
             TotalWeight: totalwt,
@@ -218,7 +255,7 @@ function BirdSale(props) {
     }
 
     const fetchCompanyDetails = async () => {
-        FetchCompanyDetails()
+        FetchCompanyDetails(process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setCompanyDetails(data.Result);
@@ -257,6 +294,106 @@ function BirdSale(props) {
         setBirdSaleData({ ...birdsaledata, Comments: e.target.value });
     }
 
+    const additionalChargeChange = (e) => {
+        let addch=parseFloat(e.target.value||0);
+        //let dueamt=parseFloat(birdsaledata.Due||0);
+        setBirdSaleData({ ...birdsaledata, AdditionalCharge: e.target.value,
+            Due:((birdsaledata.TotalWeight||0) * (birdsaledata.Rate||0))+ parseFloat(addch),
+            TotalAmount:((birdsaledata.TotalWeight||0) * (birdsaledata.Rate||0))+parseFloat(addch)
+            
+        });
+    }
+
+    const cashChange = (e) => {
+        const re = /^\d*\.?\d{0,2}$/
+        
+        if (e.target.value === '' || re.test(e.target.value)) {
+            let cashamt=parseFloat(e.target.value||0);
+            setBirdSaleData({ ...birdsaledata, Cash:e.target.value, 
+                Paid: (cashamt+parseFloat(birdsaledata.PhonePay||0)+
+                parseFloat(birdsaledata.NetBanking||0)+parseFloat(birdsaledata.UPI||0)
+                +parseFloat(birdsaledata.Cheque||0)), 
+                Due: (birdsaledata.TotalAmount - 
+                    (cashamt+ parseFloat(birdsaledata.PhonePay||0)+
+                parseFloat(birdsaledata.NetBanking||0)+parseFloat(birdsaledata.UPI||0)
+                +parseFloat(birdsaledata.Cheque||0))
+                ) });
+        }
+    }
+
+    const phonePayChange = (e) => {
+        const re = /^\d*\.?\d{0,2}$/
+        
+        if (e.target.value === '' || re.test(e.target.value)) {
+            let phpayamt=parseFloat(e.target.value||0);
+        //setBirdSaleData({ ...birdsaledata, VehicleNo: e.target.value });
+
+        setBirdSaleData({ ...birdsaledata, PhonePay:e.target.value, 
+            Paid: (phpayamt+parseFloat(birdsaledata.Cash||0)+
+            parseFloat(birdsaledata.NetBanking||0)+parseFloat(birdsaledata.UPI||0)
+            +parseFloat(birdsaledata.Cheque||0)), 
+            Due: (birdsaledata.TotalAmount - 
+                (phpayamt+ parseFloat(birdsaledata.Cash||0)+
+            parseFloat(birdsaledata.NetBanking||0)+parseFloat(birdsaledata.UPI||0)
+            +parseFloat(birdsaledata.Cheque||0))
+            ) });
+    }
+}
+
+    const netBankingChange = (e) => {
+        const re = /^\d*\.?\d{0,2}$/
+
+        if (e.target.value === '' || re.test(e.target.value)) {
+            let nbamt=parseFloat(e.target.value||0);
+
+            setBirdSaleData({ ...birdsaledata, NetBanking:e.target.value, 
+                Paid: (nbamt+parseFloat(birdsaledata.Cash||0)+
+                parseFloat(birdsaledata.PhonePay||0)+parseFloat(birdsaledata.UPI||0)
+                +parseFloat(birdsaledata.Cheque||0)), 
+                Due: (birdsaledata.TotalAmount - 
+                    (nbamt+ parseFloat(birdsaledata.Cash||0)+
+                parseFloat(birdsaledata.PhonePay||0)+parseFloat(birdsaledata.UPI||0)
+                +parseFloat(birdsaledata.Cheque||0))
+                ) });
+            }
+}
+
+    const upiChange = (e) => {
+        const re = /^\d*\.?\d{0,2}$/
+
+        if (e.target.value === '' || re.test(e.target.value)) {
+            let upiamt=parseFloat(e.target.value||0);
+
+            setBirdSaleData({ ...birdsaledata, UPI:e.target.value, 
+                Paid: (upiamt+parseFloat(birdsaledata.Cash||0)+
+                parseFloat(birdsaledata.PhonePay||0)+parseFloat(birdsaledata.NetBanking||0)
+                +parseFloat(birdsaledata.Cheque||0)), 
+                Due: (birdsaledata.TotalAmount - 
+                    (upiamt+ parseFloat(birdsaledata.Cash||0)+
+                parseFloat(birdsaledata.PhonePay||0)+parseFloat(birdsaledata.NetBanking||0)
+                +parseFloat(birdsaledata.Cheque||0))
+                ) });
+            }
+}
+
+    const chequeChange = (e) => {
+        const re = /^\d*\.?\d{0,2}$/
+
+        if (e.target.value === '' || re.test(e.target.value)) {
+            let chqamt=parseFloat(e.target.value||0);
+
+            setBirdSaleData({ ...birdsaledata, Cheque:e.target.value, 
+                Paid: (chqamt+parseFloat(birdsaledata.Cash||0)+
+                parseFloat(birdsaledata.PhonePay||0)+parseFloat(birdsaledata.NetBanking||0)
+                +parseFloat(birdsaledata.UPI||0)), 
+                Due: (birdsaledata.TotalAmount - 
+                    (chqamt+ parseFloat(birdsaledata.Cash||0)+
+                parseFloat(birdsaledata.PhonePay||0)+parseFloat(birdsaledata.NetBanking||0)
+                +parseFloat(birdsaledata.UPI||0))
+                ) });
+            }
+    }
+
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
@@ -267,6 +404,10 @@ function BirdSale(props) {
             fetchCustomerDetails(uid);
             setBirdSaleData({ ...birdsaledata, CustomerId: uid });
             fetchCompanyDetails();
+
+            setBankDetails({ ...bankdetails, BankName: process.env.REACT_APP_BANK_NAME,
+                AccountNo:process.env.REACT_APP_ACCOUNT_NO,IfscCode: process.env.REACT_APP_IFSC_CODE
+             });
         }
         else {
             HandleLogout();
@@ -287,7 +428,7 @@ function BirdSale(props) {
 
 
     const fetchUnit = () => {
-        FetchUnit()
+        FetchUnit(process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setUnitList(data.Result);
@@ -299,7 +440,7 @@ function BirdSale(props) {
     }
 
     const fetchSheds = () => {
-        FetchShedsList()
+        FetchShedsList(process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setShedList(data.Result);
@@ -311,7 +452,7 @@ function BirdSale(props) {
     }
 
     const fetchLots = () => {
-        FetchLots()
+        FetchLots(process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setLots(data.Result);
@@ -323,7 +464,7 @@ function BirdSale(props) {
     }
 
     const fetchShedLotsMapList = () => {
-        FetchShedLotMapList()
+        FetchShedLotMapList(process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     SetShedLotMapList(data.Result);
@@ -352,7 +493,7 @@ function BirdSale(props) {
 
     const _birdSaleList = (uid) => {
         setIsLoaded(true);
-        FetchBirdSaleList(uid,null)
+        FetchBirdSaleList(uid,null,process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setBirdSaleList(data.Result);
@@ -409,7 +550,14 @@ function BirdSale(props) {
                     Paid: birdsaledata.Paid,
                     Due: birdsaledata.Due,
                     PaymentDate: birdsaledata.PaymentDate,
-                    Comments: birdsaledata.Comments
+                    Comments: birdsaledata.Comments,
+                    VehicleNo: birdsaledata.VehicleNo,
+                    AdditionalCharge:birdsaledata.AdditionalCharge,
+                    Cash:birdsaledata.Cash,
+                    PhonePay:birdsaledata.PhonePay,
+                    NetBanking:birdsaledata.NetBanking,
+                    UPI:birdsaledata.UPI,
+                    Cheque:birdsaledata.Cheque
 
                 })
             }).then(res => res.json())
@@ -459,9 +607,16 @@ function BirdSale(props) {
                     Due: birdsaledata.Due,
                     PaymentDate: birdsaledata.PaymentDate,
                     Comments: birdsaledata.Comments,
-                    AmountInWords: AmountInWords(birdsaledata.TotalAmount),
-                    InvoiceNo:birdsaledata.InvoiceNo
-            
+                    AmountInWords: ConvertNumberToWords(birdsaledata.TotalAmount),
+                    InvoiceNo:birdsaledata.InvoiceNo,
+                    VehicleNo:birdsaledata.VehicleNo,
+                    UnitName:birdsaledata.UnitName,
+                    AdditionalCharge:birdsaledata.AdditionalCharge,
+                    Cash:birdsaledata.Cash,
+                    PhonePay:birdsaledata.PhonePay,
+                    NetBanking:birdsaledata.NetBanking,
+                    UPI:birdsaledata.UPI,
+                    Cheque:birdsaledata.Cheque
         });
 
         setInvoiceModalShow(true);
@@ -498,7 +653,14 @@ function BirdSale(props) {
                     Paid: birdsaledata.Paid,
                     Due: birdsaledata.Due,
                     PaymentDate: birdsaledata.PaymentDate,
-                    Comments: birdsaledata.Comments
+                    Comments: birdsaledata.Comments,
+                    VehicleNo:birdsaledata.VehicleNo,
+                    AdditionalCharge:birdsaledata.AdditionalCharge,
+                    Cash:birdsaledata.Cash,
+                    PhonePay:birdsaledata.PhonePay,
+                    NetBanking:birdsaledata.NetBanking,
+                    UPI:birdsaledata.UPI,
+                    Cheque:birdsaledata.Cheque
 
                 })
             }).then(res => res.json())
@@ -670,19 +832,19 @@ function BirdSale(props) {
                 <h2>Bird Sale Tracker</h2>
             </div>
             <div className="container" style={{ marginTop: '30px' }}>
-                <div className="row align-items-center">
-                    <div className="col">
+                <div className="row align-items-center" style={{fontSize:13}}>
+                <div className="col-2">
                         <p><strong>From</strong></p>
                         <DateComponent date={null} onChange={onDateFilterFromChange} isRequired={false} value={filterFromDate} />
                     </div>
-                    <div className="col">
+                    <div className="col-2">
                         <p><strong>To</strong></p>
                         <DateComponent date={null} onChange={onDateFilterToChange} isRequired={false} value={filterToDate} />
                     </div>
-                    <div className="col">
-                        <p><strong>Shed</strong></p>
+                    <div className="col-2">
+                        <p style={{fontSize:13}}><strong >Shed</strong></p>
                         <Form.Select aria-label="Default select example"
-                            onChange={onShedFilterChange}>
+                            onChange={onShedFilterChange} style={{fontSize:13}}>
                             <option selected value="">Choose...</option>
                             {
                                 shedlist.map((item) => {
@@ -698,24 +860,20 @@ function BirdSale(props) {
                             }
                         </Form.Select>
                     </div>
-                </div>
-            </div>
 
-            <div className="row">
-                <div className="col" style={{ textAlign: 'left', marginTop: '20px' }}>
-                    <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2' }} onClick={() => onDownloadExcel()} ></i>
-                </div>
-                <div className="col" style={{ textAlign: 'right', marginTop: '20px' }}>
-                    <Button className="mr-2" variant="primary"
+                    <div className="col-6" style={{textAlign:'right', marginTop: 30}}>
+                    <i className="fa-regular fa-file-excel fa-2xl"
+                     style={{ color: '#bea2a2', marginRight:30 }} onClick={() => onDownloadExcel()} ></i>
+                      <Button className="mr-2" variant="primary"
                         style={{ marginRight: "17.5px" }}
                         onClick={() => clickAddBirdSale()}>New</Button>
+                    </div>
                 </div>
-
             </div>
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
-                    <tr align='left' className="tr-custom">
+                    <tr align='center' className="tr-custom">
                         <th>Date</th>
                         <th>Shed</th>
                         {/* <th>Lot</th> */}
@@ -728,6 +886,7 @@ function BirdSale(props) {
                         <th>Due</th>
                         <th>Payment date</th>
                         <th>Comments</th>
+                        <th>Vehicle no</th>
                         <th>Invoice</th>
                         <th>Options</th>
                     </tr>
@@ -746,7 +905,10 @@ function BirdSale(props) {
                             const _lot = lots.filter((c) => c.Id === p.LotId);
                             const _lotname = _lot.length > 0 ? _lot[0].LotName : "";
                             p.LotName = _lotname;
-
+                            //p.UnitName=_uname;
+                            //const [_unitname, setUnitName] = useState();
+                            //setBirdSaleData({ ...birdsaledata, UnitName: _uname });
+                           // setUnitName(_uname);
                             BirdSaleListDowanloadArr.push({
                                 Date: moment(p.Date).format('DD-MMM-YYYY'),
                                 ShedName: _shedname, LotName: _lotname, CustomerId: p.CustomerId, BirdCount: p.BirdCount, TotalWeight: p.TotalWeight + " " + _uname,
@@ -757,27 +919,30 @@ function BirdSale(props) {
 
 
                             return (
-                                !isloaded && <tr align='center' key={p.Id}>
-                                    <td align='left'>{moment(p.Date).format('DD-MMM-YYYY')}</td>
-                                    <td align='left'>{_shedname}</td>
+                                !isloaded && <tr align='center' key={p.Id} style={{fontSize:13}}>
+                                    <td align='center'>{moment(p.Date).format('DD-MMM-YYYY')}</td>
+                                    <td align='center'>{_shedname}</td>
                                     {/* <td align='left'>{_lotname}</td> */}
-                                    <td align='left'>{p.CustomerName}</td>
-                                    <td align='left'>{p.BirdCount}</td>
-                                    <td align='left'>{p.TotalWeight + " " + _uname}</td>
-                                    <td align='left'>{p.Rate}</td>
-                                    <td align='left'>{p.TotalAmount.toFixed(2)}</td>
-                                    <td align='left'>{p.Paid.toFixed(2)}</td>
-                                    <td align='left'>{p.Due.toFixed(2)}</td>
-                                    <td align='left'>{moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
-                                    <td align='left'>{p.Comments}</td>
+                                    <td align='center'>{p.CustomerName}</td>
+                                    <td align='center'>{p.BirdCount}</td>
+                                    <td align='center'>{p.TotalWeight + " " + _uname}</td>
+                                    <td align='center'>{p.Rate}</td>
+                                    <td align='center'>{p.TotalAmount.toFixed(2)}</td>
+                                    <td align='center'>{p.Paid.toFixed(2)}</td>
+                                    <td align='center'>{p.Due.toFixed(2)}</td>
+                                    <td align='center'>{moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
+                                    <td align='center'>{p.Comments}</td>
+                                    <td align='center'>{p.VehicleNo}</td>
                                     <td>
                                         <i className="fa-sharp fa-solid fa-receipt fa-beat" title='Invoice' 
                                         style={{ color: '#086dba', marginLeft: '15px' }} onClick={() => clickInvoice(p)}></i>
                                     </td>
+                                    
                                     <td align='center'>
                                         {
                                             <ButtonToolbar>
-                                                <i className="fa-solid fa-pen-to-square" style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => clickEditBirdSale(p)}></i>
+                                                <i className="fa-solid fa-pen-to-square" 
+                                                style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => clickEditBirdSale(p)}></i>
                                                 {localStorage.getItem('isadmin') === 'true' &&
                                                     <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteBirdSale(p.Id)}></i>}
                                             </ButtonToolbar>
@@ -845,7 +1010,8 @@ function BirdSale(props) {
                         <Fragment>
                             <PDFViewer width="900" height="900" className="app" >
                                 <InvoiceBirdSale companydetails={companydetails} 
-                                birdsaledata={birdsaledata} customerdetails={customerdetails}/>
+                                birdsaledata={birdsaledata} customerdetails={customerdetails} 
+                                bankdetails={bankdetails}/>
                             </PDFViewer>
                         </Fragment>
                     </Modal.Body>
@@ -873,7 +1039,7 @@ function BirdSale(props) {
                                     <Form noValidate validated={validated} className="needs-validation">
                                         <Row className="mb-3">
                                             <Form.Group as={Col} controlId="Date">
-                                                <Form.Label>Date*</Form.Label>
+                                                <Form.Label style={{fontSize:13}}>Date*</Form.Label>
                                                 <DateComponent date={null} onChange={dateChange} isRequired={true} 
                                                 value={birdsaledata.Date} />
                                                 <Form.Control.Feedback type="invalid">
@@ -883,7 +1049,7 @@ function BirdSale(props) {
                                         </Row>
                                         <Row className="mb-12">
                                             <Form.Group controlId="ShedId" as={Col} >
-                                                <Form.Label>Shed*</Form.Label>
+                                                <Form.Label style={{fontSize:13}}>Shed*</Form.Label>
                                                 <Form.Control type="text" name="LotId" hidden disabled value={birdsaledata.LotId}
                                                 />
                                                 <Form.Select aria-label="Default select example"
@@ -964,9 +1130,9 @@ function BirdSale(props) {
                                         <Row className="mb-12">
 
                                             <Form.Group controlId="UnitId" as={Col} >
-                                                <Form.Label>Unit*</Form.Label>
+                                                <Form.Label style={{fontSize:13}}>Unit*</Form.Label>
                                                 <Form.Select aria-label="Default select example"
-                                                    onChange={unitIdChange} required>
+                                                    onChange={unitIdChange} required style={{fontSize:13}}>
                                                     <option selected disabled value="">Choose...</option>
                                                     {
                                                         unitlist.map((item) => {
@@ -999,6 +1165,16 @@ function BirdSale(props) {
                                             />
                                         </Row>
                                         <Row className="mb-12">
+                                        <InputField controlId="AdditionalCharge" label="Additional charge"
+                                            type="number"
+                                            value={birdsaledata.AdditionalCharge}
+                                            name="AdditionalCharge"
+                                            placeholder="Additional charge"
+                                            errormessage="Please enter Additional charge"
+                                            required={false}
+                                            disabled={false}
+                                            onChange={additionalChargeChange}
+                                        />
                                             <InputField controlId="TotalAmount" label="Total amount*"
                                                 type="text"
                                                 value={birdsaledata.TotalAmount}
@@ -1008,8 +1184,66 @@ function BirdSale(props) {
                                                 required={true}
                                                 disabled={true}
                                             />
+                                            </Row>
+                                            <Row>
 
-                                            <InputField controlId="Paid" label="Paid*"
+<InputField controlId="Cash" label="Cash "
+    type="text"
+    value={birdsaledata.Cash}
+    name="Cash"
+    placeholder="Cash"
+    errormessage="Please enter amount"
+    required={false}
+    disabled={false}
+    onChange={cashChange}
+/>
+   <InputField controlId="PhonePay" label="Phone Pay"
+    type="text"
+    value={birdsaledata.PhonePay}
+    name="PhonePay"
+    placeholder="PhonePay"
+    errormessage="Please enter amount"
+    required={false}
+    disabled={false}
+    onChange={phonePayChange}
+/>  
+
+<InputField controlId="NetBanking" label="Net Banking Pay"
+    type="text"
+    value={birdsaledata.NetBanking}
+    name="NetBanking"
+    placeholder="NetBanking"
+    errormessage="Please enter amount"
+    required={false}
+    disabled={false}
+    onChange={netBankingChange}
+/>   
+
+  <InputField controlId="UPI" label="UPI"
+    type="text"
+    value={birdsaledata.UPI}
+    name="UPI"
+    placeholder="UPI"
+    errormessage="Please enter amount"
+    required={false}
+    disabled={false}
+    onChange={upiChange}
+/>    
+
+<InputField controlId="Cheque" label="Cheque"
+    type="text"
+    value={birdsaledata.Cheque}
+    name="Cheque"
+    placeholder="Cheque"
+    errormessage="Please enter amount"
+    required={false}
+    disabled={false}
+    onChange={chequeChange}
+/>    
+</Row>
+                                            <Row>
+
+                                            {/* <InputField controlId="Paid" label="Paid*"
                                                 type="text"
                                                 value={birdsaledata.Paid}
                                                 name="Paid"
@@ -1018,7 +1252,7 @@ function BirdSale(props) {
                                                 required={true}
                                                 disabled={false}
                                                 onChange={paidChange}
-                                            />
+                                            /> */}
                                             <InputField controlId="Due" label="Due"
                                                 type="text"
                                                 value={birdsaledata.Due}
@@ -1028,21 +1262,30 @@ function BirdSale(props) {
                                                 required={true}
                                                 disabled={true}
                                             />
-                                        </Row>
-                                        <Row className="mb-4">
+                                       
                                             <Form.Group as={Col} controlId="PaymentDate">
-                                                <Form.Label>Payment date*</Form.Label>
+                                                <Form.Label style={{fontSize:13}}>Payment date*</Form.Label>
                                                 <DateComponent date={null} onChange={paymentDateChange} isRequired={true} value={birdsaledata.PaymentDate} />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please select payment date
                                                 </Form.Control.Feedback>
                                             </Form.Group>
+                                            <InputField controlId="VehicleNo" label="Vehicle no"
+                            type="text"
+                            value={birdsaledata.VehicleNo}
+                            name="VehicleNo"
+                            placeholder="Vehicle no"
+                            errormessage="Please enter Vehicle no"
+                            required={false}
+                            disabled={false}
+                            onChange={vehicleNoChange}
+                        />
                                         </Row>
                                         <Row className="mb-12">
                                             <Form.Group controlId="Comments" as={Col} >
-                                                <Form.Label>Comments</Form.Label>
+                                                <Form.Label style={{fontSize:13}}>Comments</Form.Label>
                                                 <Form.Control as="textarea" rows={3} name="Comments" onChange={commentsChange} value={birdsaledata.Comments}
-                                                    placeholder="Comments" />
+                                                    placeholder="Comments" style={{fontSize:13}} />
                                             </Form.Group>
                                         </Row>
 

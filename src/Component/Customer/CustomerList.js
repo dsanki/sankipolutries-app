@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { variables } from '../../Variables';
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form, Alert } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom'
+import { useNavigate,useLocation } from 'react-router-dom'
 import moment from 'moment';
 import InputField from '../ReuseableComponent/InputField'
 import DateComponent from '../DateComponent';
@@ -24,8 +24,8 @@ function CustomerList(props) {
     const [filterCutomerName, setFilterCutomerName] = useState("");
     const [customerListForFilter, setCustomerListForFilter] = useState([]);
 
-    //const search = useLocation().search;
-    //const [_type, setType] = useState(new URLSearchParams(search).get('type'));
+    const search = useLocation().search;
+    const [_type, setType] = useState(new URLSearchParams(search).get('customertype'));
 
     
 
@@ -177,10 +177,16 @@ function CustomerList(props) {
             .then(response => response.json())
             .then(data => {
                 if (data.StatusCode === 200) {
-                   // _filterList = _filterList.filter((c) => c.CustomerTypeId == custType);
-                    setCustomerList(data.Result);
+                    var filterList=data.Result;
+                    //var custype=producttypes.filter(x=>x.ProductName==_type);
+                    if (typeof(_type) !== 'undefined' && _type != null) {
+                        setFilterCutomerType(_type);
+                        filterList = data.Result.filter((c) => c.CustomerTypeId == _type);
+                    }
+                   
+                    setCustomerList(filterList);
                     setCustomerListForFilter(data.Result);
-                    setTotalPages(Math.ceil(data.Result.length / process.env.REACT_APP_PAGE_PAGINATION_NO));
+                    setTotalPages(Math.ceil(filterList.length / process.env.REACT_APP_PAGE_PAGINATION_NO));
                 }
                 else if (data.StatusCode === 401) {
                     history("/login")
@@ -392,6 +398,10 @@ function CustomerList(props) {
     const onCustomerTypeChange = (e) => {
         setFilterCutomerType(e.target.value);
         getFilterCustomerListData(filterCutomerName,e.target.value);
+
+        const url = new URL(window.location.href);
+        url.searchParams.set('customertype', e.target.value);
+        window.history.pushState(null, '', url.toString());
     }
 
     const customerNameSearch = (e) => {
@@ -422,10 +432,10 @@ function CustomerList(props) {
 
     return (
         <div>
-            <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
-                <h2>Welcome to Customer List  page</h2>
+            <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px'}}>
+                <h2>Customer List</h2>
             </div>
-            <div className="container" style={{ marginTop: '10px' }}>
+            <div className="container" style={{ marginTop: '10px', width: '50%' }}>
                 <div className="row align-items-center">
                     <div className="col">
                         <InputField  label="Customer name"
@@ -436,15 +446,16 @@ function CustomerList(props) {
                                                 onChange={customerNameSearch}
                                                 required={false}
                                                 disabled={false}
+                                                
                                             />
                     </div>
                    
                     <div className="col">
                         
-                    <label class="form-label">Customer Type</label>
+                    <label class="form-label" style={{fontSize:13}}>Customer Type</label>
                         
                         <Form.Select aria-label="Default select example"
-                            onChange={onCustomerTypeChange}>
+                            onChange={onCustomerTypeChange} style={{fontSize:13}}>
                             <option selected value="">Choose...</option>
                             {
                                 producttypes.map((item) => {
@@ -452,7 +463,7 @@ function CustomerList(props) {
                                         <option
                                             key={item.ProductId}
                                             defaultValue={item.ProductId == null ? null : item.ProductId}
-                                            selected={item.ProductId === filterCutomerType}
+                                            selected={item.ProductId === parseInt(filterCutomerType)}
                                             value={item.ProductId}
                                         >{item.ProductName}</option>
                                        
@@ -461,16 +472,17 @@ function CustomerList(props) {
                             }
                         </Form.Select>
                     </div>
-                </div>
-            </div>
-            <div className="row">
-                <div className="col" style={{ textAlign: 'right', marginTop: '20px'  }}>
+                    <div className="col" style={{ textAlign: 'right', marginTop: '30px'}}>
                     <Button className="mr-2" variant="primary"
                         style={{ marginRight: "17.5px" }}
                         onClick={() => clickAddCustomer()}>Add</Button>
                 </div>
-
+                </div>
             </div>
+            {/* <div className="row">
+              
+
+            </div> */}
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
@@ -495,7 +507,7 @@ function CustomerList(props) {
                             let fullname=(p.MiddleName!="" && p.MiddleName!=null) ? p.FirstName+" "+p.MiddleName+" "+p.LastName: 
                             p.FirstName+" "+p.LastName;
                             return (
-                                <tr align='center' key={p.ID}>
+                                <tr align='center' key={p.ID} style={{fontSize:13}} >
                                     <td align='left'>
                                         {
 
@@ -661,7 +673,7 @@ function CustomerList(props) {
                                             />
 
                                             <Form.Group controlId="CustomerTypeId" as={Col} >
-                                                <Form.Label>Customer type</Form.Label>
+                                                <Form.Label style={{fontSize:13}}>Customer type</Form.Label>
                                                 <Form.Select aria-label="Default select example"
                                                     onChange={custTypeChange} required>
                                                     <option selected disabled value="">Choose...</option>
@@ -710,9 +722,10 @@ function CustomerList(props) {
                                         </Row> */}
                                         <Row className="mb-12">
                                             <Form.Group as={Col} controlId="ProfileImageUrl">
-                                                <Form.Label>Customer photo</Form.Label>
-                                                <input class="form-control" type="file" id="formFile" onChange={profileImageUpload} multiple="false" accept="image/*" />
-                                                <Form.Control.Feedback type="invalid">
+                                                <Form.Label style={{fontSize:13}}>Customer photo</Form.Label>
+                                                <input class="form-control" type="file" id="formFile" 
+                                                onChange={profileImageUpload} multiple="false" accept="image/*" style={{fontSize:13}} />
+                                                <Form.Control.Feedback type="invalid" style={{fontSize:13}}>
                                                     Please select image
                                                 </Form.Control.Feedback>
                                             </Form.Group>

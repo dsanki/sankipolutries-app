@@ -5,7 +5,10 @@ import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
 import DateComponent from '../DateComponent';
 import InputField from '../ReuseableComponent/InputField'
-
+import { GetCustomerByTypeId, dateyyyymmdd, 
+    HandleLogout, downloadExcel } from './../../Utility'
+import Loading from '../Loading/Loading'
+//
 function RawMaterials(props) {
 
     let history = useNavigate();
@@ -22,7 +25,7 @@ function RawMaterials(props) {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [addModalShow, setAddModalShow] = useState(false);
-
+    const [producttypes, setProductType] = useState([]);
 
     let addModalClose = () => {
         setAddModalShow(false);
@@ -45,7 +48,8 @@ function RawMaterials(props) {
         PaymentDate: "",
         Comments: "",
         InvoiceDate:"",
-        InvoiceNo:""
+        InvoiceNo:"",
+        ExtraCharge:""
 
     };
 
@@ -69,7 +73,8 @@ function RawMaterials(props) {
             PaymentDate: "",
             Comments: "",
             InvoiceDate:"",
-            InvoiceNo:""
+            InvoiceNo:"",
+            ExtraCharge:""
         })
     }
 
@@ -91,7 +96,8 @@ function RawMaterials(props) {
             PaymentDate: md.PaymentDate,
             Comments: md.Comments,
             InvoiceDate:md.InvoiceDate,
-            InvoiceNo:md.InvoiceNo
+            InvoiceNo:md.InvoiceNo,
+            ExtraCharge:md.ExtraCharge
         })
     }
 
@@ -123,8 +129,9 @@ function RawMaterials(props) {
         setMaterialsData({
             ...materialsdata,
             Quantity: e.target.value,
-            TotalAmount: e.target.value * materialsdata.Rate,
-            Due: (e.target.value * materialsdata.Rate) - materialsdata.Paid
+            TotalAmount:Math.round((e.target.value * materialsdata.Rate) + parseFloat(materialsdata.ExtraCharge||0)).toFixed(2),
+            Due: Math.round(((e.target.value * materialsdata.Rate)+ 
+            parseFloat(materialsdata.ExtraCharge||0)) - materialsdata.Paid).toFixed(2)
         });
     }
 
@@ -136,21 +143,32 @@ function RawMaterials(props) {
         setMaterialsData({
             ...materialsdata,
             Rate: e.target.value,
-            TotalAmount: materialsdata.Quantity * e.target.value,
-            Due: (materialsdata.Quantity * e.target.value) - materialsdata.Paid
+            TotalAmount: Math.round((materialsdata.Quantity * e.target.value)+ parseFloat(materialsdata.ExtraCharge||0)).toFixed(2),
+            Due: Math.round(((materialsdata.Quantity * e.target.value)+ parseFloat(materialsdata.ExtraCharge||0)) 
+            - materialsdata.Paid).toFixed(2)
         });
     }
 
     const totalAmountChange = (e) => {
         setMaterialsData({
             ...materialsdata,
-            TotalAmount: e.target.value,
-            Due: e.target.value - materialsdata.Paid
+            TotalAmount:Math.round(e.target.value).toFixed(2),
+            Due:Math.round((e.target.value+  parseFloat(materialsdata.ExtraCharge||0)) - materialsdata.Paid).toFixed(2)
+        });
+    }
+
+    const extraAmountChange = (e) => {
+        setMaterialsData({
+            ...materialsdata,
+            ExtraCharge: e.target.value,
+            TotalAmount: Math.round((materialsdata.Quantity * materialsdata.Rate)+ parseFloat(e.target.value||0)).toFixed(2),
+            Due: Math.round(((materialsdata.Quantity * materialsdata.Rate)+ parseFloat(e.target.value||0)) - materialsdata.Paid).toFixed(2)
         });
     }
 
     const paidChange = (e) => {
-        setMaterialsData({ ...materialsdata, Paid: e.target.value, Due: materialsdata.TotalAmount - e.target.value });
+        setMaterialsData({ ...materialsdata, Paid: e.target.value, 
+            Due: Math.round(parseFloat(materialsdata.TotalAmount) - parseFloat(e.target.value||0)).toFixed(2) });
     }
     const paymentDateChange = (e) => {
         setMaterialsData({ ...materialsdata, PaymentDate: e.target.value });
@@ -173,9 +191,10 @@ function RawMaterials(props) {
         }
     }, [obj]);
 
+    
 
     const fetchRawMaterials = async () => {
-        fetch(variables.REACT_APP_API + 'RawMaterials/GetRawMaterials',
+        fetch(process.env.REACT_APP_API + 'RawMaterials/GetRawMaterials',
             {
                 method: 'GET',
                 headers: {
@@ -190,7 +209,7 @@ function RawMaterials(props) {
                     setRawMaterialList(data.Result);
                     setRawMaterialListFilter(data.Result);
                     setCount(data.Result.length);
-                    setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
+                    setTotalPages(Math.ceil(data.Result.length / process.env.REACT_APP_PAGE_PAGINATION_NO));
                 }
                 else if (data.StatusCode === 401) {
                     history("/login")
@@ -205,7 +224,7 @@ function RawMaterials(props) {
     }
 
     const fetchMaterialsTypes = async () => {
-        fetch(variables.REACT_APP_API + 'RawMaterials/GetRawMaterialsTypes',
+        fetch(process.env.REACT_APP_API+ 'RawMaterials/GetRawMaterialsTypes',
             {
                 method: 'GET',
                 headers: {
@@ -232,7 +251,7 @@ function RawMaterials(props) {
     }
 
     const fetchUnit = async () => {
-        fetch(variables.REACT_APP_API + 'Unit',
+        fetch(process.env.REACT_APP_API + 'Unit',
             {
                 method: 'GET',
                 headers: {
@@ -259,8 +278,8 @@ function RawMaterials(props) {
     }
 
 
-    const fetchClient = async () => {
-        fetch(variables.REACT_APP_API + 'client',
+    const fetchCutomerTypes = async () => {
+        fetch(process.env.REACT_APP_API + 'ProductType/GetProductType',
             {
                 method: 'GET',
                 headers: {
@@ -272,7 +291,7 @@ function RawMaterials(props) {
             .then(response => response.json())
             .then(data => {
                 if (data.StatusCode === 200) {
-                    setClientList(data.Result);
+                    setProductType(data.Result);
                 }
                 else if (data.StatusCode === 401) {
                     history("/login")
@@ -287,6 +306,27 @@ function RawMaterials(props) {
     }
 
 
+    const fetchClient = async () => { GetCustomerByTypeId(process.env.REACT_APP_CUST_TYPE_ID,
+        process.env.REACT_APP_API)
+        .then(data => {
+            if (data.StatusCode === 200) {
+                setClientList(data.Result);
+            }
+            else if (data.StatusCode === 401) {
+                HandleLogout();
+                history("/login")
+            }
+            else if (data.StatusCode === 404) {
+                props.showAlert("Data not found to fetch sheds!!", "danger")
+            }
+            else {
+                props.showAlert("Error occurred to fetch sheds!!", "danger")
+            }
+
+        });
+    }
+
+
     const handleSubmitEdit = (e) => {
         e.preventDefault();
         var form = e.target.closest('.needs-validation');
@@ -297,7 +337,7 @@ function RawMaterials(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'RawMaterials/UpdateMaterials', {
+            fetch(process.env.REACT_APP_API + 'RawMaterials/UpdateMaterials', {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -320,7 +360,8 @@ function RawMaterials(props) {
                     PaymentDate: materialsdata.PaymentDate,
                     Comments: materialsdata.Comments,
                     InvoiceDate:materialsdata.InvoiceDate,
-                    InvoiceNo:materialsdata.InvoiceNo
+                    InvoiceNo:materialsdata.InvoiceNo,
+                    ExtraCharge:materialsdata.ExtraCharge
 
                 })
             }).then(res => res.json())
@@ -363,7 +404,7 @@ function RawMaterials(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'RawMaterials/AddMaterials', {
+            fetch(process.env.REACT_APP_API + 'RawMaterials/AddMaterials', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -385,7 +426,8 @@ function RawMaterials(props) {
                     PaymentDate: materialsdata.PaymentDate,
                     Comments: materialsdata.Comments,
                     InvoiceDate:materialsdata.InvoiceDate,
-                    InvoiceNo:materialsdata.InvoiceNo
+                    InvoiceNo:materialsdata.InvoiceNo,
+                    ExtraCharge:materialsdata.ExtraCharge
 
                 })
             }).then(res => res.json())
@@ -443,7 +485,7 @@ function RawMaterials(props) {
 
     const preDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages;
-    const itemsPerPage = variables.PAGE_PAGINATION_NO;
+    const itemsPerPage = process.env.REACT_APP_PAGE_PAGINATION_NO;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const itemsToDiaplay = rawmaterialList && rawmaterialList.length > 0 ? rawmaterialList.slice(startIndex, endIndex) : [];
@@ -452,18 +494,23 @@ function RawMaterials(props) {
     return (
         <div>
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '30px', marginBottom: '30px' }}>
-                <h2>Welcome to Raw Materials List Page</h2>
+                <h2>Raw Materials</h2>
             </div>
 
             <div className="row">
                 <div className="col">
                     <p><strong>Supplier</strong></p>
-                    <select className="form-select" aria-label="Default select example" onChange={filterSupplierChange}>
+                    <select className="form-select" aria-label="Default select example" 
+                    onChange={filterSupplierChange} style={{fontSize:13}}>
                         <option selected>--Select Supplier--</option>
                         {
-                            clientlist.filter((c) => c.ClientType === 2 || c.ClientType === 3).map((item) => {
+                           
+                            clientlist.map((item) => {
+
+                                   let fullname=(item.MiddleName!="" && item.MiddleName!=null) ? item.FirstName+" "+item.MiddleName+" "+item.LastName: 
+                                   item.FirstName+" "+item.LastName;
                                 return (
-                                    <option value={item.Id} key={item.Id}>{item.ClientName}</option>)
+                                    <option value={item.ID} key={item.ID}>{fullname}</option>)
                             }
                             )};
                     </select>
@@ -487,6 +534,7 @@ function RawMaterials(props) {
                         <th>Quantity</th>
                         <th>Rate</th>
                         <th>Total amount</th>
+                        <th>Extra Charge</th>
                         <th>Paid</th>
                         <th>Due</th>
                         <th>Payment date</th>
@@ -502,14 +550,16 @@ function RawMaterials(props) {
                             const _unit = unitlist.filter((c) => c.ID === p.UnitId);
                             const _uname = _unit.length > 0 ? _unit[0].UnitName : "";
 
-                            const _supp = clientlist.filter((c) => c.Id === p.ClientId);
-                            const _suppname = _supp.length > 0 ? _supp[0].ClientName : "";
-
+                            const _supp = clientlist.filter((c) => c.ID === p.ClientId);
+                           // const _suppname = _supp.length > 0 ? _supp[0].ClientName : "";
+                            let _suppname= _supp.length > 0 ?(_supp[0].MiddleName!="" && _supp[0].MiddleName!=null) ? 
+                            _supp[0].FirstName+" "+_supp[0].MiddleName+" "+_supp[0].LastName: 
+                            _supp[0].FirstName+" "+_supp[0].LastName:"";
                             const _mat = rawMaterialsTypes.filter((c) => c.Id === p.MaterialTypeId);
                             const _matname = _mat.length > 0 ? _mat[0].Name : "";
 
                             return (
-                                <tr align='center' key={p.Id}>
+                                <tr align='center' key={p.Id} style={{fontSize:13}} >
                                     <td align='left'>{moment(p.BillingDate).format('DD-MMM-YYYY')}</td>
                                     <td align='left'>{_suppname}</td>
                                     <td align='left'>{_matname}</td>
@@ -517,9 +567,10 @@ function RawMaterials(props) {
                                     <td align='left'>{p.Quantity + " " + _uname}</td>
                                     <td align='left'>{p.Rate}</td>
                                     <td align='left'>{p.TotalAmount.toFixed(2)}</td>
+                                    <td align='left'>{parseFloat(p.ExtraCharge||0).toFixed(2)}</td>
                                     <td align='left'>{p.Paid.toFixed(2)}</td>
                                     <td align='left'>{p.Due.toFixed(2)}</td>
-                                    <td align='left'>{moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
+                                    <td align='left'>{p.PaymentDate!=null?moment(p.PaymentDate).format('DD-MMM-YYYY'):""}</td>
                                     <td align='left'>{p.Comments}</td>
                                     <td align='center'>
                                         {
@@ -542,7 +593,7 @@ function RawMaterials(props) {
             </Table >
 
             {
-                rawmaterialList && rawmaterialList.length > variables.PAGE_PAGINATION_NO &&
+                rawmaterialList && rawmaterialList.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
                 <button
                     onClick={handlePrevClick}
                     disabled={preDisabled}
@@ -554,7 +605,7 @@ function RawMaterials(props) {
 
                 Array.from({ length: totalPages }, (_, i) => {
                     return (
-                        rawmaterialList && rawmaterialList.length > variables.PAGE_PAGINATION_NO &&
+                        rawmaterialList && rawmaterialList.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
                         <button
                             onClick={() => handlePageChange(i + 1)}
                             key={i}
@@ -566,7 +617,7 @@ function RawMaterials(props) {
                 })
             }
 
-            {rawmaterialList && rawmaterialList.length > variables.PAGE_PAGINATION_NO &&
+            {rawmaterialList && rawmaterialList.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
                 <button
                     onClick={handleNextClick}
                     disabled={nextDisabled}
@@ -597,7 +648,7 @@ function RawMaterials(props) {
                                     <Form noValidate validated={validated} className="needs-validation">
                                     <Row className="mb-12">
                                             <Form.Group as={Col} controlId="InvoiceDate">
-                                                <Form.Label>Invoice Date</Form.Label>
+                                                <Form.Label style={{fontSize:13}}>Invoice Date</Form.Label>
                                                 <DateComponent date={null} onChange={invoiceDateChange} isRequired={true} 
                                                 value={materialsdata.InvoiceDate} />
                                                 <Form.Control.Feedback type="invalid">
@@ -618,7 +669,7 @@ function RawMaterials(props) {
                                         <Row className="mb-12">
 
                                             <Form.Group as={Col} controlId="Date">
-                                                <Form.Label>Date</Form.Label>
+                                                <Form.Label style={{fontSize:13}}>Date</Form.Label>
                                                 <DateComponent date={null} onChange={billingDateChange} isRequired={true} 
                                                 value={materialsdata.BillingDate} />
                                                 <Form.Control.Feedback type="invalid">
@@ -628,9 +679,9 @@ function RawMaterials(props) {
                                         </Row>
                                         <Row className="mb-12">
                                             <Form.Group controlId="MaterialTypeId" as={Col} >
-                                                <Form.Label>Material</Form.Label>
+                                                <Form.Label style={{fontSize:13}}>Material</Form.Label>
                                                 <Form.Select aria-label="Default select example"
-                                                    onChange={materialTypeChange} required>
+                                                    onChange={materialTypeChange} required style={{fontSize:13}}>
                                                     <option selected disabled value="">Choose...</option>
                                                     {
                                                         rawMaterialsTypes.map((item) => {
@@ -651,21 +702,23 @@ function RawMaterials(props) {
                                             </Form.Group>
 
                                             <Form.Group controlId="ClientId" as={Col} >
-                                                <Form.Label>Supplier</Form.Label>
+                                                <Form.Label style={{fontSize:13}}>Supplier</Form.Label>
                                                 <Form.Select aria-label="Default select example"
-                                                    onChange={clientIdChange} required>
+                                                    onChange={clientIdChange} required style={{fontSize:13}}>
                                                     <option selected disabled value="">Choose...</option>
                                                     {
-                                                        clientlist.filter((c) => c.ClientType === 2 || c.ClientType === 3).map((item) => {
-                                                            return (
-                                                                <option
-                                                                    key={item.Id}
-                                                                    defaultValue={item.Id == null ? null : item.Id}
-                                                                    selected={item.Id === materialsdata.ClientId}
-                                                                    value={item.Id}
-                                                                >{item.ClientName}</option>
-                                                            );
+
+                                                        clientlist.map((item) => {
+
+                                                            let fullname=(item.MiddleName!="" && item.MiddleName!=null) ? item.FirstName+" "+item.MiddleName+" "+item.LastName: 
+                                                            item.FirstName+" "+item.LastName;
+                                                        return (
+                                                            <option value={item.ID}
+                                                             key={item.ID}
+                                                             defaultValue={item.ID == null ? null : item.ID}
+                                                             selected={item.ID === materialsdata.ClientId}>{fullname}</option>)
                                                         })
+                                                       
                                                     }
                                                 </Form.Select>
                                                 <Form.Control.Feedback type="invalid">
@@ -680,7 +733,7 @@ function RawMaterials(props) {
                                                 placeholder="Broker"
                                                 errormessage="Please enter broker name"
                                                 onChange={brokerChange}
-                                                required={true}
+                                                required={false}
                                                 disabled={false}
                                             />
 
@@ -715,9 +768,9 @@ function RawMaterials(props) {
                                             </Form.Group> */}
 
                                             <Form.Group controlId="UnitId" as={Col} >
-                                                <Form.Label>Unit</Form.Label>
+                                                <Form.Label style={{fontSize:13}}>Unit</Form.Label>
                                                 <Form.Select aria-label="Default select example"
-                                                    onChange={unitIdChange} required>
+                                                    onChange={unitIdChange} required style={{fontSize:13}}>
                                                     <option selected disabled value="">Choose...</option>
                                                     {
                                                         unitlist.map((item) => {
@@ -748,14 +801,16 @@ function RawMaterials(props) {
                                                 onChange={rateChange}
                                             />
 
-                                            {/* <Form.Group controlId="Rate" as={Col} >
-                                                <Form.Label>Rate</Form.Label>
-                                                <Form.Control type="number" name="Rate" required onChange={rateChange}
-                                                    placeholder="Rate" value={materialsdata.Rate} />
-                                                <Form.Control.Feedback type="invalid">
-                                                    Please enter rate
-                                                </Form.Control.Feedback>
-                                            </Form.Group> */}
+                                        <InputField controlId="ExtraCharge" label="ExtraCharge"
+                                                type="number"
+                                                value={materialsdata.ExtraCharge}
+                                                name="ExtraCharge"
+                                                placeholder="ExtraCharge"
+                                                errormessage="Extra amount"
+                                                required={false}
+                                                disabled={false}
+                                                onChange={extraAmountChange}
+                                            />                        
 
 
                                         </Row>
@@ -821,11 +876,12 @@ function RawMaterials(props) {
 
 
                                             <Form.Group as={Col} controlId="PaymentDate">
-                                                <Form.Label>Payment date</Form.Label>
-                                                <DateComponent date={null} onChange={paymentDateChange} isRequired={true} value={materialsdata.PaymentDate} />
-                                                <Form.Control.Feedback type="invalid">
+                                                <Form.Label style={{fontSize:13}}>Payment date</Form.Label>
+                                                <DateComponent date={null} onChange={paymentDateChange} 
+                                                value={materialsdata.PaymentDate} isRequired={false} />
+                                                {/* <Form.Control.Feedback type="invalid">
                                                     Please select payment date
-                                                </Form.Control.Feedback>
+                                                </Form.Control.Feedback> */}
                                                 {/* <Form.Control
                                                     type="date"
                                                     value={materialsdata.PaymentDate ? dateForPicker(materialsdata.PaymentDate) : ''}
@@ -835,9 +891,9 @@ function RawMaterials(props) {
                                         </Row>
                                         <Row className="mb-12">
                                             <Form.Group controlId="Comments" as={Col} >
-                                                <Form.Label>Comments</Form.Label>
+                                                <Form.Label style={{fontSize:13}}>Comments</Form.Label>
                                                 <Form.Control as="textarea" rows={3} name="Comments" onChange={commentsChange} value={materialsdata.Comments}
-                                                    placeholder="Comments" />
+                                                    placeholder="Comments"  style={{fontSize:13}}/>
                                             </Form.Group>
                                         </Row>
 

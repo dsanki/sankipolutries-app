@@ -35,7 +35,7 @@ const Invoice = (props) => (
             <InvoiceNo invoice={props.invoice} />
             <BillTo invoice={props.invoice} />
             <InvoiceItemsTable invoice={props.invoice} />
-            <InvoiceThankYouMsg />
+            <InvoiceThankYouMsg bankdetails={props.bankdetails} />
         </Page>
     </Document>
 );

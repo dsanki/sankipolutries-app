@@ -494,7 +494,7 @@ function MortalityList(props) {
 
             itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => (
 
-              !isloaded && <tr key={p.id} align='center'>
+              !isloaded && <tr key={p.id} align='center' style={{fontSize:14}} >
                 <td align='center'>{Moment(p.date).format('DD-MMM-YYYY')}</td>
                 <td align='center'>{p.shedname}</td>
                 <td align='center'>{p.lotname}</td>

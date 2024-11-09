@@ -408,7 +408,7 @@ function ChicksMasterComponent(props) {
                 <tbody>
                     {
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => (
-                            <tr key={p.Id} align='center'>
+                            <tr key={p.Id} align='center' style={{fontSize:14}} >
                                 <td align='left'>{p.LotName}</td>
                                 <td align='center'>{Moment(p.Date).format('DD-MMM-YYYY')}</td>
                                 <td align='center'>{p.Chicks}</td>

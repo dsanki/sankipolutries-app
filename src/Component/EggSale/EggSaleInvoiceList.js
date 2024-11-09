@@ -1,25 +1,24 @@
 import React, { useState, useEffect, useMemo, Fragment } from 'react'
-import { variables } from '../../Variables';
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate, useParams,useLocation } from 'react-router-dom'
 import moment from 'moment';
 import { ErrorMessageHandle } from '../../Utility';
 import InputField from '../ReuseableComponent/InputField'
+import PaymentControl from '../ReuseableComponent/PaymentControl'
 import DateComponent from '../DateComponent';
 import {
     dateyyyymmdd, HandleLogout, downloadExcel,
-    FetchCompanyDetails, AmountInWords, ConvertNumberToWords,ReplaceNonNumeric, 
-    Commarize, FecthEggSaleInvoiceList,FecthEggCategory
+    FetchCompanyDetails, AmountInWords, ReplaceNonNumeric, Commarize, 
+    FecthEggCategory, FecthEggSaleInvoiceList, ConvertNumberToWords, 
+    FecthEggSaleInvoiceById, FectAllEggSaleInvoiceList, CalculateNoOfDays
 } from './../../Utility'
-
 import Loading from '../Loading/Loading'
+
 import ReactDOM from 'react-dom';
 import { PDFViewer } from '@react-pdf/renderer';
 import InvoiceEggSale from '../Invoice/InvoiceEggSale';
 
-
-
-function EggSale(props) {
+function EggSaleInvoiceList(props) {
 
     let history = useNavigate();
     //const { uid } = useParams();
@@ -44,7 +43,7 @@ function EggSale(props) {
     modaltitle: "",
     Id: 0,
     InvoiceNo: "",
-    CustomerId: uid,
+    CustomerId: "",
     TotalQuantity: "",
     PurchaseDate: "",
     TotalCost: "",
@@ -65,11 +64,11 @@ function EggSale(props) {
     const [eggsaledata, setEggSaletData] = useState(initialvalues);
 
     const clickAddEggSale = (p) => {
-        history("/eggsalemodule/" + uid);
+        history("/customerlist/?customertype=1");
     }
 
     const clickEditEggSale = (p) => {
-        history("/eggsalemodule/" + uid + "/" + p.Id);
+        history("/eggsalemodule/" + p.CustomerId + "/" + p.Id);
     }
 
     const _bankdetails={
@@ -85,8 +84,8 @@ function EggSale(props) {
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
-            setEggSaletData({ ...eggsaledata, CustomerId: uid });
-            fetchCustomerDetails(uid);
+           // setEggSaletData({ ...eggsaledata, CustomerId: uid });
+            //fetchCustomerDetails(uid);
             fetchCompanyDetails();
             fetchEggCategory();
 
@@ -105,7 +104,7 @@ function EggSale(props) {
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
-            fetchEggSaleDetails(uid);
+            fetchEggSaleDetails(filterFromDate,filterToDate);
         }
         else {
             HandleLogout();
@@ -158,11 +157,10 @@ function EggSale(props) {
     const [_finalcost, _setFinalCost] = useState(0);
     const [_totalPaid, _setTotalPaid] = useState(0);
     const [_totalDue, _setTotalDue] = useState(0);
-    const [_totaladvance, _setTotalAdvance] = useState(0);
 
-    const fetchEggSaleDetails = async (custid) => {
+    const fetchEggSaleDetails = async (fromdate,todate) => {
         setIsLoaded(true);
-        FecthEggSaleInvoiceList(custid, process.env.REACT_APP_API)
+        FectAllEggSaleInvoiceList(fromdate,todate, process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setEggSaleList(data.Result);
@@ -189,18 +187,15 @@ function EggSale(props) {
     }
 
     const calculateValues = (data) => {
-        const { totalCost, totalQuantity, totalDiscount, totalFinalCost, 
-            totalPaid, totalDue,totalAdvance } 
-        = data.reduce((accumulator, item) => {
+        const { totalCost, totalQuantity, totalDiscount, totalFinalCost, totalPaid, totalDue } = data.reduce((accumulator, item) => {
             accumulator.totalCost += item.TotalCost;
             accumulator.totalQuantity += parseInt(item.TotalQuantity);
             accumulator.totalDiscount += item.TotalDiscount;
             accumulator.totalFinalCost += item.FinalCostInvoice;
             accumulator.totalPaid += item.Paid;
             accumulator.totalDue += item.Due;
-            accumulator.totalAdvance+=parseFloat(item.Advance||0);
             return accumulator;
-        }, { totalCost: 0, totalQuantity: 0, totalDiscount: 0, totalFinalCost: 0, totalPaid: 0, totalDue: 0, totalAdvance:0 })
+        }, { totalCost: 0, totalQuantity: 0, totalDiscount: 0, totalFinalCost: 0, totalPaid: 0, totalDue: 0 })
 
         _setTotalQuantity(totalQuantity);
         _setTotalCost(totalCost);
@@ -208,7 +203,6 @@ function EggSale(props) {
         _setFinalCost(totalFinalCost);
         _setTotalPaid(totalPaid);
         _setTotalDue(totalDue);
-        _setTotalAdvance(totalAdvance);
     }
 
     const fetchCustomerDetails = async (custid) => {
@@ -305,15 +299,13 @@ function EggSale(props) {
     const nextDisabled = currentPage === totalPages;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const itemsToDiaplay = eggsalelist && eggsalelist.length > 0 ? eggsalelist.slice(startIndex, endIndex) : [];
+    const itemsToDiaplay = eggsalelist && eggsalelist.length > 0 ? 
+    eggsalelist.slice(startIndex, endIndex) : [];
     if (itemsToDiaplay.length === 0 && eggsalelist.length > 0) {
         setCurrentPage(currentPage - 1);
     }
 
-    const onDateFilterFromChange = (e) => {
-        setFilterFromDate(e.target.value);
-        getFilterData(e.target.value, filterToDate);
-    }
+    
 
     const getFilterData = (fromDate, toDate) => {
         let _filterList = [];
@@ -334,9 +326,31 @@ function EggSale(props) {
         calculateValues(_filterList);
     }
 
+    const onDateFilterFromChange = (e) => {
+        setFilterFromDate(e.target.value);
+       // getFilterData(e.target.value, filterToDate);
+       if(e.target.value!="" && filterToDate!="")
+       {
+        // let days= CalculateNoOfDays(e.target.value,filterToDate);
+        // if(days>0)
+        // {
+        fetchEggSaleDetails(e.target.value,filterToDate)
+    //     }
+    }
+       
+    }
+
     const onDateFilterToChange = (e) => {
-        setFilterToDate(e.target.value);
-        getFilterData(filterFromDate, e.target.value);
+       setFilterToDate(e.target.value);
+      //  getFilterData(filterFromDate, e.target.value);
+      if(e.target.value!="" && filterFromDate!="")
+        {
+        //    let days= CalculateNoOfDays(filterFromDate,e.target.value);
+        //    if(days>0)
+        //    {
+                fetchEggSaleDetails(filterFromDate,e.target.value)
+           //}
+        }
     }
 
     const onDownloadExcel = () => {
@@ -352,6 +366,8 @@ function EggSale(props) {
     }
 
     const clickInvoice = (eggsale) => {
+
+        fetchCustomerDetails(eggsale.CustomerId);
 
         setEggSaletData({
             Id: eggsale.Id,
@@ -393,16 +409,9 @@ function EggSale(props) {
         <div>
             {isloaded && <Loading />}
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
-                <h2>Egg sale tracker</h2>
+                <h2>Egg sale list</h2>
             </div>
-            <div className="card" style={{ marginBottom: '20px', fontSize:13 }}>
-                <div className="card-body">
-                    <h5 className="card-title" style={{fontSize:15,     marginBottom: 2}}>Customer Name: {customerdetails.FirstName + " " + customerdetails.LastName}</h5>
-                    <p className="card-title" style={{marginBottom: 2}}>Mobile no: {customerdetails.MobileNo}</p>
-                    <p className="card-title" style={{marginBottom: 2}}>Email: {customerdetails.Email}</p>
-                    <p className="card-title" style={{marginBottom: 2}}>Address: {customerdetails.Address}</p>
-                </div>
-            </div>
+            
             <div className="container" style={{ marginTop: '20px', marginBottom: '10px' }}>
                 <div className="row align-items-center" style={{fontSize:13}}>
                     <div className="col-2">
@@ -414,6 +423,10 @@ function EggSale(props) {
                         <DateComponent date={null} onChange={onDateFilterToChange} isRequired={false} value={filterToDate} />
                     </div>
 
+                    {/* <div className="col-4" style={{textAlign:'right'}}>
+                   
+                    </div> */}
+
                     <div className="col-6" style={{textAlign:'right', marginTop: 30}}>
                     <i className="fa-regular fa-file-excel fa-2xl" 
                     style={{ color: '#bea2a2',marginRight:30}} 
@@ -422,7 +435,6 @@ function EggSale(props) {
                     style={{ marginRight: "17.5px" }}
                     onClick={() => clickAddEggSale()}>Add</Button>
 
-                    <a className="mr-2 btn btn-primary" href={`/eggsalepaymentin/?uid=${uid}`}>Payment</a>
                        
                     </div>
                     <div className="col-2" style={{textAlign:'right', marginTop: 30}}>
@@ -440,34 +452,25 @@ function EggSale(props) {
             </div>
            
 
-            {/* <div class="row">
-                <div class="col-md-9">  <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2' }} title='Download Egg Sale List' onClick={() => onDownloadExcel()} ></i></div>
-                <div class="col-md-3"> <div class="row"><div class="col-md-6" style={{ textAlign: 'right' }}> <Button className="mr-2" variant="primary"
-                    style={{ marginRight: "17.5px" }}
-                    onClick={() => clickAddEggSale()}>Add</Button></div>
-
-                    <div class="col-md-6">
-                        <select className="form-select" aria-label="Default select example" style={{ width: "80px" }} onChange={selectPaginationChange}>
-                            <option selected value="10">10</option>
-                            <option value="20">20</option>
-                            <option value="30">30</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="200">200</option>
-                        </select></div></div></div>
-            </div> */}
+            <div class="row">
+                <div class="col-md-9">  </div>
+                <div class="col-md-3"> <div class="row">
+                    
+                    </div></div>
+            </div>
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
                     <tr className="tr-custom" align='center'>
                         <th>Date</th>
+                        <th>Customer name</th>
                         <th>Quantity</th>
                         <th>Total cost (<span>&#8377;</span>)</th>
                         <th>Discount (<span>&#8377;</span>)</th>
                         <th>Final cost (<span>&#8377;</span>)</th>
                         <th>Paid (<span>&#8377;</span>)</th>
                         <th>Due (<span>&#8377;</span>)</th>
-                        <th>Advance</th>
+                        <th>Comments</th>
                         <th align='center'>Invoice</th>
                         <th>Options</th>
                     </tr>
@@ -476,10 +479,15 @@ function EggSale(props) {
                     {
 
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
+                            
                             return (
                                 !isloaded && <tr align='center' style={{fontSize:13}} key={p.Id}>
 
                                     <td align='center'>{moment(p.PurchaseDate).format('DD-MMM-YYYY')}</td>
+
+                                    <td align='center'><a href={`/eggsale/?uid=${p.CustomerId}`}>{p.CustomerName}
+                                            <span className="sr-only">(current)</span></a></td>
+                                    {/* <td align='center'>{p.CustomerName}</td> */}
                                     <td align='center'>{new Intl.NumberFormat('en-IN', {
                                     }).format(p.TotalQuantity.toFixed(2))}
                                     </td>
@@ -507,7 +515,7 @@ function EggSale(props) {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2
                                     }).format(parseFloat(p.Due).toFixed(2))}</td>
-                                    <td align='center'>{p.Advance}</td>
+                                    <td align='left'>{p.Comments}</td>
                                     <td>
                                         <i className="fa-sharp fa-solid fa-receipt fa-beat" title='Invoice' style={{ color: '#086dba', marginLeft: '15px' }} onClick={() => clickInvoice(p)}></i>
                                     </td>
@@ -536,7 +544,7 @@ function EggSale(props) {
                         </tr>
                     }
                 </tbody>
-                <tfoot style={{ backgroundColor: '#cccccc', fontWeight: 'bold', fontSize:13 }}>
+                {/* <tfoot style={{ backgroundColor: '#cccccc', fontWeight: 'bold' }}>
                     <td align='center'>Total</td>
 
                     <td align='center'>{_totalquantity}</td>
@@ -546,11 +554,10 @@ function EggSale(props) {
                     <td align='center'>{parseFloat(_finalcost).toFixed(2)}</td>
                     <td align='center'>{parseFloat(_totalPaid).toFixed(2)}</td>
                     <td align='center'>{parseFloat(_totalDue).toFixed(2)}</td>
-                    <td align='center'>{parseFloat(_totaladvance).toFixed(2)}</td>
                     <td></td>
                     <td></td>
                     <td></td>
-                </tfoot>
+                </tfoot> */}
             </Table >
 
             {
@@ -625,4 +632,4 @@ function EggSale(props) {
     )
 }
 
-export default EggSale
+export default EggSaleInvoiceList

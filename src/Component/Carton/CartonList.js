@@ -94,7 +94,7 @@ const CartonList = (props) => {
 
 
     const fetchClient = async () => {
-        await fetch(variables.REACT_APP_API + 'client',
+        await fetch(process.env.REACT_APP_API + 'client',
             {
                 method: 'GET',
                 headers: {
@@ -122,7 +122,7 @@ const CartonList = (props) => {
     }
     const fetchCarton = async () => {
         setIsLoaded(true);
-        await fetch(variables.REACT_APP_API + 'carton',
+        await fetch(process.env.REACT_APP_API + 'carton',
             {
                 method: 'GET',
                 headers: {
@@ -160,7 +160,7 @@ const CartonList = (props) => {
     };
     const deleteCarton = (cartonid) => {
         if (window.confirm('Are you sure?')) {
-            fetch(variables.REACT_APP_API + 'carton/' + cartonid, {
+            fetch(process.env.REACT_APP_API + 'carton/' + cartonid, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
@@ -235,7 +235,7 @@ const CartonList = (props) => {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'Carton', {
+            fetch(process.env.REACT_APP_API + 'Carton', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -290,7 +290,7 @@ const CartonList = (props) => {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'Carton', {
+            fetch(process.env.REACT_APP_API + 'Carton', {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -465,7 +465,7 @@ const CartonList = (props) => {
             }
 
             {
-                cartons && cartons.length > variables.PAGE_PAGINATION_NO &&
+                cartons && cartons.length > process.env.REACT_APP_PAGE_PAGINATION_NO   &&
                 <>
                     <button
                         onClick={handlePrevClick}

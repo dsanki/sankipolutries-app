@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
     width: '50%',
     flexDirection: 'column',
     justifyContent: 'flex-start',
-    marginTop: 10
+    marginTop: 8
   },
   company: {
     // marginTop: 20,
@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
 
     // color: '#61dafb',
     letterSpacing: 1,
-    fontSize: 15,
+    fontSize: 14,
     // textAlign: 'center',
     textTransform: 'uppercase',
     fontFamily: 'Helvetica-Bold'
@@ -68,10 +68,10 @@ const Company = (props) => (
     <View style={styles.headerContainer}>
      
       <Text style={styles.company}>{props.companydetails[0].CompanyName}</Text><br />
-      <Text>{props.companydetails[0].Address}</Text><br />
-      <Text>{`Phone no: ${props.companydetails[0].PhoneNo}`}</Text><br />
-      <Text>{`Email: ${props.companydetails[0].Email}`}</Text><br />
-      <Text>{`PAN: ${props.companydetails[0].PAN}`}</Text>
+      <Text style={{fontSize:10}}>{props.companydetails[0].Address}</Text><br />
+      <Text style={{fontSize:10}}>{`Phone no: ${props.companydetails[0].PhoneNo}`}</Text><br />
+      <Text style={{fontSize:10}}>{`Email: ${props.companydetails[0].Email}`}</Text><br />
+      <Text style={{fontSize:10}}>{`PAN: ${props.companydetails[0].PAN}`}</Text>
     </View>
   
 );

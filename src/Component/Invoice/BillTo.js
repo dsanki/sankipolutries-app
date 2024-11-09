@@ -5,12 +5,13 @@ const styles = StyleSheet.create({
   headerBillToContainer: {
     textAlign: 'left',
     width: '40%',
-    marginTop: 10,
+    marginTop: 8,
     justifyContent: 'flex-start',
+    fontSize:10
   },
   headerBillToContainergap: {
     width: '10%',
-    marginTop: 10
+    marginTop: 8
   },
   billTo: {
     paddingBottom: 3,
@@ -32,7 +33,7 @@ const BillTo = (props) => (
       <Text>{props.customerdetails.Email}</Text>
       <Text>{props.customerdetails.Address}</Text>
       <Text style={{fontFamily: 'Helvetica-Bold'}}>Motor Vehicle No:</Text><br/>
-      <Text>{props.eggsaledata.VehicleNo}</Text>
+      <Text style={{fontSize:10}}>{props.vehicle.VehicleNo}</Text>
     </View>
   </Fragment>
 );

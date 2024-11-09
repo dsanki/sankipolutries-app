@@ -3,7 +3,7 @@ import { Button, ButtonToolbar, Table, Form, Row, Col, Modal} from 'react-bootst
 
 const InputField = ({ controlid, label, type, value, name, placeholder, onChange, errormessage,required,disabled }) => (
   <Form.Group controlId={controlid} as={Col} >
-    <Form.Label>{label}</Form.Label>
+    <Form.Label style={{fontSize:13}}>{label}</Form.Label>
     <Form.Control type={type}
       value={value}
       name={name}
@@ -11,7 +11,8 @@ const InputField = ({ controlid, label, type, value, name, placeholder, onChange
       placeholder={placeholder}
       onChange={onChange} 
       required={required}
-      disabled={disabled}/>
+      disabled={disabled} 
+      style={{fontSize:13}}/>
     <Form.Control.Feedback type="invalid">
       {errormessage}
     </Form.Control.Feedback>
