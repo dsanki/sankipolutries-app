@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { variables } from './../../Variables'
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
 import Moment from 'moment';
-import EditCarton from './EditCarton';
-import AddCarton from './AddCarton';
 import { useNavigate } from 'react-router-dom'
 import DateComponent from '../DateComponent';
 import InputField from '../ReuseableComponent/InputField'
 import Loading from '../Loading/Loading'
-import { HandleLogout, dateyyyymmdd, downloadExcel } from './../../Utility'
+import { HandleLogout, dateyyyymmdd, downloadExcel, GetCustomerByTypeId } from './../../Utility'
 import moment from 'moment';
-//
 
 const CartonList = (props) => {
     let history = useNavigate();
@@ -25,7 +21,6 @@ const CartonList = (props) => {
     const [validated, setValidated] = useState(false);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [isloaded, setIsLoaded] = useState(true);
-    //const [_quanTity, setquanTity] = useState(0);
     const initialvalues = {
         modaltitle: "",
         Id: 0,
@@ -92,34 +87,27 @@ const CartonList = (props) => {
         }
     }, [obj]);
 
-
     const fetchClient = async () => {
-        await fetch(process.env.REACT_APP_API + 'client',
-            {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
+        GetCustomerByTypeId(process.env.REACT_APP_CUST_TYPE_ID_PKG,
+            process.env.REACT_APP_API)
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setClients(data.Result);
                 }
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.StatusCode === 200) {
-                    setClients(result.Result);
-                }
-                else if (result.StatusCode === 401) {
+                else if (data.StatusCode === 401) {
                     HandleLogout();
                     history("/login")
                 }
-                else if (result.StatusCode === 404) {
-                    props.showAlert("Data not found!!", "danger")
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found to fetch sheds!!", "danger")
                 }
                 else {
-                    props.showAlert("Error occurred!!", "danger")
+                    props.showAlert("Error occurred to fetch sheds!!", "danger")
                 }
+
             });
     }
+
     const fetchCarton = async () => {
         setIsLoaded(true);
         await fetch(process.env.REACT_APP_API + 'carton',
@@ -343,11 +331,17 @@ const CartonList = (props) => {
         setCartonsData({ ...cartonsdata, BillingDate: e.target.value });
     }
     const quantityChange = (e) => {
-        setCartonsData({ ...cartonsdata, Quantity: e.target.value, TotalAmount: (e.target.value * cartonsdata.Rate) });
+        setCartonsData({
+            ...cartonsdata, Quantity: e.target.value,
+            TotalAmount: (e.target.value * cartonsdata.Rate)
+        });
     }
 
     const cartonsRateChange = (e) => {
-        setCartonsData({ ...cartonsdata, Rate: e.target.value, TotalAmount: (e.target.value * cartonsdata.Quantity) });
+        setCartonsData({
+            ...cartonsdata, Rate: e.target.value,
+            TotalAmount: (e.target.value * cartonsdata.Quantity)
+        });
     }
 
     const paidChange = (e) => {
@@ -386,13 +380,6 @@ const CartonList = (props) => {
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
                 <h2>Welcome to Carton List Page</h2>
             </div>
-            {/* <div className="row">
-                <div className="col" style={{ textAlign: 'right' }}>
-                    <Button className="mr-2" variant="primary"
-                        style={{ marginRight: "17.5px" }}
-                        onClick={() => clickAddCarton()}>Add</Button>
-                </div>
-            </div> */}
 
             <div class="row">
                 <div class="col-md-9">  <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2' }} title='Download Egg Sale List' onClick={() => onDownloadExcel()} ></i></div>
@@ -413,41 +400,46 @@ const CartonList = (props) => {
 
             {<Table className="mt-4" striped bordered hover size="sm">
                 <thead>
-                    <tr align='left' className="tr-custom">
+                    <tr align='center' className="tr-custom">
                         <th>Quantity</th>
                         <th>Billing Date</th>
                         <th>Client Name</th>
-                        <th>Rate</th>
-                        <th>Total Amount</th>
-                        <th>Payment</th>
+                        <th>Rate (<span>&#8377;</span>)</th>
+                        <th>Total Amount (<span>&#8377;</span>)</th>
+                        <th>Payment (<span>&#8377;</span>)</th>
+                        <th>Unloading Charge (<span>&#8377;</span>)</th>
                         <th>Payment Date</th>
-                        <th>Unloading Charge</th>
                         <th>Options</th>
                     </tr>
                 </thead>
                 <tbody>
                     {
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((carton) => {
-
-                            const filterByClientId = clients.filter((c) => c.Id === carton.ClientId);
-                            const filterByClientName = filterByClientId.length > 0 ? filterByClientId[0].ClientName : "";
+                            const _supp = clients.filter((c) => c.ID === carton.ClientId);
+                            const filterByClientName = _supp.length > 0 ? (_supp[0].MiddleName != "" && _supp[0].MiddleName != null) ?
+                                _supp[0].FirstName + " " + _supp[0].MiddleName + " " + _supp[0].LastName :
+                                _supp[0].FirstName + " " + _supp[0].LastName : "";
                             carton.ClientName = filterByClientName;
+
+                            
                             return (
-                                isloaded && <tr key={carton.Id} align='left'>
-                                    <td align='left'>{carton.Quantity}</td>
-                                    <td align='left'>{Moment(carton.BillingDate).format('DD-MMM-YYYY')}</td>
+                                !isloaded && <tr key={carton.Id} align='center' style={{fontSize:14}}>
+                                    <td>{carton.Quantity}</td>
+                                    <td>{Moment(carton.BillingDate).format('DD-MMM-YYYY')}</td>
                                     <td>{filterByClientName}</td>
                                     <td>{carton.Rate.toFixed(2)}</td>
                                     <td>{carton.TotalAmount.toFixed(2)}</td>
                                     <td>{carton.Payment.toFixed(2)}</td>
-                                    <td>{Moment(carton.PaymentDate).format('DD-MMM-YYYY')}</td>
                                     <td>{carton.UnloadingCharge.toFixed(2)}</td>
-                                    <td align='center'>
+                                    <td>{Moment(carton.PaymentDate).format('DD-MMM-YYYY')}</td>
+                                    <td>
                                         {
                                             <ButtonToolbar>
-                                                <i className="fa-solid fa-pen-to-square" style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => clickEditCarton(carton)}></i>
+                                                <i className="fa-solid fa-pen-to-square" style={{ color: '#0545b3', marginLeft: '15px' }}
+                                                    onClick={() => clickEditCarton(carton)}></i>
                                                 {localStorage.getItem('isadmin') === 'true' &&
-                                                    <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteCarton(carton.Id)}></i>}
+                                                    <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }}
+                                                        onClick={() => deleteCarton(carton.Id)}></i>}
                                             </ButtonToolbar>
                                         }
                                     </td>
@@ -465,7 +457,7 @@ const CartonList = (props) => {
             }
 
             {
-                cartons && cartons.length > process.env.REACT_APP_PAGE_PAGINATION_NO   &&
+                cartons && cartons.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
                 <>
                     <button
                         onClick={handlePrevClick}
@@ -525,17 +517,18 @@ const CartonList = (props) => {
                                                     onChange={clientChange} required>
                                                     <option selected disabled value="">Choose...</option>
                                                     {
-                                                        clients.filter((c) => c.ClientType === 2 || c.ClientType === 3).map((item) => {
+
+                                                        clients.map((item) => {
+
+                                                            let fullname = (item.MiddleName != "" && item.MiddleName != null) ?
+                                                                item.FirstName + " " + item.MiddleName + " " + item.LastName :
+                                                                item.FirstName + " " + item.LastName;
                                                             return (
-                                                                <option
-                                                                    key={item.Id}
-                                                                    defaultValue={item.Id == null ? null : item.Id}
-                                                                    selected={item.Id === cartonsdata.ClientId}
-                                                                    value={item.Id}
-                                                                >{item.ClientName}</option>
-                                                            );
+                                                                <option value={item.ID} key={item.ID}
+                                                                    selected={item.ID === cartonsdata.ClientId}>{fullname}</option>)
                                                         })
                                                     }
+
                                                 </Form.Select>
                                                 <Form.Control.Feedback type="invalid">
                                                     Please select client

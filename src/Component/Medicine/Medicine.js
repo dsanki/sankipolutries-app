@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
 import InputField from '../ReuseableComponent/InputField'
 import DateComponent from '../DateComponent';
-import { FecthStockListById, HandleLogout, dateyyyymmdd, downloadExcel } from './../../Utility'
+import { FecthStockListById, HandleLogout, dateyyyymmdd, downloadExcel, GetCustomerByTypeId } from './../../Utility'
 import Loading from '../Loading/Loading'
 
 function Medicine(props) {
@@ -36,6 +36,43 @@ function Medicine(props) {
     setValidated(false);
   };
 
+  const [formMedicineFields, setMedicineFields] = useState([
+    { MedicineID: '', 
+      MedicineName: '' , 
+      Quantity: '', 
+      UnitPrice: '',
+      Quantity:'',
+      GST:'',
+      TotalAmount:''
+     }
+  ])
+
+  const handleMedicineFieldsChange = (event, index) => {
+    let data = [...formMedicineFields];
+    data[index][event.target.name] = event.target.value;
+    setMedicineFields(data);
+  }
+
+  const addFields = () => {
+    let object = {
+      MedicineID: '', 
+      MedicineName: '' , 
+      Quantity: '', 
+      UnitPrice: '',
+      Quantity:'',
+      GST:'',
+      TotalAmount:''
+    }
+    //props.addFields();
+    setMedicineFields([...formMedicineFields, object])
+  }
+
+  const removeFields = (index) => {
+    let data = [...formMedicineFields];
+    data.splice(index, 1);
+    setMedicineFields(data);
+  }
+
   const initialvalues = {
     modaltitle: "",
     Id: 0,
@@ -53,8 +90,8 @@ function Medicine(props) {
     ChequeRefNo: "",
     Comments: "",
     GST: "",
-    InvoiceNo:"",
-    InvoiceDate:""
+    InvoiceNo: "",
+    InvoiceDate: ""
 
   };
 
@@ -79,8 +116,8 @@ function Medicine(props) {
       ChequeRefNo: "",
       Comments: "",
       GST: "",
-      InvoiceNo:"",
-      InvoiceDate:""
+      InvoiceNo: "",
+      InvoiceDate: ""
     })
   }
 
@@ -103,26 +140,26 @@ function Medicine(props) {
       ChequeRefNo: md.ChequeRefNo,
       Comments: md.Comments,
       GST: md.GST,
-      InvoiceNo:md.InvoiceNo,
-      InvoiceDate:md.InvoiceDate
+      InvoiceNo: md.InvoiceNo,
+      InvoiceDate: md.InvoiceDate
     })
   }
 
   const medicineNameChange = (e) => {
     let stk = stocklist.filter(x => x.ItemId === parseInt(e.target.value));
-    let qty =meddata.Quantity !== "" ? parseInt(meddata.Quantity) : 0;
+    let qty = meddata.Quantity !== "" ? parseInt(meddata.Quantity) : 0;
     let gstpercentage = stk[0].GST / 100;
-    let totalamount=(parseFloat(stk[0].PurchasePrice) * qty);
-    let totalgst=totalamount*gstpercentage;
-   // let total = stk[0].GST > 0 ? ((parseFloat(stk[0].PurchasePrice) * qty) * gstpercentage) : ((parseFloat(stk[0].PurchasePrice) * qty));
-   let totalinclGST = totalamount+totalgst;
+    let totalamount = (parseFloat(stk[0].PurchasePrice) * qty);
+    let totalgst = totalamount * gstpercentage;
+    // let total = stk[0].GST > 0 ? ((parseFloat(stk[0].PurchasePrice) * qty) * gstpercentage) : ((parseFloat(stk[0].PurchasePrice) * qty));
+    let totalinclGST = totalamount + totalgst;
     setMedData({
       ...meddata, MedicineName: stk[0].ItemName,
       MedicineID: stk[0].ItemId,
       UnitPrice: stk[0].PurchasePrice,
       GST: stk[0].GST,
       TotalAmount: totalinclGST,
-      Due:totalinclGST-meddata.Paid
+      Due: totalinclGST - meddata.Paid
     });
   }
   const dateChange = (e) => {
@@ -136,16 +173,16 @@ function Medicine(props) {
       let qty = e.target.value !== "" ? parseInt(e.target.value) : 0;
       let gstpercentage = stk[0].GST / 100;
 
-      let totalamount=(parseFloat(stk[0].PurchasePrice) * qty);
-      let totalgst=totalamount*gstpercentage;
+      let totalamount = (parseFloat(stk[0].PurchasePrice) * qty);
+      let totalgst = totalamount * gstpercentage;
 
-      let totalinclGST = totalamount+totalgst;
+      let totalinclGST = totalamount + totalgst;
 
       setMedData({
         ...meddata,
         Quantity: e.target.value,
         TotalAmount: totalinclGST, GST: stk[0].GST,
-        Due:totalinclGST-meddata.Paid
+        Due: totalinclGST - meddata.Paid
       });
     }
   }
@@ -203,7 +240,7 @@ function Medicine(props) {
     if (localStorage.getItem('token')) {
       fetchUnit();
       fetchClient();
-      fetchStockListById(variables.STOCK_CAT_MEDICINE)
+      fetchStockListById(process.env.REACT_APP_STOCK_CAT_MEDICINE)
     }
     else {
 
@@ -215,12 +252,12 @@ function Medicine(props) {
 
 
   const fetchStockListById = async (catid) => {
-    
-    FecthStockListById(catid)
+
+    FecthStockListById(catid, process.env.REACT_APP_API)
       .then(data => {
         if (data.StatusCode === 200) {
           setStockList(data.Result);
-         
+
         }
         else if (data.StatusCode === 401) {
           HandleLogout();
@@ -228,18 +265,18 @@ function Medicine(props) {
         }
         else if (data.StatusCode === 404) {
           props.showAlert("Data not found!!", "danger");
-          
+
         }
         else {
           props.showAlert("Error occurred!!", "danger");
-         
+
         }
       })
   }
 
   const fetchMedicineList = async () => {
     setIsLoaded(true);
-    fetch(variables.REACT_APP_API + 'Medicine/GetMedicine',
+    fetch(process.env.REACT_APP_API + 'Medicine/GetMedicine',
       {
         method: 'GET',
         headers: {
@@ -258,22 +295,22 @@ function Medicine(props) {
         }
         else if (data.StatusCode === 401) {
           HandleLogout();
-          
+
           history("/login")
         }
         else if (data.StatusCode === 404) {
           props.showAlert("Data not found!!", "danger")
           setIsLoaded(false);
-      }
-      else {
+        }
+        else {
           props.showAlert("Error occurred!!", "danger")
           setIsLoaded(false);
-      }
+        }
       });
   }
 
   const fetchUnit = async () => {
-    fetch(variables.REACT_APP_API + 'Unit',
+    fetch(process.env.REACT_APP_API + 'Unit',
       {
         method: 'GET',
         headers: {
@@ -297,16 +334,8 @@ function Medicine(props) {
   }
 
   const fetchClient = async () => {
-    fetch(variables.REACT_APP_API + 'client',
-      {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('token')
-        }
-      })
-      .then(response => response.json())
+    GetCustomerByTypeId(process.env.REACT_APP_CUST_TYPE_MEDICINE,
+      process.env.REACT_APP_API)
       .then(data => {
         if (data.StatusCode === 200) {
           setClientList(data.Result);
@@ -315,6 +344,13 @@ function Medicine(props) {
           HandleLogout();
           history("/login")
         }
+        else if (data.StatusCode === 404) {
+          props.showAlert("Data not found to fetch sheds!!", "danger")
+        }
+        else {
+          props.showAlert("Error occurred to fetch sheds!!", "danger")
+        }
+
       });
   }
 
@@ -328,7 +364,7 @@ function Medicine(props) {
     }
     else {
 
-      fetch(variables.REACT_APP_API + 'Medicine/UpdateMedicine', {
+      fetch(process.env.REACT_APP_API + 'Medicine/UpdateMedicine', {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
@@ -350,8 +386,8 @@ function Medicine(props) {
           PaymentDate: meddata.PaymentDate,
           ChequeRefNo: meddata.ChequeRefNo,
           Comments: meddata.Comments,
-          InvoiceDate:meddata.InvoiceDate,
-          InvoiceNo:meddata.InvoiceNo
+          InvoiceDate: meddata.InvoiceDate,
+          InvoiceNo: meddata.InvoiceNo
 
         })
       }).then(res => res.json())
@@ -393,7 +429,7 @@ function Medicine(props) {
     }
     else {
 
-      fetch(variables.REACT_APP_API + 'Medicine/AddMedicine', {
+      fetch(process.env.REACT_APP_API + 'Medicine/AddMedicine', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -415,8 +451,8 @@ function Medicine(props) {
           PaymentDate: meddata.PaymentDate,
           ChequeRefNo: meddata.ChequeRefNo,
           Comments: meddata.Comments,
-          InvoiceDate:meddata.InvoiceDate,
-          InvoiceNo:meddata.InvoiceNo
+          InvoiceDate: meddata.InvoiceDate,
+          InvoiceNo: meddata.InvoiceNo
 
         })
       }).then(res => res.json())
@@ -514,45 +550,64 @@ function Medicine(props) {
   const selectPaginationChange = (e) => {
     setItemsPerPage(e.target.value);
     addCount(count);
-}
+  }
 
-const onDownloadExcel = () => {
-  const _list = medicineList.map((p) => {
+  const onDownloadExcel = () => {
+    const _list = medicineList.map((p) => {
       return ({
-          Date: moment(p.Date).format('DD-MMM-YYYY'),
-          MedicineName:p.MedicineName,
-          Quantity: p.Quantity, 
-          Rate: p.UnitPrice.toFixed(2), 
-          TotalAmount: p.TotalAmount.toFixed(2), 
-          Paid: p.Paid.toFixed(2), 
-          Due: p.Due.toFixed(2), 
-          PaymentDate: moment(p.PaymentDate).format('DD-MMM-YYYY'),
-          Comments: p.Comments,
-          InvoiceDate:p.InvoiceDate,
-          InvoiceNo:p.InvoiceNo
+        Date: moment(p.Date).format('DD-MMM-YYYY'),
+        MedicineName: p.MedicineName,
+        Quantity: p.Quantity,
+        Rate: p.UnitPrice.toFixed(2),
+        TotalAmount: p.TotalAmount.toFixed(2),
+        Paid: p.Paid.toFixed(2),
+        Due: p.Due.toFixed(2),
+        PaymentDate: moment(p.PaymentDate).format('DD-MMM-YYYY'),
+        Comments: p.Comments,
+        InvoiceDate: p.InvoiceDate,
+        InvoiceNo: p.InvoiceNo
       });
-  });
+    });
 
-  downloadExcel(_list, "MedicineList");
-}
+    downloadExcel(_list, "MedicineList");
+  }
 
 
   return (
     <div>
-  {isloaded && <Loading />}
+      {isloaded && <Loading />}
       <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '30px', marginBottom: '30px' }}>
         <h2> Medicine Tracker</h2>
       </div>
 
       <div className="container" style={{ marginTop: '30px', marginBottom: '20px' }}>
-        <div className="row align-items-center">
-          <div className="col">
+        <div className="row align-items-center" style={{ fontSize: 13 }}>
+          <div className="col-2">
             <p><strong>From</strong></p>
             <DateComponent date={null} onChange={onDateFilterFromChange} isRequired={false} value={filterFromDate} />
           </div>
-          <div className="col">
+          <div className="col-2">
             <p><strong>To</strong></p>
             <DateComponent date={null} onChange={onDateFilterToChange} isRequired={false} value={filterToDate} />
+          </div>
+
+          <div className="col-6" style={{ textAlign: 'right', marginTop: 30 }}>
+            <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2', marginRight: 30 }}
+              title='Download Egg Sale List' onClick={() => onDownloadExcel()} ></i>
+
+            <Button className="mr-2" variant="primary"
+              style={{ marginRight: "17.5px" }}
+              onClick={() => clickAddMedicine()}>Add</Button>
+          </div><div className="col-2" >
+            <select className="form-select" aria-label="Default select example"
+              style={{ width: "80px", marginTop: 30 }} onChange={selectPaginationChange}>
+              <option selected value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+            </select>
           </div>
           {/* <div className="col">
                     <p><strong>Supplier</strong></p>
@@ -590,34 +645,19 @@ const onDownloadExcel = () => {
       </div> */}
 
 
-      <div class="row">
-                <div class="col-md-9">  <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2' }} title='Download Egg Sale List' onClick={() => onDownloadExcel()} ></i></div>
-                <div class="col-md-3"> <div class="row"><div class="col-md-6" style={{ textAlign: 'right' }}> <Button className="mr-2" variant="primary"
-                    style={{ marginRight: "17.5px" }}
-                    onClick={() => clickAddMedicine()}>Add</Button></div>
 
-                    <div class="col-md-6">
-                        <select className="form-select" aria-label="Default select example" style={{ width: "80px" }} onChange={selectPaginationChange}>
-                            <option selected value="10">10</option>
-                            <option value="20">20</option>
-                            <option value="30">30</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="200">200</option>
-                        </select></div></div></div>
-            </div>
 
       <Table className="mt-4" striped bordered hover size="sm">
         <thead>
-          <tr align='left' className="tr-custom">
+          <tr align='center' className="tr-custom">
             <th>Date</th>
             <th>Supplier</th>
             <th>Medicine name</th>
             <th>Quantity</th>
-            <th>Unit Price</th>
-            <th>Total amount</th>
-            <th>Paid</th>
-            <th>Due</th>
+            <th>Unit Price (<span>&#8377;</span>)</th>
+            <th>Total amount (<span>&#8377;</span>)</th>
+            <th>Paid (<span>&#8377;</span>)</th>
+            <th>Due (<span>&#8377;</span>)</th>
             <th>Payment date</th>
             <th>Cheque ref</th>
             <th>Comments</th>
@@ -632,23 +672,28 @@ const onDownloadExcel = () => {
               // const _unit = unitlist.filter((c) => c.ID === p.UnitId);
               // const _uname = _unit.length > 0 ? _unit[0].UnitName : "";
               let stk = stocklist.filter(x => x.ItemId === parseInt(p.MedicineID));
-              p.GST=stk.length>0?stk[0].GST:0;
-              const _supp = clientlist.filter((c) => c.Id === p.ClientId);
-              const _suppname = _supp.length > 0 ? _supp[0].ClientName : "";
+              p.GST = stk.length > 0 ? stk[0].GST : 0;
+
+
+              const _supp = clientlist.filter((c) => c.ID === p.ClientId);
+              const _suppname = _supp.length > 0 ? (_supp[0].MiddleName != "" && _supp[0].MiddleName != null) ?
+                _supp[0].FirstName + " " + _supp[0].MiddleName + " " + _supp[0].LastName :
+                _supp[0].FirstName + " " + _supp[0].LastName : "";
+              p.ClientName = _suppname;
 
               return (
-                !isloaded && <tr align='center' key={p.Id}>
-                  <td align='left'>{moment(p.Date).format('DD-MMM-YYYY')}</td>
-                  <td align='left'>{_suppname}</td>
-                  <td align='left'>{p.MedicineName}</td>
-                  <td align='left'>{p.Quantity}</td>
-                  <td align='left'>{p.UnitPrice}</td>
-                  <td align='left'>{p.TotalAmount.toFixed(2)}</td>
-                  <td align='left'>{p.Paid.toFixed(2)}</td>
-                  <td align='left'>{p.Due.toFixed(2)}</td>
-                  <td align='left'>{moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
-                  <td align='left'>{p.ChequeRefNo}</td>
-                  <td align='left'>{p.Comments}</td>
+                !isloaded && <tr align='center' style={{ fontSize: 14 }} key={p.Id}>
+                  <td >{moment(p.Date).format('DD-MMM-YYYY')}</td>
+                  <td >{_suppname}</td>
+                  <td>{p.MedicineName}</td>
+                  <td >{p.Quantity}</td>
+                  <td >{p.UnitPrice}</td>
+                  <td >{p.TotalAmount.toFixed(2)}</td>
+                  <td >{p.Paid.toFixed(2)}</td>
+                  <td >{p.Due.toFixed(2)}</td>
+                  <td >{moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
+                  <td >{p.ChequeRefNo}</td>
+                  <td >{p.Comments}</td>
                   <td align='center'>
                     {
                       <ButtonToolbar>
@@ -687,71 +732,79 @@ const onDownloadExcel = () => {
               <Col sm={12}>
                 <div>
                   <Form noValidate validated={validated} className="needs-validation">
-                  <Row className="mb-12">
-                        <Form.Group as={Col} controlId="InvoiceDate">
-                          <Form.Label>Invoice Date</Form.Label>
-                          <DateComponent date={null} onChange={invoiceDateChange} isRequired={true} value={meddata.InvoiceDate} />
-                          <Form.Control.Feedback type="invalid">
-                            Please select invoice date
-                          </Form.Control.Feedback>
-                        </Form.Group>
+                    <Row className="mb-12">
+                      <Form.Group as={Col} controlId="InvoiceDate">
+                        <Form.Label style={{ fontSize: 13 }}>Invoice Date</Form.Label>
+                        <DateComponent date={null} onChange={invoiceDateChange} isRequired={true} value={meddata.InvoiceDate} />
+                        <Form.Control.Feedback type="invalid">
+                          Please select invoice date
+                        </Form.Control.Feedback>
+                      </Form.Group>
 
-                        <InputField controlId="UnitPrice" label="Invoice No"
-                          type="text"
-                          value={meddata.InvoiceNo}
-                          name="InvoiceNo"
-                          placeholder="Invoice No"
-                          errormessage="Please enter Invoice No"
-                          required={true}
-                          disabled={false}
+                      <InputField controlId="InvoiceNo" label="Invoice No"
+                        type="text"
+                        value={meddata.InvoiceNo}
+                        name="InvoiceNo"
+                        placeholder="Invoice no"
+                        errormessage="Please enter Invoice No"
+                        required={true}
+                        disabled={false}
+                        onChange={invoiceNoChange}
                       />
                     </Row>
                     <Row className="mb-12">
 
                       <Form.Group as={Col} controlId="Date">
-                        <Form.Label>Date</Form.Label>
+                        <Form.Label style={{ fontSize: 13 }}>Date</Form.Label>
                         <DateComponent date={null} onChange={dateChange} isRequired={true} value={meddata.Date} />
                         <Form.Control.Feedback type="invalid">
                           Please select date
                         </Form.Control.Feedback>
-                      
+
                       </Form.Group>
                       <Form.Group controlId="ClientId" as={Col} >
-                        <Form.Label>Supplier</Form.Label>
-                        <Form.Select aria-label="Default select example"
+                        <Form.Label style={{ fontSize: 13 }}>Supplier</Form.Label>
+                        <Form.Select style={{ fontSize: 13 }}
                           onChange={clientChange} required>
                           <option selected disabled value="">Choose...</option>
                           {
-                            clientlist.filter((c) => c.ClientType === 2 || c.ClientType === 3).map((item) => {
+
+                            clientlist.map((item) => {
+
+                              let fullname = (item.MiddleName != "" && item.MiddleName != null) ?
+                                item.FirstName + " " + item.MiddleName + " " + item.LastName :
+                                item.FirstName + " " + item.LastName;
                               return (
-                                <option
-                                  key={item.Id}
-                                  defaultValue={item.Id == null ? null : item.Id}
-                                  selected={item.Id === meddata.ClientId}
-                                  value={item.Id}
-                                >{item.ClientName}</option>
-                              );
+                                <option value={item.ID} key={item.ID}
+                                  selected={item.ID === meddata.ClientId}>{fullname}</option>)
                             })
+
+
                           }
                         </Form.Select>
                         <Form.Control.Feedback type="invalid">
                           Please select supplier
                         </Form.Control.Feedback>
                       </Form.Group>
-                      {/* <InputField controlId="MedicineName" label="Medicine name"
-                        type="text"
-                        value={meddata.MedicineName}
-                        name="MedicineName"
-                        placeholder="Medicine name"
-                        errormessage="Please enter medicine name"
-                        onChange={medicineNameChange}
-                        required={true}
-                        disabled={false}
-                      /> */}
 
-                      <Form.Group controlId="MedicineName" as={Col} >
-                        <Form.Label>Medicine name</Form.Label>
-                        <Form.Select aria-label="Default select example"
+                    
+
+                    </Row>
+
+
+                    <Row>
+                    <div className="row">
+      <form>
+
+<i class="fa-regular fa-circle-plus" onClick={addFields }></i>
+        {/* <button onClick={addFields} style={{ width: 37, marginLeft: 10, marginTop: 10 }}>+</button> */}
+        {formMedicineFields.map((form, index) => {
+          return (
+            <div key={index} style={{ marginTop: 10 }}>
+              <Row className="mb-12">
+              <Form.Group controlId="MedicineName" as={Col} >
+                        <Form.Label style={{ fontSize: 13 }}>Medicine name</Form.Label>
+                        <Form.Select style={{ fontSize: 13 }}
                           onChange={medicineNameChange} required>
                           <option selected disabled value="">Choose...</option>
                           {
@@ -771,26 +824,11 @@ const onDownloadExcel = () => {
                           Please select medicine name
                         </Form.Control.Feedback>
                       </Form.Group>
-
-
-                      {/* <Form.Group controlId="MedicineName" as={Col} >
-                        <Form.Label>Medicine name</Form.Label>
-                        <Form.Control type="text" name="MedicineName" required value={meddata.MedicineName}
-                          placeholder="Medicine name" onChange={medicineNameChange} />
-                        <Form.Control.Feedback type="invalid">
-                          Please enter medicine name
-                        </Form.Control.Feedback>
-                      </Form.Group> */}
-
-                    </Row>
-
-
-                    <Row className="mb-12">
                       <InputField controlId="UnitPrice" label="Unit Price"
                         type="text"
                         value={meddata.UnitPrice}
                         name="UnitPrice"
-                        placeholder="UnitPrice"
+                        placeholder="Unit price"
                         errormessage="Please enter UnitPrice"
                         required={true}
                         disabled={true}
@@ -816,41 +854,6 @@ const onDownloadExcel = () => {
                         disabled={true}
                       />
 
-                      {/* <Form.Group controlId="Quantity" as={Col} >
-                        <Form.Label>Quantity</Form.Label>
-                        <Form.Control type="text" name="Quantity" onChange={quantityChange}
-                          placeholder="Quantity" value={meddata.Quantity} />
-                        <Form.Control.Feedback type="invalid">
-                          Please enter quantity
-                        </Form.Control.Feedback>
-                      </Form.Group> */}
-
-
-
-
-                      {/* <Form.Group controlId="UnitId" as={Col} >
-                        <Form.Label>Unit</Form.Label>
-                        <Form.Select aria-label="Default select example"
-                          onChange={unitChange} required>
-                          <option selected disabled value="">Choose...</option>
-                          {
-                            unitlist.map((item) => {
-                              return (
-                                <option
-                                  key={item.ID}
-                                  defaultValue={item.ID == null ? null : item.ID}
-                                  selected={item.ID === meddata.UnitId}
-                                  value={item.ID}
-                                >{item.UnitName}</option>
-                              );
-                            })
-                          }
-                        </Form.Select>
-                        <Form.Control.Feedback type="invalid">
-                          Please select customer type
-                        </Form.Control.Feedback>
-                      </Form.Group> */}
-
                       <InputField controlId="TotalAmount" label="Total amount"
                         type="number"
                         value={meddata.TotalAmount}
@@ -860,16 +863,30 @@ const onDownloadExcel = () => {
                         required={true}
                         disabled={true}
                       />
+              
+                <div className="col">
+                  <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }}
+                    onClick={() => removeFields(index)}></i>
+                  {/* <button style={{ width: 37, marginLeft: 10 }} 
+                onClick={() => removeFields(index)}>-</button> */}
+                </div>
+              </Row>
+            </div>
+          )
+        })}
+      </form>
+    </div>
+                    </Row>
 
 
-                      {/* <Form.Group controlId="TotalAmount" as={Col} >
-                        <Form.Label>Total amount</Form.Label>
-                        <Form.Control type="text" name="TotalAmount" required onChange={totalAmountChange}
-                          placeholder="Total amount" value={meddata.TotalAmount} />
-                        <Form.Control.Feedback type="invalid">
-                          Please enter total amount
-                        </Form.Control.Feedback>
-                      </Form.Group> */}
+
+
+
+                    
+
+                    <Row className="mb-12">
+
+                   
                     </Row>
                     <Row className="mb-12">
 
@@ -883,14 +900,7 @@ const onDownloadExcel = () => {
                         disabled={false}
                         onChange={paidChange}
                       />
-                      {/* <Form.Group controlId="Paid" as={Col} >
-                        <Form.Label>Paid</Form.Label>
-                        <Form.Control type="text" name="Email" required onChange={paidChange} value={meddata.Paid}
-                          placeholder="Paid" />
-                        <Form.Control.Feedback type="invalid">
-                          Please paid amount
-                        </Form.Control.Feedback>
-                      </Form.Group> */}
+
                       <InputField controlId="Due" label="Due"
                         type="number"
                         value={meddata.Due}
@@ -900,37 +910,27 @@ const onDownloadExcel = () => {
                         required={true}
                         disabled={true}
                       />
-                      {/* <Form.Group controlId="Due" as={Col} >
-                        <Form.Label>Due</Form.Label>
-                        <Form.Control type="text" name="Due" disabled value={meddata.Due}
-                          placeholder="Due" />
 
-                      </Form.Group> */}
                       <Form.Group as={Col} controlId="PaymentDate">
-                        <Form.Label>Payment date</Form.Label>
+                        <Form.Label style={{ fontSize: 13 }}>Payment date</Form.Label>
                         <DateComponent date={null} onChange={paymentDateChange} isRequired={true} value={meddata.PaymentDate} />
                         <Form.Control.Feedback type="invalid">
                           Please select payment date
                         </Form.Control.Feedback>
-                        {/* <Form.Control
-                          type="date"
-                          value={meddata.PaymentDate ? dateForPicker(meddata.PaymentDate) : ''}
-                          onChange={paymentDateChange}
-                        /> */}
                       </Form.Group>
                     </Row>
 
                     <Row className="mb-12">
                       <Form.Group controlId="ChequeRefNo" as={Col} >
-                        <Form.Label>Cheque Ref No</Form.Label>
-                        <Form.Control as="textarea" rows={3} name="ChequeRefNo" onChange={chequeRefNoChange} value={meddata.ChequeRefNo}
+                        <Form.Label style={{ fontSize: 13 }}>Cheque Ref No</Form.Label>
+                        <Form.Control as="textarea" rows={3} style={{ fontSize: 13 }} name="ChequeRefNo" onChange={chequeRefNoChange} value={meddata.ChequeRefNo}
                           placeholder="Cheque Ref No" />
                       </Form.Group>
                     </Row>
                     <Row className="mb-12">
                       <Form.Group controlId="Comments" as={Col} >
-                        <Form.Label>Comments</Form.Label>
-                        <Form.Control as="textarea" rows={3} name="Comments" onChange={commentsChange} value={meddata.Comments}
+                        <Form.Label style={{ fontSize: 13 }}>Comments</Form.Label>
+                        <Form.Control as="textarea" rows={3} style={{ fontSize: 13 }} name="Comments" onChange={commentsChange} value={meddata.Comments}
                           placeholder="Comments" />
                       </Form.Group>
                     </Row>

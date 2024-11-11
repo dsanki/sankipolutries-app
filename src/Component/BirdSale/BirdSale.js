@@ -863,7 +863,8 @@ function BirdSale(props) {
 
                     <div className="col-6" style={{textAlign:'right', marginTop: 30}}>
                     <i className="fa-regular fa-file-excel fa-2xl"
-                     style={{ color: '#bea2a2', marginRight:30 }} onClick={() => onDownloadExcel()} ></i>
+                     style={{ color: '#bea2a2', marginRight:30 }} 
+                     onClick={() => onDownloadExcel()} ></i>
                       <Button className="mr-2" variant="primary"
                         style={{ marginRight: "17.5px" }}
                         onClick={() => clickAddBirdSale()}>New</Button>

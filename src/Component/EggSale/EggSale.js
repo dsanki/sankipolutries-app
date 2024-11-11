@@ -239,9 +239,9 @@ function EggSale(props) {
             });
     }
 
-    const deleteEggSale = (id) => {
+    const deleteEggSaleInv = (id) => {
         if (window.confirm('Are you sure?')) {
-            fetch(process.env.REACT_APP_API + 'EggSale/' + id, {
+            fetch(process.env.REACT_APP_API + 'EggSale/DeleteEggSaleInvoice/?id=' + id, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': localStorage.getItem('token')
@@ -520,7 +520,7 @@ function EggSale(props) {
 
                                                 {localStorage.getItem('isadmin') === 'true' &&
                                                     <i className="fa-solid fa-trash" title='Delete' style={{ color: '#f81616', marginLeft: '15px' }} 
-                                                    onClick={() => deleteEggSale(p.Id)}></i>}
+                                                    onClick={() => deleteEggSaleInv(p.Id)}></i>}
 
 
 

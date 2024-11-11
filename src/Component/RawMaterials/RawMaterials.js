@@ -526,7 +526,7 @@ function RawMaterials(props) {
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
-                    <tr align='left' className="tr-custom">
+                    <tr align='center' className="tr-custom">
                         <th>Date</th>
                         <th>Supplier</th>
                         <th>Materials name</th>

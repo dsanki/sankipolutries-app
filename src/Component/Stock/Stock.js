@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { variables } from '../../Variables';
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'
 import { FecthStockListById, HandleLogout, dateyyyymmdd, downloadExcel } from './../../Utility'
@@ -108,7 +107,7 @@ function Stock(props) {
 
     const fetchStockListById = async (catid) => {
         setIsLoaded(true);
-        FecthStockListById(catid)
+        FecthStockListById(catid, process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setStockList(data.Result);
@@ -144,7 +143,7 @@ function Stock(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'Stock/UpdateStock', {
+            fetch(process.env.REACT_APP_API + 'Stock/UpdateStock', {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -194,7 +193,7 @@ function Stock(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'Stock/AddStock', {
+            fetch(process.env.REACT_APP_API+ 'Stock/AddStock', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -273,17 +272,17 @@ function Stock(props) {
     const deleteStock = () => {
     }
 
-    const[filtercategory, setFilterCategory]=useState("");
+    const [filtercategory, setFilterCategory] = useState("");
 
     const onCategoryFilterChange = (e) => {
         let _filterList = stockListForFilter;
-        let category=e.target.value;
+        let category = e.target.value;
         setFilterCategory(category);
-       // getFilterData(filterFromDate, filterToDate, e.target.value)
+        // getFilterData(filterFromDate, filterToDate, e.target.value)
 
-        if (category !=="") {
+        if (category !== "") {
             _filterList = stockListForFilter.filter((c) => c.Category === category);
-           
+
         }
 
         setStockList(_filterList);
@@ -300,22 +299,22 @@ function Stock(props) {
             <div className="container" style={{ marginTop: '30px' }}>
                 <div className="row align-items-center">
 
-                <div className="col-4">
+                    <div className="col-4">
                         <p><strong>Category</strong></p>
                         <Form.Select aria-label="Default select example"
                             onChange={onCategoryFilterChange}>
                             <option selected value="">Choose...</option>
                             {
-                               categoryList.categories.map((item) => {
-                                return (
-                                    <option
-                                        key={item.Key}
-                                        defaultValue={item.Value == null ? null : item.Value}
-                                        selected={item.Value === stockdata.Category}
-                                        value={item.Value}
-                                    >{item.Value}</option>
-                                );
-                            })
+                                categoryList.categories.map((item) => {
+                                    return (
+                                        <option
+                                            key={item.Key}
+                                            defaultValue={item.Value == null ? null : item.Value}
+                                            selected={item.Value === stockdata.Category}
+                                            value={item.Value}
+                                        >{item.Value}</option>
+                                    );
+                                })
                             }
                         </Form.Select>
                     </div>
@@ -342,8 +341,8 @@ function Stock(props) {
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
-                    <tr align='left' className="tr-custom">
-                        <th>Item Name</th>
+                    <tr align='center' className="tr-custom">
+                        <th align='left'>Item Name</th>
                         <th>GST</th>
                         <th>Purchase Price</th>
                         <th>Category</th>
@@ -354,11 +353,11 @@ function Stock(props) {
                     {
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
                             return (
-                                !isloaded && <tr align='center' key={p.ItemId}>
-                                    <td align='left' style={{maxWidth:'50%',width:'50%'}}>{p.ItemName}</td>
-                                    <td align='left'>{parseFloat(p.GST).toFixed(2)}</td>
-                                    <td align='left'>{parseFloat(p.PurchasePrice).toFixed(2)}</td>
-                                    <td align='left'>{p.Category}</td>
+                                !isloaded && <tr align='center' style={{ fontSize: 13 }} key={p.ItemId}>
+                                    <td align='left' style={{ maxWidth: '50%', width: '50%' }}>{p.ItemName}</td>
+                                    <td >{parseFloat(p.GST).toFixed(2)}</td>
+                                    <td >{parseFloat(p.PurchasePrice).toFixed(2)}</td>
+                                    <td >{p.Category}</td>
                                     <td align='center'>
                                         {
                                             <ButtonToolbar>
@@ -466,8 +465,8 @@ function Stock(props) {
                                             />
 
                                             <Form.Group controlId="Category" as={Col} >
-                                                <Form.Label>Category name</Form.Label>
-                                                <Form.Select aria-label="Default select example"
+                                                <Form.Label style={{fontSize:13}}>Category name</Form.Label>
+                                                <Form.Select style={{fontSize:13}}
                                                     onChange={categoryChange} required>
                                                     <option selected disabled value="">Choose...</option>
                                                     {

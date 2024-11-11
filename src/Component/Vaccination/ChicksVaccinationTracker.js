@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { variables } from '../../Variables';
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
@@ -68,7 +67,7 @@ function ChicksVaccinationTracker(props) {
 
     const fetchVaccinationTracker = async () => {
         setIsLoaded(true);
-        fetch(variables.REACT_APP_API + 'VaccinationTracker/GetVaccinationTracker',
+        fetch(process.env.REACT_APP_API + 'VaccinationTracker/GetVaccinationTracker',
             {
                 method: 'GET',
                 headers: {
@@ -82,7 +81,7 @@ function ChicksVaccinationTracker(props) {
                 if (data.StatusCode === 200) {
                     setVaccinationTrackerList(data.Result);
                     setVccListFilter(data.Result);
-                    setTotalPages(Math.ceil(data.Result.length / variables.PAGE_PAGINATION_NO));
+                    setTotalPages(Math.ceil(data.Result.length / process.env.REACT_APP_PAGE_PAGINATION_NO));
                     setVccDownload(data.Result);
                     setIsLoaded(false);
                 }
@@ -101,7 +100,7 @@ function ChicksVaccinationTracker(props) {
 
 
     const fetchVaccinationType = async () => {
-        fetch(variables.REACT_APP_API + 'VaccinationTracker/GetVaccinationType',
+        fetch(process.env.REACT_APP_API + 'VaccinationTracker/GetVaccinationType',
             {
                 method: 'GET',
                 headers: {
@@ -130,7 +129,7 @@ function ChicksVaccinationTracker(props) {
 
 
     const fetchVaccinationRoute = async () => {
-        fetch(variables.REACT_APP_API + 'VaccinationTracker/GetVaccinationRoute',
+        fetch(process.env.REACT_APP_API + 'VaccinationTracker/GetVaccinationRoute',
             {
                 method: 'GET',
                 headers: {
@@ -158,7 +157,7 @@ function ChicksVaccinationTracker(props) {
     }
 
     const fetchVaccinationList = async () => {
-        fetch(variables.REACT_APP_API + 'VaccinationTracker/GetVaccinationList',
+        fetch(process.env.REACT_APP_API + 'VaccinationTracker/GetVaccinationList',
             {
                 method: 'GET',
                 headers: {
@@ -186,7 +185,7 @@ function ChicksVaccinationTracker(props) {
     }
 
     const fetchVaccinationAgeList = async () => {
-        fetch(variables.REACT_APP_API + 'VaccinationTracker/GetVaccinationAge',
+        fetch(process.env.REACT_APP_API + 'VaccinationTracker/GetVaccinationAge',
             {
                 method: 'GET',
                 headers: {
@@ -214,7 +213,7 @@ function ChicksVaccinationTracker(props) {
     }
 
     const fetchSheds = () => {
-        FetchShedsList()
+        FetchShedsList(process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setShedList(data.Result);
@@ -234,7 +233,7 @@ function ChicksVaccinationTracker(props) {
 
 
     const fetchShedLotsMapList = () => {
-        FetchShedLotMapList()
+        FetchShedLotMapList(process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setShedLotMapList(data.Result);
@@ -359,22 +358,30 @@ function ChicksVaccinationTracker(props) {
         if (filterval.length > 0) {
             lotid = filterval[0].lotid;
             lotname = filterval[0].lotname;
-            FetchLotById(lotid)
+            FetchLotById(lotid, process.env.REACT_APP_API)
                 .then(data => {
                     totalbirds = data.Result.TotalChicks - (data.Result.Mortality + data.Result.TotalMortality + data.Result.TotalBirdSale);
                     weeks = CalculateAgeInWeeks(data.Result.Date);
                     days = CalculateAgeInDays(data.Result.Date);
-                    setVaccTrackerData({ ...vacctrackerdata, ShedId: shedid, LotNo: lotid, LotName: lotname, TotalBirds: totalbirds, AgeDays: days, AgeWeeks: weeks });
+                    setVaccTrackerData({
+                        ...vacctrackerdata, ShedId: shedid, LotNo: lotid,
+                        LotName: lotname, TotalBirds: totalbirds,
+                        AgeDays: days, AgeWeeks: weeks
+                    });
                 });
         }
         else {
-            setVaccTrackerData({ ...vacctrackerdata, ShedId: shedid, LotNo: lotid, LotName: lotname, TotalBirds: totalbirds, AgeDays: days, AgeWeeks: weeks });
+            setVaccTrackerData({
+                ...vacctrackerdata, ShedId: shedid,
+                LotNo: lotid, LotName: lotname, TotalBirds: totalbirds,
+                AgeDays: days, AgeWeeks: weeks
+            });
         }
     }
 
     const deleteVaccTracker = (id) => {
         if (window.confirm('Are you sure?')) {
-            fetch(variables.REACT_APP_API + 'VaccinationTracker/' + id, {
+            fetch(process.env.REACT_APP_API + 'VaccinationTracker/' + id, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
@@ -424,7 +431,7 @@ function ChicksVaccinationTracker(props) {
     }
     const preDisabled = currentPage === 1;
     const nextDisabled = currentPage === totalPages
-    const itemsPerPage = variables.PAGE_PAGINATION_NO;
+    const itemsPerPage = process.env.REACT_APP_PAGE_PAGINATION_NO;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const itemsToDiaplay = vaccinationtrackerlist.slice(startIndex, endIndex);
@@ -442,7 +449,7 @@ function ChicksVaccinationTracker(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'VaccinationTracker/AddVaccinationTracker', {
+            fetch(process.env.REACT_APP_API + 'VaccinationTracker/AddVaccinationTracker', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -496,7 +503,7 @@ function ChicksVaccinationTracker(props) {
         }
         else {
 
-            fetch(variables.REACT_APP_API + 'VaccinationTracker/UpdateVaccinationTracker', {
+            fetch(process.env.REACT_APP_API + 'VaccinationTracker/UpdateVaccinationTracker', {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -596,6 +603,7 @@ function ChicksVaccinationTracker(props) {
 
             const filterByVccRoute = vaccinationroutelist.filter((c) => c.id === p.RouteID);
             const vccroute = filterByVccRoute.length > 0 ? filterByVccRoute[0].Route : "";
+
             p.AgeDays = CalculateAgeInDays(p.LotDate);
             p.AgeWeeks = CalculateAgeInWeeks(p.LotDate);
 
@@ -604,12 +612,6 @@ function ChicksVaccinationTracker(props) {
                 ShedName: shedname, LotName: p.LotName, Vaccination: vccname, Age: vccage, Type: vcctypename,
                 Route: vccroute, Comments: p.Comments
             });
-
-            // VccListDowanloadArr.push({
-            //     Date: moment(p.Date).format('DD-MMM-YYYY'),
-            //     ShedName: shedname, LotName: p.LotName, Vaccination: vccname, Age: vccage, Type: vcctypename,
-            //     Route: vccroute, Comments: p.Comments
-            // });
         });
 
         downloadExcel(vvv, "VaccinationTrackerList");
@@ -667,7 +669,7 @@ function ChicksVaccinationTracker(props) {
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
-                    <tr align='left' className="tr-custom">
+                    <tr align='center' className="tr-custom">
                         <th>Date</th>
                         <th>Shed</th>
                         <th>Lot name</th>
@@ -708,15 +710,15 @@ function ChicksVaccinationTracker(props) {
                             });
 
                             return (
-                                !isloaded && <tr align='center' key={p.Id}>
-                                    <td align='left'>{moment(p.Date).format('DD-MMM-YYYY')}</td>
-                                    <td align='left'>{shedname}</td>
-                                    <td align='left'>{p.LotName}</td>
-                                    <td align='left'>{vccname}</td>
-                                    <td align='left'>{vccage}</td>
-                                    <td align='left'>{vcctypename}</td>
-                                    <td align='left'>{vccroute}</td>
-                                    <td align='left'>{p.Comments}</td>
+                                !isloaded && <tr align='center' style={{fontSize:13}} key={p.Id}>
+                                    <td >{moment(p.Date).format('DD-MMM-YYYY')}</td>
+                                    <td >{shedname}</td>
+                                    <td >{p.LotName}</td>
+                                    <td >{vccname}</td>
+                                    <td >{vccage}</td>
+                                    <td >{vcctypename}</td>
+                                    <td >{vccroute}</td>
+                                    <td >{p.Comments}</td>
                                     <td align='center'>
                                         {
                                             <ButtonToolbar>
@@ -738,7 +740,7 @@ function ChicksVaccinationTracker(props) {
             </Table >
 
             {
-                vaccinationtrackerlist && vaccinationtrackerlist.length > variables.PAGE_PAGINATION_NO &&
+                vaccinationtrackerlist && vaccinationtrackerlist.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
                 <>
                     <button
                         onClick={handlePrevClick}

@@ -3,7 +3,7 @@ import './App.css';
 import React, { useState, Component, Fragment } from 'react'
 import Home from './Home';
 
- import NavComponent from './Component/Nav/NavComponent';
+import NavComponent from './Component/Nav/NavComponent';
   import ChicksMasterComponent from './Component/Chicks/ChicksMasterComponent';
 import LoginComponent from './Component/Login';
  import ClientList from './Component/Client/ClientList'
@@ -25,16 +25,16 @@ import CartonList from './Component/Carton/CartonList';
  import RawMaterials from './Component/RawMaterials/RawMaterials'
  import BirdSale from './Component/BirdSale/BirdSale'
 import Navigation from './Component/Nav/Navigation'
-// import NavSticky from './Component/Nav/NavSticky'
-// import ChicksVaccinationTracker from './Component/Vaccination/ChicksVaccinationTracker'
+//  import Test from './Component/Testing/Test'
+ import ChicksVaccinationTracker from './Component/Vaccination/ChicksVaccinationTracker'
 // import ReactDOM from 'react-dom';
 // import Invoice from './Component/Invoice/Invoice';
 // import InvoiceData from './data/InvoiceData'
 // import EggSaleInvoice from './Component/EggSale/EggSaleInvoice'
-// import Stock from './Component/Stock/Stock';
+ import Stock from './Component/Stock/Stock';
 function App() {
 
-       console.log("Local-"+process.env.REACT_APP_API)
+      // console.log("Local-"+process.env.REACT_APP_API)
       //  console.log("development-"+process.env.development.REACT_APP_API)
       //  console.log("test-"+process.env.test.REACT_APP_API)
       //  console.log("production-"+process.env.production.REACT_APP_API)
@@ -89,21 +89,21 @@ function App() {
             {/* <Route path="/carton" element={<CartonList showAlert={showAlert} />} />
             
             
-           
+           */}
            
             
             
            
-            <Route path="/rawmaterials" element={<RawMaterials showAlert={showAlert} />} />
+            {/* <Route path="/test" element={<Test showAlert={showAlert} />} />  */}
             
             <Route path="/vaccinationtracker" element={<ChicksVaccinationTracker showAlert={showAlert} />} />
             
-            <Route path="/stock" element={<Stock showAlert={showAlert} />} /> */}
-
-<Route path="/medicine" element={<Medicine showAlert={showAlert} />} />
- <Route path="/carton" element={<CartonList showAlert={showAlert} />} />
-<Route path="/lotList" element={<LotListComponent showAlert={showAlert} />} />
-<Route path="/chicksmaster" element={<ChicksMasterComponent showAlert={showAlert} />} />
+           
+            <Route path="/stock" element={<Stock showAlert={showAlert} />} /> 
+            <Route path="/medicine" element={<Medicine showAlert={showAlert} />} />
+            <Route path="/carton" element={<CartonList showAlert={showAlert} />} />
+            <Route path="/lotList" element={<LotListComponent showAlert={showAlert} />} />
+            <Route path="/chicksmaster" element={<ChicksMasterComponent showAlert={showAlert} />} />
             <Route path="/birdsale" element={<BirdSale showAlert={showAlert} />} />
             <Route path="/birdsale/:uid" element={<BirdSale showAlert={showAlert} />} />
             <Route path="/birdsale/?:uid" element={<BirdSale showAlert={showAlert} />} />

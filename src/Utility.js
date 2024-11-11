@@ -81,6 +81,19 @@ export const FetchMortalityList = async (apiurl) => {
   return data;
 }
 
+export const FetchPaymentMode = async (apiurl) => {
+  const response = await fetch(apiurl + 'PaymentMode/GetPaymentMode',
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+
+  const data = await response.json();
+  return data;
+}
+
 export const FetchShedsList = async (apiurl) => {
   const response = await fetch(apiurl + 'ChicksMaster/GetShedList',
     {
