@@ -557,7 +557,8 @@ function BirdSale(props) {
                     PhonePay:birdsaledata.PhonePay,
                     NetBanking:birdsaledata.NetBanking,
                     UPI:birdsaledata.UPI,
-                    Cheque:birdsaledata.Cheque
+                    Cheque:birdsaledata.Cheque,
+                    CompanyId: localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -616,7 +617,8 @@ function BirdSale(props) {
                     PhonePay:birdsaledata.PhonePay,
                     NetBanking:birdsaledata.NetBanking,
                     UPI:birdsaledata.UPI,
-                    Cheque:birdsaledata.Cheque
+                    Cheque:birdsaledata.Cheque,
+                    CompanyId: localStorage.getItem('companyid')
         });
 
         setInvoiceModalShow(true);
@@ -660,7 +662,8 @@ function BirdSale(props) {
                     PhonePay:birdsaledata.PhonePay,
                     NetBanking:birdsaledata.NetBanking,
                     UPI:birdsaledata.UPI,
-                    Cheque:birdsaledata.Cheque
+                    Cheque:birdsaledata.Cheque,
+                    CompanyId: localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())

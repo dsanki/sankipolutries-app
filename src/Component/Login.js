@@ -1,14 +1,45 @@
-import React, { useState } from 'react'
+import React, { useState,useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { variables } from '../Variables';
 import { Modal, Button, Row, Col, Form } from 'react-bootstrap';
 import { cookie } from 'react-cookie'
 //import LoginContext from "../Context/LoginContext";
 
+import {
+    HandleLogout,
+    FetchCompanyDetails
+  } from '../Utility'
+
 function Login(props) {
     const [credentials, setCredentials] = useState({ username: "", password: "" });
     const [validated, setValidated] = useState(false);
     let history = useNavigate();
+    const [companylist, setCompanyList] = useState([]);
+
+    const fetchCompanyDetails = async () => {
+        FetchCompanyDetails(process.env.REACT_APP_API)
+          .then(data => {
+            if (data.StatusCode === 200) {
+              setCompanyList(data.Result);
+    
+            }
+            else if (data.StatusCode === 401) {
+              HandleLogout();
+              history("/login")
+            }
+            else if (data.StatusCode === 404) {
+              props.showAlert("Data not found!!", "danger")
+            }
+            else {
+              props.showAlert("Error occurred!!", "danger")
+            }
+          })
+      }
+
+      useEffect((e) => {
+
+        fetchCompanyDetails();
+      }, []);
 
     const handleSubmit = async (e) => {
        e.preventDefault();
@@ -39,9 +70,13 @@ function Login(props) {
                 localStorage.setItem('token', data.Token);
                 localStorage.setItem('username', data.UserName);
                 localStorage.setItem('isadmin', data.IsAdmin);
-                //cookie.setCookie('UserProfile', JSON.stringify(userProfile), expireAt, getBaseURL());
-    
-                history("/");
+                localStorage.setItem('companyid', data.CompanyId);
+
+                let comdet = companylist.filter(x => x.Id == data.CompanyId);
+                localStorage.setItem('companydetails', JSON.stringify(comdet[0]));
+
+                //`/home?companyid=${comid}`
+                history(`/home?companyid=${data.CompanyId}`);
     
             }
             else {

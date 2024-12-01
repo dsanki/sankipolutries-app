@@ -11,7 +11,7 @@ export const categoryList = {
         { Key: 2, Value: 'VACCINE' },
         { Key: 3, Value: 'EGG' },
         { Key: 4, Value: 'PACKAGING' },
-        { Key: 5, Value: 'RAW MATERIALS' },
+        { Key: 5, Value: 'RAW_MATERIALS' },
         { Key: 6, Value: 'FEED' },
         { Key: 7, Value: 'PACKAGING' }
     ]

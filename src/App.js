@@ -21,17 +21,22 @@ import CartonList from './Component/Carton/CartonList';
  import EggSaleInvoiceList from './Component/EggSale/EggSaleInvoiceList';
  import EggSalePaymentIn from './Component/EggSale/EggSalePaymentIn';
  import Medicine from './Component/Medicine/Medicine';
-// import CollapsibleExample from './Component/Nav/CollapsibleExample';
+ import PaymentOut from './Component/Medicine/PaymentOut';
  import RawMaterials from './Component/RawMaterials/RawMaterials'
  import BirdSale from './Component/BirdSale/BirdSale'
 import Navigation from './Component/Nav/Navigation'
-//  import Test from './Component/Testing/Test'
+import Test from './Component/Testing/Test'
  import ChicksVaccinationTracker from './Component/Vaccination/ChicksVaccinationTracker'
+ import ShedMedcineTracker from './Component/Medicine/ShedMedcineTracker';
 // import ReactDOM from 'react-dom';
 // import Invoice from './Component/Invoice/Invoice';
 // import InvoiceData from './data/InvoiceData'
-// import EggSaleInvoice from './Component/EggSale/EggSaleInvoice'
+ import Registration from './Component/Registration/Registration'
  import Stock from './Component/Stock/Stock';
+ import CompanySelection from './Component/CompanySelection/CompanySelection';
+ import EggStockInventory from './Component/EggInventory/EggStockInventory'
+ 
+ 
 function App() {
 
       // console.log("Local-"+process.env.REACT_APP_API)
@@ -86,19 +91,13 @@ function App() {
           <Alert alert={alert} />
           <Routes>
             <Route path="/" element={<Home showAlert={showAlert} />} />
-            {/* <Route path="/carton" element={<CartonList showAlert={showAlert} />} />
-            
-            
-           */}
-           
-            
-            
-           
-            {/* <Route path="/test" element={<Test showAlert={showAlert} />} />  */}
-            
+            <Route path="/registration" element={<Registration showAlert={showAlert} />} />
+            <Route path="/test" element={<Test showAlert={showAlert} />} />
             <Route path="/vaccinationtracker" element={<ChicksVaccinationTracker showAlert={showAlert} />} />
-            
-           
+            <Route path="/companyselection" element={<CompanySelection showAlert={showAlert} />} /> 
+            <Route path="/:companyid" element={<Home showAlert={showAlert} />} /> 
+            <Route path="/?:companyid" element={<Home showAlert={showAlert} />} />
+            <Route path="/?companyid" element={<Home showAlert={showAlert} />} />  
             <Route path="/stock" element={<Stock showAlert={showAlert} />} /> 
             <Route path="/medicine" element={<Medicine showAlert={showAlert} />} />
             <Route path="/carton" element={<CartonList showAlert={showAlert} />} />
@@ -120,10 +119,15 @@ function App() {
             <Route path="/eggsalepaymentin/:uid" element={<EggSalePaymentIn showAlert={showAlert} />} />
             <Route path="/eggsalepaymentin/?:uid" element={<EggSalePaymentIn showAlert={showAlert} />} />
             <Route path="/clientlist" element={<ClientList showAlert={showAlert} />} />
-            
+            <Route path="/shedmedicinetracker" element={<ShedMedcineTracker showAlert={showAlert} />} />
             <Route path="/shedlotmap" element={<ShedLotMap showAlert={showAlert} />} />
             <Route path="/mortalitylist" element={<MortalityList showAlert={showAlert} />} />
             <Route path="/rawmaterials" element={<RawMaterials showAlert={showAlert} />} />
+            <Route path="/eggstockinventory" element={<EggStockInventory showAlert={showAlert} />} />
+            <Route path="/paymentout" element={<PaymentOut showAlert={showAlert} />} />
+            <Route path="/paymentout/:uid" element={<PaymentOut showAlert={showAlert} />} />
+            <Route path="/paymentout/?:uid" element={<PaymentOut showAlert={showAlert} />} />
+            
           </Routes>
         </div>
 

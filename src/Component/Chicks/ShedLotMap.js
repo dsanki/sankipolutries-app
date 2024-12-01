@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { variables } from './../../Variables';
 import { Button, ButtonToolbar, Table, Row, Col, Form, Modal } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'
+import { HandleLogout} from './../../Utility'
 
 function ShedLotMap(props) {
     let history = useNavigate();
@@ -56,7 +57,7 @@ function ShedLotMap(props) {
     }, [obj]);
 
     const fetchSheds = async () => {
-        fetch(process.env.REACT_APP_API + 'ChicksMaster/GetShedList',
+        fetch(process.env.REACT_APP_API + 'ChicksMaster/GetShedList?CompanyId='+localStorage.getItem('companyid'),
             {
                 method: 'GET',
                 headers: {
@@ -69,12 +70,46 @@ function ShedLotMap(props) {
             });
     }
 
-    const deleteShedLotMap = () => {
+    
 
+    const deleteShedLotMap = (id) => {
+        if (window.confirm('Are you sure?')) {
+            fetch(process.env.REACT_APP_API + 'ChicksMaster/DeleteLotShedMap?id=' + id, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            }).then(res => res.json())
+                .then((result) => {
+
+                    if (result.StatusCode === 200) {
+                        setCount(1);
+                        props.showAlert("Successfully deleted", "info")
+                    }
+                    else if (result.StatusCode === 401) {
+                        HandleLogout();
+                        history("/login")
+                    }
+                    else if (result.StatusCode === 404) {
+                        props.showAlert("Data not found!!", "danger")
+                    }
+                    else {
+                        props.showAlert("Error occurred!!", "danger")
+                    }
+                },
+                    (error) => {
+                        props.showAlert("Error occurred!!", "danger")
+                    });
+
+            addCount(count);
+        }
     }
 
     const fetchLots = async () => {
-        fetch(process.env.REACT_APP_API + 'ChicksMaster/GetLots',
+        fetch(process.env.REACT_APP_API + 'ChicksMaster/GetLots?CompanyId='+
+            localStorage.getItem('companyid'),
             {
                 method: 'GET',
                 headers: {
@@ -88,7 +123,8 @@ function ShedLotMap(props) {
     }
 
     const fetchShedLotsMapList = async () => {
-        fetch(process.env.REACT_APP_API + 'ChicksMaster/GetShedLotMapList',
+        fetch(process.env.REACT_APP_API + 'ChicksMaster/GetShedLotMapList?CompanyId='+
+            localStorage.getItem('companyid'),
             {
                 method: 'GET',
                 headers: {
@@ -177,6 +213,7 @@ function ShedLotMap(props) {
                     'Authorization': localStorage.getItem('token')
                 },
                 body: JSON.stringify({
+                    Id:shedlotdata.Id,
                     ShedId: shedlotdata.ShedId,
                     LotId: shedlotdata.LotId
                 })
@@ -239,7 +276,7 @@ function ShedLotMap(props) {
                                             <i className="fa-solid fa-pen-to-square" style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => clickEditShedLot(p)}></i>
 
                                             {localStorage.getItem('isadmin') === 'true' &&
-                                                <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteShedLotMap(p.ShedId)}></i>}
+                                                <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteShedLotMap(p.id)}></i>}
 
                                         </ButtonToolbar>
                                     }

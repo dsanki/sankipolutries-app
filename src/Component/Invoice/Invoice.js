@@ -1,6 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
-import logo from '../../image/logo.png'
+import logoSP from '../../image/logo.png'
+import logoKP from '../../image/kalandi_logo.JPG'
 import InvoiceTitle from './InvoiceTitle'
 import BillTo from './BillTo'
 import InvoiceNo from './InvoiceNo'
@@ -30,12 +31,12 @@ const styles = StyleSheet.create({
 const Invoice = (props) => (
     <Document>
         <Page size="A4" style={styles.page}>
-            <Image style={styles.logo} src={logo} />
+            <Image style={styles.logo} src={logoSP} />
             <InvoiceTitle title='Invoice' />
             <InvoiceNo invoice={props.invoice} />
             <BillTo invoice={props.invoice} />
             <InvoiceItemsTable invoice={props.invoice} />
-            <InvoiceThankYouMsg bankdetails={props.bankdetails} />
+            <InvoiceThankYouMsg bankdetails={props.bankdetails} companydetails={props.companydetails} />
         </Page>
     </Document>
 );

@@ -14,6 +14,7 @@ function Medicine(props) {
 
 
   const [medicineList, setMedicineList] = useState([]);
+  const [subMedicineList, setSubMedicineList] = useState([]);
   const [medicineListForFilter, setMedicineListForFilter] = useState([]);
   //const [medicinedata, setMedicineData] = useState([]);
   const [clientlist, setClientList] = useState([]);
@@ -31,20 +32,49 @@ function Medicine(props) {
   const [isloaded, setIsLoaded] = useState(true);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  const [ucount, setUCount] = useState(0);
+  const objupdate = useMemo(() => ({ ucount }), [ucount]);
+
+  const [newcount, setAddNewCount] = useState(0);
+  const objAddNew = useMemo(() => ({ newcount }), [newcount]);
+
   let addModalClose = () => {
     setAddModalShow(false);
     setValidated(false);
   };
 
+  let addUCount = (num) => {
+    setUCount(num + 1);
+  };
+
+  let addNewCount = (num) => {
+    setAddNewCount(num + 1);
+  };
+
+  const initialMedicineSubvalues = {
+    Id: '0',
+    MedicineId: '',
+    MedicineName: '',
+    Quantity: '',
+    UnitPrice: '',
+    GST: '',
+    Amount: '',
+    ParentId: '0'
+  }
+
+  //const [formMedicineFields, setMedicineFields] = useState(initialMedicineSubvalues);
+
   const [formMedicineFields, setMedicineFields] = useState([
-    { MedicineID: '', 
-      MedicineName: '' , 
-      Quantity: '', 
+    {
+      Id: '0',
+      MedicineId: '',
+      MedicineName: '',
+      Quantity: '',
       UnitPrice: '',
-      Quantity:'',
-      GST:'',
-      TotalAmount:''
-     }
+      GST: '',
+      Amount: '',
+      ParentId: '0'
+    }
   ])
 
   const handleMedicineFieldsChange = (event, index) => {
@@ -53,35 +83,33 @@ function Medicine(props) {
     setMedicineFields(data);
   }
 
-  const addFields = () => {
+  const addFields = (e) => {
     let object = {
-      MedicineID: '', 
-      MedicineName: '' , 
-      Quantity: '', 
+      Id: '0',
+      MedicineId: '',
+      MedicineName: '',
+      Quantity: '',
       UnitPrice: '',
-      Quantity:'',
-      GST:'',
-      TotalAmount:''
+      GST: '',
+      Amount: '',
+      ParentId: '0'
     }
     //props.addFields();
-    setMedicineFields([...formMedicineFields, object])
+    setMedicineFields([...formMedicineFields, object]);
+    addNewCount(newcount);
   }
 
   const removeFields = (index) => {
     let data = [...formMedicineFields];
     data.splice(index, 1);
     setMedicineFields(data);
+    addUCount(ucount);
   }
 
   const initialvalues = {
     modaltitle: "",
     Id: 0,
-    MedicineID: "",
-    MedicineName: "",
-    Quantity: "",
-    UnitPrice: "",
     Date: "",
-    UnitId: "",
     TotalAmount: "",
     Paid: "",
     Due: "",
@@ -89,25 +117,20 @@ function Medicine(props) {
     PaymentDate: "",
     ChequeRefNo: "",
     Comments: "",
-    GST: "",
     InvoiceNo: "",
-    InvoiceDate: ""
-
+    InvoiceDate: "",
+    MedicineSubList: [initialMedicineSubvalues],
   };
 
   const [meddata, setMedData] = useState(initialvalues);
 
   const clickAddMedicine = () => {
     setAddModalShow({ addModalShow: true });
+    setMedicineFields([initialMedicineSubvalues]);
     setMedData({
-      modaltitle: "Add Medicine",
+      modaltitle: "Add Medicine/Vaccine",
       Id: 0,
-      MedicineID: "",
-      MedicineName: "",
-      Quantity: "",
-      UnitPrice: "",
       Date: "",
-      UnitId: "",
       TotalAmount: "",
       Paid: "",
       Due: "",
@@ -115,23 +138,19 @@ function Medicine(props) {
       PaymentDate: "",
       ChequeRefNo: "",
       Comments: "",
-      GST: "",
       InvoiceNo: "",
-      InvoiceDate: ""
+      InvoiceDate: "",
+      MedicineSubList: [initialMedicineSubvalues],
     })
   }
 
   const clickEditMedicine = (md) => {
     setAddModalShow({ addModalShow: true });
+    setMedicineFields(md.MedicineSubList);
     setMedData({
-      modaltitle: "Edit Medicine",
+      modaltitle: "Edit Medicine/Vaccine",
       Id: md.Id,
-      MedicineID: md.MedicineID,
-      MedicineName: md.MedicineName,
-      Quantity: md.Quantity,
-      UnitPrice: md.UnitPrice,
       Date: md.Date,
-      UnitId: md.UnitId,
       TotalAmount: md.TotalAmount,
       Paid: md.Paid,
       Due: md.Due,
@@ -139,51 +158,143 @@ function Medicine(props) {
       PaymentDate: md.PaymentDate,
       ChequeRefNo: md.ChequeRefNo,
       Comments: md.Comments,
-      GST: md.GST,
       InvoiceNo: md.InvoiceNo,
-      InvoiceDate: md.InvoiceDate
+      InvoiceDate: md.InvoiceDate,
+      MedicineSubList: md.MedicineSubList
+
     })
   }
 
-  const medicineNameChange = (e) => {
+
+  const [_totalAmount, _setTotalAmount] = useState(0);
+  const [_totalPaid, _setTotalPaid] = useState(0);
+  const [_totalDue, _setTotalDue] = useState(0);
+
+  const calculateValues = (data) => {
+    const { totalAmount,totalPaid, totalDue }
+        = data.reduce((accumulator, item) => {
+            accumulator.totalAmount += parseFloat(item.TotalAmount || 0);
+            accumulator.totalPaid +=parseFloat(item.Paid || 0);
+            accumulator.totalDue +=parseFloat(item.Due || 0);
+            return accumulator;
+        }, { totalAmount: 0,  totalPaid: 0, totalDue: 0})
+
+    _setTotalAmount(totalAmount);
+    _setTotalPaid(totalPaid);
+    _setTotalDue(totalDue);
+}
+
+  const medicineNameChange = (e, index) => {
     let stk = stocklist.filter(x => x.ItemId === parseInt(e.target.value));
-    let qty = meddata.Quantity !== "" ? parseInt(meddata.Quantity) : 0;
-    let gstpercentage = stk[0].GST / 100;
-    let totalamount = (parseFloat(stk[0].PurchasePrice) * qty);
-    let totalgst = totalamount * gstpercentage;
+    //let qty = meddata.Quantity !== "" ? parseInt(meddata.Quantity) : 0;
+
     // let total = stk[0].GST > 0 ? ((parseFloat(stk[0].PurchasePrice) * qty) * gstpercentage) : ((parseFloat(stk[0].PurchasePrice) * qty));
+
+    // setMedData({
+    //   ...meddata,
+    //   Amount: totalinclGST,
+    //   Due: totalinclGST - meddata.Paid
+    // });
+
+    let data = [...formMedicineFields];
+    data[index]["MedicineName"] = stk[0].ItemName;
+    data[index]["MedicineId"] = stk[0].ItemId;
+    //data[index]["UnitPrice"] = stk[0].PurchasePrice;
+
+    let gstpercentage = parseFloat(data[index]["GST"]||0)/ 100;
+    let totalamount = (parseFloat(data[index]["UnitPrice"]||0) * parseFloat(data[index]["Quantity"] || 0));
+    let totalgst = totalamount * gstpercentage;
     let totalinclGST = totalamount + totalgst;
-    setMedData({
-      ...meddata, MedicineName: stk[0].ItemName,
-      MedicineID: stk[0].ItemId,
-      UnitPrice: stk[0].PurchasePrice,
-      GST: stk[0].GST,
-      TotalAmount: totalinclGST,
-      Due: totalinclGST - meddata.Paid
-    });
+
+
+    //data[index]["GST"] = stk[0].GST;
+    data[index]["Amount"] = totalinclGST;
+
+    setMedicineFields(data);
   }
   const dateChange = (e) => {
     setMedData({ ...meddata, Date: e.target.value });
+    // let data = [...formMedicineFields];
+    // data[index]["Date"] = e.target.value;
   }
 
-  const quantityChange = (e) => {
-    const re = /^[0-9\b]+$/;
+  const unitPriceChange = (e, index) => {
+    const re = /^\d*\.?\d{0,2}$/;
     if (e.target.value === '' || re.test(e.target.value)) {
-      let stk = stocklist.filter(x => x.ItemId === parseInt(meddata.MedicineID));
-      let qty = e.target.value !== "" ? parseInt(e.target.value) : 0;
-      let gstpercentage = stk[0].GST / 100;
+      let data = [...formMedicineFields];
 
-      let totalamount = (parseFloat(stk[0].PurchasePrice) * qty);
+      data[index]["UnitPrice"] = e.target.value;
+
+
+      let gstpercentage = parseFloat(data[index]["GST"] || 0) / 100;
+
+      let totalamount = (parseFloat(e.target.value)) * parseFloat(data[index]["Quantity"] || 0);
+      let totalgst = totalamount * gstpercentage;
+      let totalinclGST = totalamount + totalgst;
+
+      data[index]["Amount"] = totalinclGST;
+
+      setMedicineFields(data);
+
+      addUCount(ucount);
+    }
+  }
+
+
+  const gstChange = (e, index) => {
+    const re = /^\d*\.?\d{0,2}$/;
+    if (e.target.value === '' || re.test(e.target.value)) {
+      let data = [...formMedicineFields];
+
+      data[index]["GST"] = e.target.value;
+
+
+      let gstpercentage = parseFloat(e.target.value||0) / 100;
+
+      let totalamount = (parseFloat(data[index]["UnitPrice"] || 0)) 
+      * parseInt(data[index]["Quantity"] || 0);
+
+      let totalgst = totalamount * gstpercentage;
+      let totalinclGST = totalamount + totalgst;
+
+      data[index]["Amount"] = totalinclGST;
+
+      setMedicineFields(data);
+
+      addUCount(ucount);
+    }
+  }
+
+  const quantityChange = (e, index) => {
+    const re = /^[0-9\b]+$/;
+    let data = [...formMedicineFields];
+
+    if (e.target.value === '' || re.test(e.target.value)) {
+     // let stk = stocklist.filter(x => x.ItemId === parseInt(formMedicineFields[index].MedicineId));
+      //let qty = e.target.value !== "" ? parseInt(e.target.value) : 0;
+      let _unitprice=data[index]["UnitPrice"];
+      let totalamount = (parseFloat(_unitprice || 0)) * parseInt(e.target.value);
+      
+      let gstpercentage = data[index]["GST"] / 100;
+
+      //let totalamount = (parseFloat(stk[0].PurchasePrice) * qty);
       let totalgst = totalamount * gstpercentage;
 
       let totalinclGST = totalamount + totalgst;
 
-      setMedData({
-        ...meddata,
-        Quantity: e.target.value,
-        TotalAmount: totalinclGST, GST: stk[0].GST,
-        Due: totalinclGST - meddata.Paid
-      });
+      // setMedData({
+      //   ...meddata,
+      //   TotalAmount: totalinclGST, GST: stk[0].GST,
+      //   Due: totalinclGST - meddata.Paid
+      // });
+
+      //let data = [...formMedicineFields];
+      data[index]["Quantity"] = e.target.value;
+      data[index]["Amount"] = totalinclGST;
+
+      setMedicineFields(data);
+
+      addUCount(ucount);
     }
   }
 
@@ -222,11 +333,25 @@ function Medicine(props) {
     setMedData({ ...meddata, InvoiceNo: e.target.value });
   }
 
+
+  useEffect((e) => {
+
+    if (localStorage.getItem('token')) {
+      setMedData({
+        ...meddata, MedicineSubList: formMedicineFields
+      });
+    }
+    else {
+    }
+  }, [objAddNew]);
+
   useEffect((e) => {
 
     if (localStorage.getItem('token')) {
       fetchMedicineList();
       //getFilterData(filterFromDate, filterToDate);
+
+
     }
     else {
 
@@ -234,13 +359,28 @@ function Medicine(props) {
     }
   }, [obj]);
 
+  useEffect((e) => {
+    const { totalCost } =
+      formMedicineFields.reduce((accumulator, item) => {
+        accumulator.totalCost += item.Amount;
+        return accumulator;
+      }, { totalCost: 0 })
+
+
+    setMedData({
+      ...meddata, Due: parseFloat(Math.round(totalCost - parseFloat(meddata.Paid || 0))).toFixed(2),
+      TotalAmount: parseFloat(Math.round(totalCost)).toFixed(2), MedicineSubList: formMedicineFields
+    });
+
+  }, [objupdate]);
+  // addUCount(ucount);
 
   useEffect((e) => {
 
     if (localStorage.getItem('token')) {
       fetchUnit();
       fetchClient();
-      fetchStockListById(process.env.REACT_APP_STOCK_CAT_MEDICINE)
+      fetchStockListById(process.env.REACT_APP_STOCK_CAT_MEDICINE_AND_VACCINE)
     }
     else {
 
@@ -276,7 +416,7 @@ function Medicine(props) {
 
   const fetchMedicineList = async () => {
     setIsLoaded(true);
-    fetch(process.env.REACT_APP_API + 'Medicine/GetMedicine',
+    fetch(process.env.REACT_APP_API + 'Medicine/GetMedicineListByCompanyId?CompanyId='+localStorage.getItem('companyid'),
       {
         method: 'GET',
         headers: {
@@ -292,6 +432,9 @@ function Medicine(props) {
           setMedicineList(data.Result);
           setMedicineListForFilter(data.Result);
           setIsLoaded(false);
+
+          calculateValues(data.Result);
+          //setMedicineFields(data.Result.MedicineSubList)
         }
         else if (data.StatusCode === 401) {
           HandleLogout();
@@ -373,12 +516,7 @@ function Medicine(props) {
         },
         body: JSON.stringify({
           Id: meddata.Id,
-          MedicineID: meddata.MedicineID,
-          MedicineName: meddata.MedicineName,
           Date: meddata.Date,
-          Quantity: meddata.Quantity,
-          UnitPrice: meddata.UnitPrice,
-          UnitId: meddata.UnitId,
           TotalAmount: meddata.TotalAmount,
           Paid: meddata.Paid,
           Due: meddata.Due,
@@ -387,7 +525,9 @@ function Medicine(props) {
           ChequeRefNo: meddata.ChequeRefNo,
           Comments: meddata.Comments,
           InvoiceDate: meddata.InvoiceDate,
-          InvoiceNo: meddata.InvoiceNo
+          InvoiceNo: meddata.InvoiceNo,
+          MedicineSubList: meddata.MedicineSubList,
+          CompanyId:localStorage.getItem('companyid')
 
         })
       }).then(res => res.json())
@@ -438,12 +578,6 @@ function Medicine(props) {
         },
         body: JSON.stringify({
           Id: meddata.Id,
-          MedicineID: meddata.MedicineID,
-          MedicineName: meddata.MedicineName,
-          Date: meddata.Date,
-          Quantity: meddata.Quantity,
-          UnitPrice: meddata.UnitPrice,
-          UnitId: meddata.UnitId,
           TotalAmount: meddata.TotalAmount,
           Paid: meddata.Paid,
           Due: meddata.Due,
@@ -452,7 +586,10 @@ function Medicine(props) {
           ChequeRefNo: meddata.ChequeRefNo,
           Comments: meddata.Comments,
           InvoiceDate: meddata.InvoiceDate,
-          InvoiceNo: meddata.InvoiceNo
+          InvoiceNo: meddata.InvoiceNo,
+          MedicineSubList: meddata.MedicineSubList,
+          Date: meddata.Date,
+          CompanyId:localStorage.getItem('companyid')
 
         })
       }).then(res => res.json())
@@ -475,22 +612,56 @@ function Medicine(props) {
     setValidated(true);
   }
 
-  const deleteMedicine = () => {
+ 
 
+  const deleteMedicine = (id) => {
+    if (window.confirm('Are you sure?')) {
+        fetch(process.env.REACT_APP_API + 'Medicine/' + id, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
+            }
+        }).then(res => res.json())
+            .then((data) => {
+                if (data.StatusCode === 200) {
+                    setCount(count);
+                    props.showAlert("Successfully deleted", "info")
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found!!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                }
+            },
+                (error) => {
+                    props.showAlert("Error occurred!!", "danger")
+                });
+
+        addCount(count);
+    }
+}
+
+  const filterSupplierChange = (e) => {
+
+    if (e.target.value > 0) {
+      const _medd = medicineListForFilter.filter((c) => c.ClientId === parseInt(e.target.value));
+      setMedicineList(_medd);
+      calculateValues(_medd);
+    }
+    else {
+      setMedicineList(medicineListForFilter);
+      calculateValues(medicineListForFilter);
+    }
+   
+    addUCount(ucount);
   }
-
-  // const filterSupplierChange = (e) => {
-
-  //   if (e.target.value > 0) {
-  //     const _medd = medicineListForFilter.filter((c) => c.ClientId === parseInt(e.target.value));
-  //     setMedicineList(_medd);
-  //   }
-  //   else {
-  //     setMedicineList(medicineListForFilter);
-  //   }
-
-
-  // }
 
   const onDateFilterFromChange = (e) => {
     setFilterFromDate(e.target.value);
@@ -517,6 +688,7 @@ function Medicine(props) {
     //     _filterList = medicineListForFilter.filter((c) => c.ClientId === parseInt(e.target.value));
     // }
     setMedicineList(_filterList);
+    calculateValues(_filterList);
   }
 
   const onDateFilterToChange = (e) => {
@@ -577,7 +749,7 @@ function Medicine(props) {
     <div>
       {isloaded && <Loading />}
       <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '30px', marginBottom: '30px' }}>
-        <h2> Medicine Tracker</h2>
+        <h4> Medicine / Vaccine Purchase Tracker</h4>
       </div>
 
       <div className="container" style={{ marginTop: '30px', marginBottom: '20px' }}>
@@ -591,7 +763,27 @@ function Medicine(props) {
             <DateComponent date={null} onChange={onDateFilterToChange} isRequired={false} value={filterToDate} />
           </div>
 
-          <div className="col-6" style={{ textAlign: 'right', marginTop: 30 }}>
+          <div className="col-2">
+          <p><strong>Supplier</strong></p>
+                        
+                        <Form.Select style={{fontSize:'13px'}}
+                            onChange={filterSupplierChange}>
+                            <option selected value="">Choose...</option>
+                            {
+                               clientlist.map((item) => {
+                                    return (
+                                        <option
+                                            key={item.ID}
+                                            defaultValue={item.Id == null ? null : item.ID}
+                                            value={item.ID}
+                                        >{item.FirstName +" "+item.LastName}</option>
+                                    );
+                                })
+                            }
+                        </Form.Select>
+            </div>
+
+          <div className="col-4" style={{ textAlign: 'right', marginTop: 30 }}>
             <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2', marginRight: 30 }}
               title='Download Egg Sale List' onClick={() => onDownloadExcel()} ></i>
 
@@ -609,25 +801,7 @@ function Medicine(props) {
               <option value="200">200</option>
             </select>
           </div>
-          {/* <div className="col">
-                    <p><strong>Supplier</strong></p>
-                        
-                        <Form.Select aria-label="Default select example"
-                            onChange={filterSupplierChange}>
-                            <option selected value="">Choose...</option>
-                            {
-                               clientlist.filter((c) => c.ClientType === 2 || c.ClientType === 3).map((item) => {
-                                    return (
-                                        <option
-                                            key={item.Id}
-                                            defaultValue={item.Id == null ? null : item.Id}
-                                            value={item.Id}
-                                        >{item.ClientName}</option>
-                                    );
-                                })
-                            }
-                        </Form.Select>
-                    </div> */}
+          
         </div>
       </div>
 
@@ -651,15 +825,13 @@ function Medicine(props) {
         <thead>
           <tr align='center' className="tr-custom">
             <th>Date</th>
+            <th>Invoice no</th>
+            <th>Invoice date</th>
             <th>Supplier</th>
-            <th>Medicine name</th>
-            <th>Quantity</th>
-            <th>Unit Price (<span>&#8377;</span>)</th>
             <th>Total amount (<span>&#8377;</span>)</th>
             <th>Paid (<span>&#8377;</span>)</th>
             <th>Due (<span>&#8377;</span>)</th>
             <th>Payment date</th>
-            <th>Cheque ref</th>
             <th>Comments</th>
             <th>Options</th>
           </tr>
@@ -681,25 +853,30 @@ function Medicine(props) {
                 _supp[0].FirstName + " " + _supp[0].LastName : "";
               p.ClientName = _suppname;
 
+              //setMedicineFields(p.MedicineSubList);
+
               return (
-                !isloaded && <tr align='center' style={{ fontSize: 14 }} key={p.Id}>
+                !isloaded && <tr align='center' style={{ fontSize: '13px' }} key={p.Id}>
                   <td >{moment(p.Date).format('DD-MMM-YYYY')}</td>
-                  <td >{_suppname}</td>
-                  <td>{p.MedicineName}</td>
-                  <td >{p.Quantity}</td>
-                  <td >{p.UnitPrice}</td>
+                  <td>{p.InvoiceNo}</td>
+                  <td>{ moment(p.InvoiceDate).format('DD-MMM-YYYY')}</td>
+                  
+                  <td ><a href={`/paymentout/?uid=${p.ClientId}`}>{_suppname}
+                  <span className="sr-only">(current)</span></a></td>
                   <td >{p.TotalAmount.toFixed(2)}</td>
-                  <td >{p.Paid.toFixed(2)}</td>
-                  <td >{p.Due.toFixed(2)}</td>
-                  <td >{moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
-                  <td >{p.ChequeRefNo}</td>
+                  <td >{parseFloat(p.Paid||0).toFixed(2)}</td>
+                  <td >{parseFloat(p.Due||0).toFixed(2)}</td>
+                  <td >{(p.PaymentDate==''  || p.PaymentDate==null) ?'':moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
                   <td >{p.Comments}</td>
                   <td align='center'>
                     {
                       <ButtonToolbar>
                         <i className="fa-solid fa-pen-to-square" style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => clickEditMedicine(p)}></i>
                         {localStorage.getItem('isadmin') === 'true' &&
-                          <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteMedicine(p.Id)}></i>}
+                          <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} 
+                          onClick={() => deleteMedicine(p.Id)}></i>}
+
+
                       </ButtonToolbar>
                     }
                   </td>
@@ -712,6 +889,19 @@ function Medicine(props) {
             </tr>
           }
         </tbody>
+
+        <tfoot style={{ backgroundColor: '#cccccc', fontWeight: 'bold', fontSize: 13 }}>
+                    <td align='center'>Total</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td align='center'>{parseFloat(_totalAmount).toFixed(2)}</td>
+                    <td align='center'>{parseFloat(_totalPaid).toFixed(2)}</td>
+                    <td align='center'>{parseFloat(_totalDue).toFixed(2)}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tfoot>
       </Table >
       <div className="container" id="exampleModal">
         <Modal
@@ -722,7 +912,7 @@ function Medicine(props) {
           centered
         >
           <Modal.Header>
-            <Modal.Title id="contained-modal-title-vcenter">
+            <Modal.Title id="contained-modal-title-vcenter" style={{fontSize:'18px'}}>
               {meddata.modaltitle}
             </Modal.Title>
             <button type="button" class="btn-close" aria-label="Close" onClick={addModalClose}> </button>
@@ -786,107 +976,128 @@ function Medicine(props) {
                           Please select supplier
                         </Form.Control.Feedback>
                       </Form.Group>
-
-                    
-
                     </Row>
-
-
                     <Row>
-                    <div className="row">
-      <form>
+                      <div className="row">
+                        <form>
+                          <Row className="mb-12" style={{ fontSize: '12px', marginTop: '10px' }}>
+                            <div class="col-3"><p class="form-label">Medicine Name</p></div>
+                            <div class="col"><p class="form-label">Quantity</p></div>
+                            <div class="col"><p class="form-label">Unit Price</p></div>
+                            <div class="col"><p class="form-label">GST</p></div>
+                            <div class="col-2"><p class="form-label">Amount</p></div>
+                            <div class="col"><p class="form-label" ing>Delete</p></div>
+                            <hr className="line" />
+                          </Row>
 
-<i class="fa-regular fa-circle-plus" onClick={addFields }></i>
-        {/* <button onClick={addFields} style={{ width: 37, marginLeft: 10, marginTop: 10 }}>+</button> */}
-        {formMedicineFields.map((form, index) => {
-          return (
-            <div key={index} style={{ marginTop: 10 }}>
-              <Row className="mb-12">
-              <Form.Group controlId="MedicineName" as={Col} >
-                        <Form.Label style={{ fontSize: 13 }}>Medicine name</Form.Label>
-                        <Form.Select style={{ fontSize: 13 }}
-                          onChange={medicineNameChange} required>
-                          <option selected disabled value="">Choose...</option>
-                          {
-                            stocklist.map((item) => {
-                              return (
-                                <option
-                                  key={item.ItemId}
-                                  defaultValue={item.ItemId == null ? null : item.ItemId}
-                                  selected={item.ItemId === meddata.MedicineID}
-                                  value={item.ItemId}
-                                >{item.ItemName}</option>
-                              );
-                            })
-                          }
-                        </Form.Select>
-                        <Form.Control.Feedback type="invalid">
-                          Please select medicine name
-                        </Form.Control.Feedback>
-                      </Form.Group>
-                      <InputField controlId="UnitPrice" label="Unit Price"
-                        type="text"
-                        value={meddata.UnitPrice}
-                        name="UnitPrice"
-                        placeholder="Unit price"
-                        errormessage="Please enter UnitPrice"
-                        required={true}
-                        disabled={true}
-                      />
-                      <InputField controlId="Quantity" label="Quantity"
-                        type="text"
-                        value={meddata.Quantity}
-                        name="Quantity"
-                        placeholder="Quantity"
-                        errormessage="Please enter quantity"
-                        required={true}
-                        disabled={false}
-                        onChange={quantityChange}
-                      />
+                          {/* <button onClick={addFields} style={{ width: 37, marginLeft: 10, marginTop: 10 }}>+</button> */}
+                          {meddata.MedicineSubList.map((form, index) => {
+                            return (
+                              <div key={index} style={{ marginTop: 10 }}>
+                                <Row className="mb-12">
+                                  <Form.Group controlId="MedicineName" as={Col} className="col-3">
+                                    {/* <Form.Label style={{ fontSize: 13 }}>Medicine name</Form.Label> */}
+                                    <Form.Select style={{ fontSize: 13 }}
+                                      onChange={event => medicineNameChange(event, index)} required>
+                                      <option selected disabled value="">Choose Medicine</option>
+                                      {
+                                        stocklist.map((item) => {
+                                          return (
+                                            <option
+                                              key={item.ItemId}
+                                              defaultValue={item.ItemId == null ? null : item.ItemId}
+                                              selected={item.ItemId === form.MedicineId}
+                                              value={item.ItemId}
+                                            >{item.ItemName}</option>
+                                          );
+                                        })
+                                      }
+                                    </Form.Select>
+                                    <Form.Control.Feedback type="invalid">
+                                      Please select medicine name
+                                    </Form.Control.Feedback>
+                                  </Form.Group>
+                                  
+                                  <InputField controlId="Quantity" label=""
+                                    type="text"
+                                    value={form.Quantity}
+                                    name="Quantity"
+                                    placeholder="Quantity"
+                                    errormessage="Please enter quantity"
+                                    required={true}
+                                    disabled={false}
+                                    onChange={event => quantityChange(event, index)}
+                                  />
 
-                      <InputField controlId="GST" label="GST %"
-                        type="text"
-                        value={meddata.GST}
-                        name="GST"
-                        placeholder="GST"
-                        errormessage="Please enter GST"
-                        required={true}
-                        disabled={true}
-                      />
+                                  <InputField controlId="UnitPrice" label=""
+                                    type="text"
+                                    value={form.UnitPrice}
+                                    name="UnitPrice"
+                                    placeholder="Unit price"
+                                    errormessage="Please enter UnitPrice"
+                                    required={true}
+                                    disabled={false}
+                                    onChange={event => unitPriceChange(event, index)}
+                                  />
 
-                      <InputField controlId="TotalAmount" label="Total amount"
-                        type="number"
-                        value={meddata.TotalAmount}
-                        name="TotalAmount"
-                        placeholder="Total amount"
-                        errormessage="Please enter total amount"
-                        required={true}
-                        disabled={true}
-                      />
-              
-                <div className="col">
-                  <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }}
-                    onClick={() => removeFields(index)}></i>
-                  {/* <button style={{ width: 37, marginLeft: 10 }} 
+                                  <InputField controlId="GST" label=""
+                                    type="text"
+                                    value={form.GST}
+                                    name="GST"
+                                    placeholder="GST"
+                                    errormessage="Please enter GST"
+                                    required={false}
+                                    disabled={false}
+                                    onChange={event => gstChange(event, index)}
+                                    //
+                                  />
+
+                                  <InputField controlId="Amount" label=""
+                                    type="number"
+                                    value={parseFloat(Math.round(form.Amount)).toFixed(2)}
+                                    name="Amount"
+                                    placeholder="Amount"
+                                    errormessage="Enter amount"
+                                    required={true}
+                                    disabled={true}
+                                    collength="col-2"
+                                  />
+
+                                  <div className="col">
+                                    <i className="fa-solid fa-trash" style={{
+                                      color: '#f81616',
+                                      marginLeft: '15px'
+                                    }}
+                                      onClick={() => removeFields(index)}></i>
+                                    {/* <button style={{ width: 37, marginLeft: 10 }} 
                 onClick={() => removeFields(index)}>-</button> */}
-                </div>
-              </Row>
-            </div>
-          )
-        })}
-      </form>
-    </div>
+                                  </div>
+                                </Row>
+                              </div>
+                            )
+                          })}
+                        </form>
+                      </div>
+                      <i class="fa-solid fa-circle-plus" style={{ marginTop: '5px', width: '25px' }}
+                        onClick={(e) => addFields(e)}></i>
+                      {/* <i class="fa-solid fa-circle-plus" ></i> */}
+                      <hr className="line" style={{ marginTop: '20px' }} />
                     </Row>
 
+                    <Row className="mb-12">
+                      <div className="col-8">
+                        <p class="form-label">Total :</p>
+                      </div>
+                      <div className="col-4" style={{ textAlign: 'left' }}>
+                        <p class="form-label"><span>&#8377;</span> {parseFloat(meddata.TotalAmount || 0).toFixed(2)}</p>
+                      </div>
+                      <hr className="line" style={{ marginTop: '10px' }} />
+                    </Row>
 
-
-
-
-                    
 
                     <Row className="mb-12">
 
-                   
+
                     </Row>
                     <Row className="mb-12">
 
@@ -896,24 +1107,25 @@ function Medicine(props) {
                         name="Paid"
                         placeholder="Paid"
                         errormessage="Please enter paid amount"
-                        required={true}
+                        required={false}
                         disabled={false}
                         onChange={paidChange}
                       />
 
                       <InputField controlId="Due" label="Due"
                         type="number"
-                        value={meddata.Due}
+                        value={parseFloat(meddata.Due || 0).toFixed(2)}
                         name="Due"
                         placeholder="Due"
                         errormessage="Please enter due amount"
-                        required={true}
+                        required={false}
                         disabled={true}
                       />
 
                       <Form.Group as={Col} controlId="PaymentDate">
                         <Form.Label style={{ fontSize: 13 }}>Payment date</Form.Label>
-                        <DateComponent date={null} onChange={paymentDateChange} isRequired={true} value={meddata.PaymentDate} />
+                        <DateComponent date={null} onChange={paymentDateChange} 
+                        isRequired={false} value={meddata.PaymentDate} />
                         <Form.Control.Feedback type="invalid">
                           Please select payment date
                         </Form.Control.Feedback>
@@ -923,7 +1135,8 @@ function Medicine(props) {
                     <Row className="mb-12">
                       <Form.Group controlId="ChequeRefNo" as={Col} >
                         <Form.Label style={{ fontSize: 13 }}>Cheque Ref No</Form.Label>
-                        <Form.Control as="textarea" rows={3} style={{ fontSize: 13 }} name="ChequeRefNo" onChange={chequeRefNoChange} value={meddata.ChequeRefNo}
+                        <Form.Control as="textarea" rows={3} style={{ fontSize: 13 }} 
+                        name="ChequeRefNo" onChange={chequeRefNoChange} value={meddata.ChequeRefNo}
                           placeholder="Cheque Ref No" />
                       </Form.Group>
                     </Row>

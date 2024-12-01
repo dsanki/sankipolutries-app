@@ -81,11 +81,11 @@ const InvoiceThankYouMsg = (props) => (
     <>
 <View  style={styles.client}><Text>Customer Signature</Text></View>
 <View style={styles.FooterBankDetails}>
-<Text style={{fontFamily: 'Helvetica-Bold',fontSize:8}}>Bank Details of SANKI POULTRIES:</Text>
-<Text><Text style={{fontFamily: 'Helvetica-Bold',fontSize: 8}}>Bank Name: </Text><Text style={{fontSize: 8}}>{props.bankdetails.BankName}</Text></Text>
-<Text><Text style={{fontFamily: 'Helvetica-Bold', fontSize: 8}}>A/C No: </Text><Text style={{fontSize: 8}}>{props.bankdetails.AccountNo}</Text></Text>
-<Text><Text style={{fontFamily: 'Helvetica-Bold', fontSize: 8}}>Branch IFSC Code: </Text><Text style={{fontSize: 8}}>{props.bankdetails.IfscCode}</Text></Text>
-<Text><Text style={{fontFamily: 'Helvetica-Bold', fontSize: 8}}>Branch Name: </Text><Text style={{fontSize: 8}}>{props.bankdetails.BranchName}</Text></Text>
+<Text style={{fontFamily: 'Helvetica-Bold',fontSize:8}}>Bank Details of {props.companydetails[0].CompanyName}:</Text>
+<Text><Text style={{fontFamily: 'Helvetica-Bold',fontSize: 8}}>Bank Name: </Text><Text style={{fontSize: 8}}>{props.companydetails[0].BankName}</Text></Text>
+<Text><Text style={{fontFamily: 'Helvetica-Bold', fontSize: 8}}>A/C No: </Text><Text style={{fontSize: 8}}>{props.companydetails[0].AccountNo}</Text></Text>
+<Text><Text style={{fontFamily: 'Helvetica-Bold', fontSize: 8}}>Branch IFSC Code: </Text><Text style={{fontSize: 8}}>{props.companydetails[0].IFSCCode}</Text></Text>
+<Text><Text style={{fontFamily: 'Helvetica-Bold', fontSize: 8}}>Branch Name: </Text><Text style={{fontSize: 8}}>{props.companydetails[0].BranchName}</Text></Text>
 </View>
 
 <View style={styles.Footer}>
@@ -102,7 +102,7 @@ const InvoiceThankYouMsg = (props) => (
 
        
         <Text >Authorized Signature For</Text><br />
-        <Text style={{fontFamily: 'Helvetica-Bold'}} >SANKI POULTRIES</Text>
+        <Text style={{fontFamily: 'Helvetica-Bold'}} >{props.companydetails[0].CompanyName}</Text>
     </View>
     </>
 );

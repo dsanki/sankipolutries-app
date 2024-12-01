@@ -35,7 +35,8 @@ function EggSaleInvoiceList(props) {
     const [filterToDate, setFilterToDate] = useState("");
     const [isloaded, setIsLoaded] = useState(true);
     const [eggsalelistfilter, setEggSaleListFilter] = useState([]);
-    const [companydetails, setCompanyDetails] = useState([]);
+   // const [companydetails, setCompanyDetails] = useState([]);
+    const [companydetails, setCompanyDetails] = useState([JSON.parse(localStorage.getItem('companydetails'))]);
     const [eggcategory, setEggCategory] = useState([]);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -58,7 +59,8 @@ function EggSaleInvoiceList(props) {
         PhonePay:"",
         NetBanking:"",
         UPI:"",
-        Cheque:""
+        Cheque:"",
+        Complimentary:""
     }
 
     const [eggsaledata, setEggSaletData] = useState(initialvalues);
@@ -86,7 +88,7 @@ function EggSaleInvoiceList(props) {
         if (localStorage.getItem('token')) {
            // setEggSaletData({ ...eggsaledata, CustomerId: uid });
             //fetchCustomerDetails(uid);
-            fetchCompanyDetails();
+          //  fetchCompanyDetails();
             fetchEggCategory();
 
             setBankDetails({ ...bankdetails, BankName: process.env.REACT_APP_BANK_NAME,
@@ -388,7 +390,8 @@ function EggSaleInvoiceList(props) {
             PhonePay:eggsale.PhonePay,
             NetBanking:eggsale.NetBanking,
             UPI:eggsale.UPI,
-            Cheque:eggsale.Cheque
+            Cheque:eggsale.Cheque,
+            Complimentary:eggsale.Complimentary
         });
 
         setInvoiceModalShow(true);
@@ -409,7 +412,7 @@ function EggSaleInvoiceList(props) {
         <div>
             {isloaded && <Loading />}
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
-                <h2>Egg sale list</h2>
+                <h4>Egg sale list</h4>
             </div>
             
             <div className="container" style={{ marginTop: '20px', marginBottom: '10px' }}>

@@ -3,15 +3,14 @@ import { Button, ButtonToolbar, Table, Modal, Row, Col, Form } from 'react-boots
 import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
 import DateComponent from '../DateComponent';
-import {HandleLogout,downloadExcel,FecthEggCategory } from './../../Utility'
+import {HandleLogout,downloadExcel,FecthEggStockInventory } from './../../Utility'
 import Loading from '../Loading/Loading'
 
 
 
 const EggInventory = (props) => {
     let history = useNavigate();
-    const [eggtrackerlist, setEggDailyTrackerList] = useState([]);
-    const [eggtrackerlistForFilter, setEggtrackerlistForFilter] = useState([]);
+    const [eggtInventoryList, setEggInventoryList] = useState([]);
     const [isloaded, setIsLoaded] = useState(true);
     const [eggsalelist, setEggSaleList] = useState([]);
     const [eggcategory, setEggCategory] = useState([]);

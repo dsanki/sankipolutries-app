@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useMemo, Fragment } from 'react'
 import { variables } from '../../Variables';
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
-import { useNavigate, useParams,useLocation } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import moment from 'moment';
 import { ErrorMessageHandle } from '../../Utility';
 import InputField from '../ReuseableComponent/InputField'
 import DateComponent from '../DateComponent';
 import {
     dateyyyymmdd, HandleLogout, downloadExcel,
-    FetchCompanyDetails, AmountInWords, ConvertNumberToWords,ReplaceNonNumeric, 
-    Commarize, FecthEggSaleInvoiceList,FecthEggCategory
+    FetchCompanyDetails, AmountInWords, ConvertNumberToWords, ReplaceNonNumeric,
+    Commarize, FecthEggSaleInvoiceList, FecthEggCategory
 } from './../../Utility'
 
 import Loading from '../Loading/Loading'
@@ -36,30 +36,32 @@ function EggSale(props) {
     const [filterToDate, setFilterToDate] = useState("");
     const [isloaded, setIsLoaded] = useState(true);
     const [eggsalelistfilter, setEggSaleListFilter] = useState([]);
-    const [companydetails, setCompanyDetails] = useState([]);
+   // const [companydetails, setCompanyDetails] = useState([]);
+   const [companydetails, setCompanyDetails] = useState([JSON.parse(localStorage.getItem('companydetails'))]);
     const [eggcategory, setEggCategory] = useState([]);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const initialvalues = {
-    modaltitle: "",
-    Id: 0,
-    InvoiceNo: "",
-    CustomerId: uid,
-    TotalQuantity: "",
-    PurchaseDate: "",
-    TotalCost: "",
-    TotalDiscount: "",
-    FinalCostInvoice: "",
-    Paid: "",
-    Due: "",
-    EggSale: [],
-    VehicleNo:"",
-    AdditionalCharge:"",
-        Cash:"",
-        PhonePay:"",
-        NetBanking:"",
-        UPI:"",
-        Cheque:""
+        modaltitle: "",
+        Id: 0,
+        InvoiceNo: "",
+        CustomerId: uid,
+        TotalQuantity: "",
+        PurchaseDate: "",
+        TotalCost: "",
+        TotalDiscount: "",
+        FinalCostInvoice: "",
+        Paid: "",
+        Due: "",
+        EggSale: [],
+        VehicleNo: "",
+        AdditionalCharge: "",
+        Cash: "",
+        PhonePay: "",
+        NetBanking: "",
+        UPI: "",
+        Cheque: "",
+        Complimentary: ""
     }
 
     const [eggsaledata, setEggSaletData] = useState(initialvalues);
@@ -72,11 +74,11 @@ function EggSale(props) {
         history("/eggsalemodule/" + uid + "/" + p.Id);
     }
 
-    const _bankdetails={
-        BankName:"",
-        AccountNo:"",
-        IfscCode:"",
-        BankName:""
+    const _bankdetails = {
+        BankName: "",
+        AccountNo: "",
+        IfscCode: "",
+        BankName: ""
 
     }
 
@@ -87,14 +89,15 @@ function EggSale(props) {
         if (localStorage.getItem('token')) {
             setEggSaletData({ ...eggsaledata, CustomerId: uid });
             fetchCustomerDetails(uid);
-            fetchCompanyDetails();
+           // fetchCompanyDetails();
             fetchEggCategory();
 
-            setBankDetails({ ...bankdetails, BankName: process.env.REACT_APP_BANK_NAME,
-                AccountNo:process.env.REACT_APP_ACCOUNT_NO,IfscCode: process.env.REACT_APP_IFSC_CODE
+            setBankDetails({
+                ...bankdetails, BankName: process.env.REACT_APP_BANK_NAME,
+                AccountNo: process.env.REACT_APP_ACCOUNT_NO, IfscCode: process.env.REACT_APP_IFSC_CODE
                 ,
-                BranchName:process.env.REACT_APP_BRANCH_NAME
-             });
+                BranchName: process.env.REACT_APP_BRANCH_NAME
+            });
         }
         else {
             HandleLogout();
@@ -189,18 +192,19 @@ function EggSale(props) {
     }
 
     const calculateValues = (data) => {
-        const { totalCost, totalQuantity, totalDiscount, totalFinalCost, 
-            totalPaid, totalDue,totalAdvance } 
-        = data.reduce((accumulator, item) => {
-            accumulator.totalCost += item.TotalCost;
-            accumulator.totalQuantity += parseInt(item.TotalQuantity);
-            accumulator.totalDiscount += item.TotalDiscount;
-            accumulator.totalFinalCost += item.FinalCostInvoice;
-            accumulator.totalPaid += item.Paid;
-            accumulator.totalDue += item.Due;
-            accumulator.totalAdvance+=parseFloat(item.Advance||0);
-            return accumulator;
-        }, { totalCost: 0, totalQuantity: 0, totalDiscount: 0, totalFinalCost: 0, totalPaid: 0, totalDue: 0, totalAdvance:0 })
+        const { totalCost, totalQuantity, totalDiscount, totalFinalCost,
+            totalPaid, totalDue, totalAdvance }
+            = data.reduce((accumulator, item) => {
+                accumulator.totalCost += item.TotalCost;
+                accumulator.totalQuantity += parseInt(item.TotalQuantity);
+                accumulator.totalDiscount += item.TotalDiscount;
+                accumulator.totalFinalCost += item.FinalCostInvoice;
+                accumulator.totalPaid += item.Paid;
+                accumulator.totalDue += item.Due;
+                accumulator.totalAdvance += parseFloat(item.Advance || 0);
+                return accumulator;
+            }, { totalCost: 0, totalQuantity: 0, totalDiscount: 0, 
+                totalFinalCost: 0, totalPaid: 0, totalDue: 0, totalAdvance: 0 })
 
         _setTotalQuantity(totalQuantity);
         _setTotalCost(totalCost);
@@ -355,7 +359,7 @@ function EggSale(props) {
 
         setEggSaletData({
             Id: eggsale.Id,
-            InvoiceNo:eggsale.InvoiceNo,
+            InvoiceNo: eggsale.InvoiceNo,
             CustomerId: eggsale.CustomerId,
             TotalQuantity: eggsale.TotalQuantity,
             PurchaseDate: eggsale.PurchaseDate,
@@ -364,15 +368,16 @@ function EggSale(props) {
             FinalCostInvoice: eggsale.FinalCostInvoice,
             Paid: eggsale.Paid,
             Due: eggsale.Due,
-            AmountInWords: ConvertNumberToWords(parseFloat(eggsale.FinalCostInvoice||0) + parseFloat(eggsale.AdditionalCharge||0)),
-            EggSale:eggsale.EggSaleList,
-            VehicleNo:eggsale.VehicleNo,
-            AdditionalCharge:eggsale.AdditionalCharge,
-            Cash:eggsale.Cash,
-            PhonePay:eggsale.PhonePay,
-            NetBanking:eggsale.NetBanking,
-            UPI:eggsale.UPI,
-            Cheque:eggsale.Cheque
+            AmountInWords: ConvertNumberToWords(parseFloat(eggsale.FinalCostInvoice || 0) + parseFloat(eggsale.AdditionalCharge || 0)),
+            EggSale: eggsale.EggSaleList,
+            VehicleNo: eggsale.VehicleNo,
+            AdditionalCharge: eggsale.AdditionalCharge,
+            Cash: eggsale.Cash,
+            PhonePay: eggsale.PhonePay,
+            NetBanking: eggsale.NetBanking,
+            UPI: eggsale.UPI,
+            Cheque: eggsale.Cheque,
+            Complimentary: eggsale.Complimentary
         });
 
         setInvoiceModalShow(true);
@@ -393,18 +398,18 @@ function EggSale(props) {
         <div>
             {isloaded && <Loading />}
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
-                <h2>Egg sale tracker</h2>
+                <h4>Egg sale tracker</h4>
             </div>
-            <div className="card" style={{ marginBottom: '20px', fontSize:13 }}>
+            <div className="card" style={{ marginBottom: '20px', fontSize: 13 }}>
                 <div className="card-body">
-                    <h5 className="card-title" style={{fontSize:15,     marginBottom: 2}}>Customer Name: {customerdetails.FirstName + " " + customerdetails.LastName}</h5>
-                    <p className="card-title" style={{marginBottom: 2}}>Mobile no: {customerdetails.MobileNo}</p>
-                    <p className="card-title" style={{marginBottom: 2}}>Email: {customerdetails.Email}</p>
-                    <p className="card-title" style={{marginBottom: 2}}>Address: {customerdetails.Address}</p>
+                    <h5 className="card-title" style={{ fontSize: 15, marginBottom: 2 }}>Customer Name: {customerdetails.FirstName + " " + customerdetails.LastName}</h5>
+                    <p className="card-title" style={{ marginBottom: 2 }}>Mobile no: {customerdetails.MobileNo}</p>
+                    <p className="card-title" style={{ marginBottom: 2 }}>Address: {customerdetails.Address}</p>
+                    {/* <p className="card-title" style={{ marginBottom: 2 }}>Email: {customerdetails.Email??""}</p> */}
                 </div>
             </div>
             <div className="container" style={{ marginTop: '20px', marginBottom: '10px' }}>
-                <div className="row align-items-center" style={{fontSize:13}}>
+                <div className="row align-items-center" style={{ fontSize: 13 }}>
                     <div className="col-2">
                         <p><strong>From</strong></p>
                         <DateComponent date={null} onChange={onDateFilterFromChange} isRequired={false} value={filterFromDate} />
@@ -414,20 +419,20 @@ function EggSale(props) {
                         <DateComponent date={null} onChange={onDateFilterToChange} isRequired={false} value={filterToDate} />
                     </div>
 
-                    <div className="col-6" style={{textAlign:'right', marginTop: 30}}>
-                    <i className="fa-regular fa-file-excel fa-2xl" 
-                    style={{ color: '#bea2a2',marginRight:30}} 
-                    title='Download Egg Sale List' onClick={() => onDownloadExcel()} ></i>
-                    <Button className="mr-2" variant="primary"
-                    style={{ marginRight: "17.5px" }}
-                    onClick={() => clickAddEggSale()}>Add</Button>
+                    <div className="col-6" style={{ textAlign: 'right', marginTop: 30 }}>
+                        <i className="fa-regular fa-file-excel fa-2xl"
+                            style={{ color: '#bea2a2', marginRight: 30 }}
+                            title='Download Egg Sale List' onClick={() => onDownloadExcel()} ></i>
+                        <Button className="mr-2" variant="primary"
+                            style={{ marginRight: "17.5px" }}
+                            onClick={() => clickAddEggSale()}>Add</Button>
 
-                    <a className="mr-2 btn btn-primary" href={`/eggsalepaymentin/?uid=${uid}`}>Payment</a>
-                       
+                        <a className="mr-2 btn btn-primary" href={`/eggsalepaymentin/?uid=${uid}`}>Payment</a>
+
                     </div>
-                    <div className="col-2" style={{textAlign:'right', marginTop: 30}}>
-                    <select className="form-select" aria-label="Default select example" 
-                    style={{ width: "80px" }} onChange={selectPaginationChange}>
+                    <div className="col-2" style={{ textAlign: 'right', marginTop: 30 }}>
+                        <select className="form-select" aria-label="Default select example"
+                            style={{ width: "80px" }} onChange={selectPaginationChange}>
                             <option selected value="10">10</option>
                             <option value="20">20</option>
                             <option value="30">30</option>
@@ -438,7 +443,7 @@ function EggSale(props) {
                     </div>
                 </div>
             </div>
-           
+
 
             {/* <div class="row">
                 <div class="col-md-9">  <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2' }} title='Download Egg Sale List' onClick={() => onDownloadExcel()} ></i></div>
@@ -467,6 +472,7 @@ function EggSale(props) {
                         <th>Final cost (<span>&#8377;</span>)</th>
                         <th>Paid (<span>&#8377;</span>)</th>
                         <th>Due (<span>&#8377;</span>)</th>
+                        <th>Complimentary</th>
                         <th>Advance</th>
                         <th align='center'>Invoice</th>
                         <th>Options</th>
@@ -477,7 +483,7 @@ function EggSale(props) {
 
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
                             return (
-                                !isloaded && <tr align='center' style={{fontSize:13}} key={p.Id}>
+                                !isloaded && <tr align='center' style={{ fontSize: 13 }} key={p.Id}>
 
                                     <td align='center'>{moment(p.PurchaseDate).format('DD-MMM-YYYY')}</td>
                                     <td align='center'>{new Intl.NumberFormat('en-IN', {
@@ -507,6 +513,13 @@ function EggSale(props) {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2
                                     }).format(parseFloat(p.Due).toFixed(2))}</td>
+
+                                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }).format(parseFloat(p.Complimentary || 0).toFixed(2))}</td>
+
+
                                     <td align='center'>{p.Advance}</td>
                                     <td>
                                         <i className="fa-sharp fa-solid fa-receipt fa-beat" title='Invoice' style={{ color: '#086dba', marginLeft: '15px' }} onClick={() => clickInvoice(p)}></i>
@@ -515,12 +528,12 @@ function EggSale(props) {
                                         {
                                             <ButtonToolbar>
 
-                                                <i className="fa-solid fa-pen-to-square" title='Edit' style={{ color: '#0545b3', marginLeft: '15px' }} 
-                                                onClick={() => clickEditEggSale(p)}></i>
+                                                <i className="fa-solid fa-pen-to-square" title='Edit' style={{ color: '#0545b3', marginLeft: '15px' }}
+                                                    onClick={() => clickEditEggSale(p)}></i>
 
                                                 {localStorage.getItem('isadmin') === 'true' &&
-                                                    <i className="fa-solid fa-trash" title='Delete' style={{ color: '#f81616', marginLeft: '15px' }} 
-                                                    onClick={() => deleteEggSaleInv(p.Id)}></i>}
+                                                    <i className="fa-solid fa-trash" title='Delete' style={{ color: '#f81616', marginLeft: '15px' }}
+                                                        onClick={() => deleteEggSaleInv(p.Id)}></i>}
 
 
 
@@ -536,7 +549,7 @@ function EggSale(props) {
                         </tr>
                     }
                 </tbody>
-                <tfoot style={{ backgroundColor: '#cccccc', fontWeight: 'bold', fontSize:13 }}>
+                <tfoot style={{ backgroundColor: '#cccccc', fontWeight: 'bold', fontSize: 13 }}>
                     <td align='center'>Total</td>
 
                     <td align='center'>{_totalquantity}</td>
@@ -608,16 +621,16 @@ function EggSale(props) {
                         <Fragment>
                             <PDFViewer width="900" height="900" className="app" >
 
-                                <InvoiceEggSale companydetails={companydetails} 
-                                eggsaledata={eggsaledata} 
-                                customerdetails={customerdetails} 
-                                eggcategory={eggcategory} 
-                                bankdetails={bankdetails}/>
+                                <InvoiceEggSale companydetails={companydetails}
+                                    eggsaledata={eggsaledata}
+                                    customerdetails={customerdetails}
+                                    eggcategory={eggcategory}
+                                    bankdetails={bankdetails} />
                             </PDFViewer>
                         </Fragment>
                     </Modal.Body>
                 </Modal>
-</div>
+            </div>
 
 
 

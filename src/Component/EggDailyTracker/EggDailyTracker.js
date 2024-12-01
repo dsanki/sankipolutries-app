@@ -8,8 +8,10 @@ import EggCategoryWiseCount from '../ReuseableComponent/EggCategoryWiseCount'
 
 
 import DateComponent from '../DateComponent';
-import { CalculateAgeInDays, CalculateAgeInWeeks, dateyyyymmdd, FetchLotById, 
-    HandleLogout, FetchShedsList, FetchShedLotMapList, downloadExcel } from './../../Utility'
+import {
+    CalculateAgeInDays, CalculateAgeInWeeks, dateyyyymmdd, FetchLotById,
+    HandleLogout, FetchShedsList, FetchShedLotMapList, downloadExcel
+} from './../../Utility'
 import Loading from '../Loading/Loading'
 
 function EggDailyTracker(props) {
@@ -32,6 +34,7 @@ function EggDailyTracker(props) {
     const [filterToDate, setFilterToDate] = useState("");
     const [filterShed, setFilterShed] = useState();
     const [isloaded, setIsLoaded] = useState(true);
+    const [companydetails, setCompanyDetails] = useState(JSON.parse(localStorage.getItem('companydetails')));
 
     const initialvalues = {
         id: 0,
@@ -46,14 +49,14 @@ function EggDailyTracker(props) {
         ProductionPercentage: "",
         AgeDays: "",
         AgeWeeks: "",
-        EggBig:"",
-        EggCp:"",
-        EggMcp:"",
-        EggScp:"",
-        BirdWeight:"",
-        EggPack:"",
-        EggLose:"",
-        FeedConsume:""
+        EggBig: "",
+        EggCp: "",
+        EggMcp: "",
+        EggScp: "",
+        BirdWeight: "",
+        EggPack: "",
+        EggLose: "",
+        FeedConsume: ""
     };
 
     const [eggdata, setEggData] = useState(initialvalues);
@@ -75,14 +78,14 @@ function EggDailyTracker(props) {
             AgeDays: "",
             AgeWeeks: "",
             LotName: "",
-            EggBig:"",
-            EggCp:"",
-            EggMcp:"",
-            EggScp:"",
-            BirdWeight:"",
-            EggPack:"",
-            EggLose:"",
-            FeedConsume:""
+            EggBig: "",
+            EggCp: "",
+            EggMcp: "",
+            EggScp: "",
+            BirdWeight: "",
+            EggPack: "",
+            EggLose: "",
+            FeedConsume: ""
         })
     }
 
@@ -103,14 +106,14 @@ function EggDailyTracker(props) {
             AgeDays: egg.AgeDays,
             AgeWeeks: egg.AgeWeeks,
             LotName: egg.LotName,
-            EggBig:egg.EggBig,
-            EggCp:egg.EggCp,
-            EggMcp:egg.EggMcp,
-            EggScp:egg.EggScp,
-            BirdWeight:egg.BirdWeight,
-            EggPack:egg.EggPack,
-            EggLose:egg.EggLose,
-            FeedConsume:egg.FeedConsume
+            EggBig: egg.EggBig,
+            EggCp: egg.EggCp,
+            EggMcp: egg.EggMcp,
+            EggScp: egg.EggScp,
+            BirdWeight: egg.BirdWeight,
+            EggPack: egg.EggPack,
+            EggLose: egg.EggLose,
+            FeedConsume: egg.FeedConsume
         })
     }
 
@@ -122,33 +125,33 @@ function EggDailyTracker(props) {
         const re = /^[0-9\b]+$/;
         let _total = e.target.value;
         if (_total === '' || re.test(_total)) {
-            setEggData({ ...eggdata, EggBig: e.target.value});
+            setEggData({ ...eggdata, EggBig: e.target.value });
         }
     }
 
     const onEggPackChange = (e) => {
         const re = /^[0-9\b]+$/;
         let _total = e.target.value;
-        let totaleggs="";
+        let totaleggs = "";
 
-        if(_total==="" && eggdata.EggLose==="")
-            {
-                totaleggs="";
-            }
+        if (_total === "" && eggdata.EggLose === "") {
+            totaleggs = "";
+        }
 
-        else{
-            totaleggs=parseInt(_total||0)*210 +(parseInt(eggdata.EggLose||0));
+        else {
+            totaleggs = parseInt(_total || 0) * 210 + (parseInt(eggdata.EggLose || 0));
         }
         if (_total === '' || re.test(_total)) {
 
-            let percentage=((totaleggs / eggdata.TotalBirds) * 100);
-            setEggData({ ...eggdata, EggPack: e.target.value,
-                TotalEggs:totaleggs,
+            let percentage = ((totaleggs / eggdata.TotalBirds) * 100);
+            setEggData({
+                ...eggdata, EggPack: e.target.value,
+                TotalEggs: totaleggs,
                 // TotalEggs:(parseInt(totaleggs||0)*210 +
                 // parseInt(eggdata.EggLose||0))==0?"":(parseInt(totaleggs||0)*210 
                 // +parseInt(eggdata.EggLose||0)),
-                OkEggs: (totaleggs - parseInt(eggdata.BrokenEggs||0))<0?"":(totaleggs - parseInt(eggdata.BrokenEggs||0)), 
-                ProductionPercentage: percentage==0?0 : percentage.toFixed(2) 
+                OkEggs: (totaleggs - parseInt(eggdata.BrokenEggs || 0)) < 0 ? "" : (totaleggs - parseInt(eggdata.BrokenEggs || 0)),
+                ProductionPercentage: percentage == 0 ? 0 : percentage.toFixed(2)
 
             });
         }
@@ -157,34 +160,35 @@ function EggDailyTracker(props) {
     const onEggLoseChange = (e) => {
         const re = /^[0-9\b]+$/;
         let _total = e.target.value;
-        let totaleggs="";
-        if(_total==="" && eggdata.EggPack==="")
-        {
-            totaleggs="";
+        let totaleggs = "";
+        if (_total === "" && eggdata.EggPack === "") {
+            totaleggs = "";
         }
-        else{
-            totaleggs=parseInt(eggdata.EggPack||0)*210 +(parseInt(_total||0));
+        else {
+            totaleggs = parseInt(eggdata.EggPack || 0) * 210 + (parseInt(_total || 0));
         }
 
         if (_total === '' || re.test(_total)) {
-            let percentage=((totaleggs / eggdata.TotalBirds) * 100);
-            setEggData({ ...eggdata, EggLose: e.target.value,
-                TotalEggs:totaleggs,
-                OkEggs: (totaleggs - eggdata.BrokenEggs)<0?"":(totaleggs - eggdata.BrokenEggs), 
-                ProductionPercentage: percentage==0?0 : percentage.toFixed(2) 
+            let percentage = ((totaleggs / eggdata.TotalBirds) * 100);
+            setEggData({
+                ...eggdata, EggLose: e.target.value,
+                TotalEggs: totaleggs,
+                OkEggs: (totaleggs - eggdata.BrokenEggs) < 0 ? "" : (totaleggs - eggdata.BrokenEggs),
+                ProductionPercentage: percentage == 0 ? 0 : percentage.toFixed(2)
             });
         }
-       
     }
 
     const onTotalEggsChange = (e) => {
         const re = /^[0-9\b]+$/;
         let _total = e.target.value;
-        
+
         if (_total === '' || re.test(_total)) {
-            setEggData({ ...eggdata, TotalEggs: e.target.value, 
-                OkEggs: _total - eggdata.BrokenEggs, 
-                ProductionPercentage: ((_total / eggdata.TotalBirds) * 100).toFixed(2) });
+            setEggData({
+                ...eggdata, TotalEggs: e.target.value,
+                OkEggs: _total - eggdata.BrokenEggs,
+                ProductionPercentage: ((_total / eggdata.TotalBirds) * 100).toFixed(2)
+            });
         }
     }
 
@@ -192,7 +196,7 @@ function EggDailyTracker(props) {
         const re = /^[0-9\b]+$/;
         let _total = e.target.value;
         if (_total === '' || re.test(_total)) {
-            setEggData({ ...eggdata, EggCp: e.target.value});
+            setEggData({ ...eggdata, EggCp: e.target.value });
         }
     }
 
@@ -200,7 +204,7 @@ function EggDailyTracker(props) {
         const re = /^[0-9\b]+$/;
         let _total = e.target.value;
         if (_total === '' || re.test(_total)) {
-            setEggData({ ...eggdata, EggScp: e.target.value});
+            setEggData({ ...eggdata, EggScp: e.target.value });
         }
     }
 
@@ -208,7 +212,7 @@ function EggDailyTracker(props) {
         const re = /^[0-9\b]+$/;
         let _total = e.target.value;
         if (_total === '' || re.test(_total)) {
-            setEggData({ ...eggdata, EggMcp: e.target.value});
+            setEggData({ ...eggdata, EggMcp: e.target.value });
         }
     }
 
@@ -225,33 +229,36 @@ function EggDailyTracker(props) {
         //     totaleggs=parseInt(eggdata.EggPack||0)*210 +(parseInt(_total||0));
         // }
         if (_brokenegg === '' || re.test(_brokenegg)) {
-            setEggData({ ...eggdata, BrokenEggs: _brokenegg, 
-                OkEggs: (eggdata.TotalEggs - _brokenegg)<0?"":(eggdata.TotalEggs - _brokenegg), 
-                ProductionPercentage: ((eggdata.TotalEggs / eggdata.TotalBirds) * 100).toFixed(2) });
+            setEggData({
+                ...eggdata, BrokenEggs: _brokenegg,
+                OkEggs: (eggdata.TotalEggs - _brokenegg) < 0 ? "" : (eggdata.TotalEggs - _brokenegg),
+                ProductionPercentage: ((eggdata.TotalEggs / eggdata.TotalBirds) * 100).toFixed(2)
+            });
         }
     }
 
     const onFeedIntechChange = (e) => {
         const re = /^\d*\.?\d{0,2}$/
-        if (e.target.value  === '' || re.test(e.target.value )) {
-        setEggData({ ...eggdata, FeedIntech: e.target.value });
+        if (e.target.value === '' || re.test(e.target.value)) {
+            setEggData({ ...eggdata, FeedIntech: e.target.value });
         }
     }
 
     const onFeedConsumeChange = (e) => {
         const re = /^\d*\.?\d{0,2}$/
-        let totalfeedbags=e.target.value;
-        if (totalfeedbags  === '' || re.test(totalfeedbags)) {
-        setEggData({ ...eggdata, FeedConsume: totalfeedbags,
-            FeedIntech: Math.round((((totalfeedbags/2)*100000)/eggdata.TotalBirds))
-        });
+        let totalfeedbags = e.target.value;
+        if (totalfeedbags === '' || re.test(totalfeedbags)) {
+            setEggData({
+                ...eggdata, FeedConsume: totalfeedbags,
+                FeedIntech: Math.round((((totalfeedbags / 2) * 100000) / eggdata.TotalBirds))
+            });
         }
     }
 
     const onBirdWeightChange = (e) => {
         const re = /^\d*\.?\d{0,2}$/
-        if (e.target.value  === '' || re.test(e.target.value )) {
-        setEggData({ ...eggdata, BirdWeight: e.target.value });
+        if (e.target.value === '' || re.test(e.target.value)) {
+            setEggData({ ...eggdata, BirdWeight: e.target.value });
         }
     }
 
@@ -268,7 +275,7 @@ function EggDailyTracker(props) {
         if (filterval.length > 0) {
             lotid = filterval[0].lotid;
             lotname = filterval[0].lotname;
-            FetchLotById(lotid,process.env.REACT_APP_API)
+            FetchLotById(lotid, process.env.REACT_APP_API)
                 .then(data => {
                     setLotDetails(data.Result);
                     totalbirds = data.Result.TotalChicks - (data.Result.Mortality + data.Result.TotalMortality + data.Result.TotalBirdSale);
@@ -346,7 +353,7 @@ function EggDailyTracker(props) {
 
     const fetchEggDailyTrackerList = async () => {
         setIsLoaded(true);
-        fetch(process.env.REACT_APP_API + 'EggProductionDailyTracker/GetEggDailyTrackerList',
+        fetch(process.env.REACT_APP_API + 'EggProductionDailyTracker/GetEggDailyTrackerList?CompanyId=' + parseInt(localStorage.getItem('companyid')),
             {
                 method: 'GET',
                 headers: {
@@ -423,7 +430,7 @@ function EggDailyTracker(props) {
             }).then(res => res.json())
                 .then((data) => {
                     if (data.StatusCode === 200) {
-                        setCount(count);
+                        addCount(count);
                         props.showAlert("Successfully deleted", "info")
                     }
                     else if (data.StatusCode === 401) {
@@ -440,8 +447,6 @@ function EggDailyTracker(props) {
                     (error) => {
                         props.showAlert("Error occurred!!", "danger")
                     });
-
-            addCount(count);
         }
     }
 
@@ -455,7 +460,7 @@ function EggDailyTracker(props) {
         }
         else {
 
-            fetch(process.env.REACT_APP_API + 'EggProductionDailyTracker', {
+            fetch(process.env.REACT_APP_API + 'EggProductionDailyTracker/EggProductionDailyTrackerAdd', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -473,14 +478,15 @@ function EggDailyTracker(props) {
                     OkEggs: eggdata.OkEggs,
                     FeedIntech: eggdata.FeedIntech,
                     ProductionPercentage: eggdata.ProductionPercentage,
-                    EggBig:eggdata.EggBig,
-                    EggCp:eggdata.EggCp,
-                    EggMcp:eggdata.EggMcp,
-                    EggScp:eggdata.EggScp,
-                    BirdWeight:eggdata.BirdWeight,
-                    EggPack:eggdata.EggPack,
-                    EggLose:eggdata.EggLose,
-                    FeedConsume:eggdata.FeedConsume
+                    EggBig: eggdata.EggBig,
+                    EggCp: eggdata.EggCp,
+                    EggMcp: eggdata.EggMcp,
+                    EggScp: eggdata.EggScp,
+                    BirdWeight: eggdata.BirdWeight,
+                    EggPack: eggdata.EggPack,
+                    EggLose: eggdata.EggLose,
+                    FeedConsume: eggdata.FeedConsume,
+                    CompanyId: localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -520,12 +526,13 @@ function EggDailyTracker(props) {
         }
         else {
 
-            fetch(process.env.REACT_APP_API + 'EggProductionDailyTracker', {
+            fetch(process.env.REACT_APP_API + 'EggProductionDailyTracker/EggProductionDailyTrackerUpdate', {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
+                    'Authorization': localStorage.getItem('token'),
+                    'Access-Control-Allow-Origin': '*',
                 },
                 body: JSON.stringify({
                     id: eggdata.id,
@@ -538,14 +545,15 @@ function EggDailyTracker(props) {
                     OkEggs: eggdata.OkEggs,
                     FeedIntech: eggdata.FeedIntech,
                     ProductionPercentage: eggdata.ProductionPercentage,
-                    EggBig:eggdata.EggBig,
-                    EggCp:eggdata.EggCp,
-                    EggMcp:eggdata.EggMcp,
-                    EggScp:eggdata.EggScp,
-                    BirdWeight:eggdata.BirdWeight,
-                    EggPack:eggdata.EggPack,
-                    EggLose:eggdata.EggLose,
-                    FeedConsume:eggdata.FeedConsume
+                    EggBig: eggdata.EggBig,
+                    EggCp: eggdata.EggCp,
+                    EggMcp: eggdata.EggMcp,
+                    EggScp: eggdata.EggScp,
+                    BirdWeight: eggdata.BirdWeight,
+                    EggPack: eggdata.EggPack,
+                    EggLose: eggdata.EggLose,
+                    FeedConsume: eggdata.FeedConsume,
+                    CompanyId: localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -622,57 +630,57 @@ function EggDailyTracker(props) {
             return ({
                 Date: moment(p.Date).format('DD-MMM-YYYY'),
                 ShedName: shedname, LotName: p.LotName, Birds: p.TotalBirds, Eggs: p.TotalEggs, BrokenEggs: p.BrokenEggs,
-                OKEggs: p.OkEggs, 
-                EggBig:p.EggBig,
-                EggMcp:p.EggMcp, EggCp:p.EggCp,EggScp:p.EggScp,
-                FeedIntech: p.FeedIntech, Age: AgeDays / AgeWeeks, ProductionPercentage: p.ProductionPercentage, 
-               
+                OKEggs: p.OkEggs,
+                EggBig: p.EggBig,
+                EggMcp: p.EggMcp, EggCp: p.EggCp, EggScp: p.EggScp,
+                FeedIntech: p.FeedIntech, Age: AgeDays / AgeWeeks, ProductionPercentage: p.ProductionPercentage,
+
             });
         });
 
         downloadExcel(_list, "EggDailyTrackerList");
     }
 
-    const [data,setData]=useState([{category:"",pack:"",lose:"", count:""}])
+    const [data, setData] = useState([{ category: "", pack: "", lose: "", count: "" }])
 
-    const handleChange=(e,i)=>{
-        const {name,value}=e.target
+    const handleChange = (e, i) => {
+        const { name, value } = e.target
         const onchangeVal = [...data]
-        onchangeVal[i][name]=value
+        onchangeVal[i][name] = value
         setData(onchangeVal)
     }
 
-    const handleDelete=(i)=>{
+    const handleDelete = (i) => {
         const deleteVal = [...data]
-        deleteVal.splice(i,1)
+        deleteVal.splice(i, 1)
         setData(deleteVal)
     }
 
-    const handleClick=(e)=>{
+    const handleClick = (e) => {
         e.preventDefault();
-        setData([...data,{category:"",pack:"",lose:"", count:""}]);
+        setData([...data, { category: "", pack: "", lose: "", count: "" }]);
     }
 
     return (
         <>
             {isloaded && <Loading />}
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
-                <h2>Daily Production Tracker</h2>
+                <h3>Daily Production Tracker</h3>
             </div>
             <div className="container" style={{ marginTop: '30px' }}>
                 <div className="row align-items-center">
-                    <div className="col">
-                        <p><strong>From</strong></p>
+                    <div className="col-2">
+                        <p style={{ fontSize: '13px' }}><strong>From</strong></p>
                         <DateComponent date={null} onChange={onDateFilterFromChange} isRequired={false} value={filterFromDate} />
                     </div>
-                    <div className="col">
-                        <p><strong>To</strong></p>
+                    <div className="col-2">
+                        <p style={{ fontSize: '13px' }}><strong>To</strong></p>
                         <DateComponent date={null} onChange={onDateFilterToChange} isRequired={false} value={filterToDate} />
                     </div>
-                    <div className="col">
-                        <p><strong>Shed</strong></p>
+                    <div className="col-2">
+                        <p style={{ fontSize: '13px' }}><strong>Shed</strong></p>
                         <Form.Select aria-label="Default select example"
-                            onChange={onShedFilterChange}>
+                            onChange={onShedFilterChange} style={{ fontSize: '13px' }}>
                             <option selected value="">Choose...</option>
                             {
                                 shedlist.map((item) => {
@@ -688,23 +696,29 @@ function EggDailyTracker(props) {
                             }
                         </Form.Select>
                     </div>
+                    {/* <div className="col-2" style={{marginTop:'38px'}}>
+                   
+                    </div> */}
+                    <div className="col-6" style={{ textAlign: 'right', marginTop: '38px' }}>
+                        <i className="fa-regular fa-file-excel fa-2xl"
+                            style={{ color: '#bea2a2', marginRight: 30 }}
+                            onClick={() => onDownloadExcel()} ></i>
+                        <Button className="mr-2" variant="primary"
+                            style={{ marginRight: "17.5px" }}
+                            onClick={() => clickAddEggProduction()}>Add</Button>
+                    </div>
                 </div>
             </div>
 
-            <div className="row">
+            {/* <div className="row">
                 <div className="col" style={{ textAlign: 'left', marginTop: '20px' }}>
-                    <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2' }} onClick={() => onDownloadExcel()} ></i>
+                   
                 </div>
-                {/* <div className="col" sm={12}>
-                    <p><strong>Filter date</strong></p>
-                    <DateComponent date={null} onChange={onDateFilterChange} isRequired={false} value={filterDate} />
-                </div> */}
+               
                 <div className="col" style={{ textAlign: 'right', marginTop: '20px' }}>
-                    <Button className="mr-2" variant="primary"
-                        style={{ marginRight: "17.5px" }}
-                        onClick={() => clickAddEggProduction()}>Add</Button>
+                   
                 </div>
-            </div>
+            </div> */}
 
             {
                 <Table className="mt-4" striped bordered hover size="sm">
@@ -733,31 +747,31 @@ function EggDailyTracker(props) {
                                 egg.AgeDays = CalculateAgeInDays(egg.LotDate);
                                 egg.AgeWeeks = CalculateAgeInWeeks(egg.LotDate);
                                 return (
-                                    !isloaded && <tr key={egg.id} align='center' style={{fontSize:14}} >
+                                    !isloaded && <tr key={egg.id} align='center' style={{ fontSize: 13 }} >
                                         <td align='center'>{moment(egg.Date).format('DD-MMM-YYYY')}</td>
                                         <td>{shedname}</td>
 
-                                      
+
 
 
                                         <td>
-                                        {new Intl.NumberFormat('en-IN', {
-                                    }).format(parseInt(egg.TotalBirds))}
+                                            {new Intl.NumberFormat('en-IN', {
+                                            }).format(parseInt(egg.TotalBirds))}
 
-                                           </td>
+                                        </td>
                                         <td> {new Intl.NumberFormat('en-IN', {
-                                    }).format(parseInt(egg.TotalEggs))}</td>
+                                        }).format(parseInt(egg.TotalEggs))}</td>
                                         <td>
-                                        {new Intl.NumberFormat('en-IN', {
-                                    }).format(parseInt(egg.BrokenEggs))}</td>
+                                            {new Intl.NumberFormat('en-IN', {
+                                            }).format(parseInt(egg.BrokenEggs))}</td>
                                         <td> {new Intl.NumberFormat('en-IN', {
-                                    }).format(parseInt(egg.OkEggs))}</td>
+                                        }).format(parseInt(egg.OkEggs))}</td>
 
-                                        <td>{egg.EggBig!=null? new Intl.NumberFormat('en-IN', {
-                                    }).format(parseInt(egg.EggBig)):0}/{egg.EggCp!=null? new Intl.NumberFormat('en-IN', {
-                                    }).format(parseInt(egg.EggCp)):0}/{egg.EggMcp!=null?new Intl.NumberFormat('en-IN', {
-                                    }).format(parseInt(egg.EggMcp)):0}/{ egg.EggScp!=null ? new Intl.NumberFormat('en-IN', {
-                                    }).format(parseInt(egg.EggScp)): 0 }</td>
+                                        <td>{egg.EggBig != null ? new Intl.NumberFormat('en-IN', {
+                                        }).format(parseInt(egg.EggBig)) : 0}/{egg.EggCp != null ? new Intl.NumberFormat('en-IN', {
+                                        }).format(parseInt(egg.EggCp)) : 0}/{egg.EggMcp != null ? new Intl.NumberFormat('en-IN', {
+                                        }).format(parseInt(egg.EggMcp)) : 0}/{egg.EggScp != null ? new Intl.NumberFormat('en-IN', {
+                                        }).format(parseInt(egg.EggScp)) : 0}</td>
                                         <td>{egg.FeedConsume}</td>
                                         <td>{egg.FeedIntech}</td>
                                         <td>{egg.ProductionPercentage}</td>
@@ -776,7 +790,7 @@ function EggDailyTracker(props) {
                                     </tr>
                                 )
                             }) : <tr>
-                                <td style={{ textAlign: "center" }} colSpan={14}>
+                                <td style={{ textAlign: "center", fontSize:'13px' }} colSpan={14}>
                                     No Records
                                 </td>
                             </tr>
@@ -816,7 +830,7 @@ function EggDailyTracker(props) {
                         Next
                     </button>
 
-                   
+
                 </>
             }
 
@@ -842,7 +856,7 @@ function EggDailyTracker(props) {
                                 <Form noValidate validated={validated} className="needs-validation">
                                     <Row className="mb-12">
                                         <Form.Group controlId="Date" as={Col} >
-                                            <Form.Label>Date *</Form.Label>
+                                            <Form.Label style={{ fontSize: '13px' }}>Date *</Form.Label>
                                             <Form.Control type="text" name="LotId" hidden disabled value={eggdata.LotId} />
                                             <DateComponent date={null} onChange={onDateChange} isRequired={true} value={eggdata.Date} />
                                             <Form.Control.Feedback type="invalid">
@@ -851,8 +865,8 @@ function EggDailyTracker(props) {
                                         </Form.Group>
 
                                         <Form.Group controlId="ShedId" as={Col} >
-                                            <Form.Label>Shed *</Form.Label>
-                                            <Form.Select aria-label="Default select example"
+                                            <Form.Label style={{ fontSize: '13px' }}>Shed *</Form.Label>
+                                            <Form.Select style={{ fontSize: '13px' }}
                                                 onChange={onShedChange} required>
                                                 <option selected disabled value="">Choose...</option>
                                                 {
@@ -901,14 +915,14 @@ function EggDailyTracker(props) {
                                             type="number"
                                             value={eggdata.TotalBirds}
                                             name="TotalBirds"
-                                            placeholder="TotalBirds"
+                                            placeholder="Total birds"
                                             errormessage="Please enter total birds"
                                             required={true}
                                             disabled={true}
                                         />
                                     </Row>
                                     <Row className="mb-12">
-                                    <InputField controlId="EggPack"
+                                        <InputField controlId="EggPack"
                                             label="Egg Pack"
                                             type="number"
                                             value={eggdata.EggPack}
@@ -920,7 +934,7 @@ function EggDailyTracker(props) {
                                             onChange={onEggPackChange}
                                         />
 
-<InputField controlId="EggLose"
+                                        <InputField controlId="EggLose"
                                             label="Egg Lose"
                                             type="number"
                                             value={eggdata.EggLose}
@@ -932,7 +946,7 @@ function EggDailyTracker(props) {
                                             onChange={onEggLoseChange}
                                         />
                                     </Row>
-                                        
+
                                     <Row className="mb-12">
                                         <InputField controlId="TotalEggs"
                                             label="Total eggs *"
@@ -1032,7 +1046,7 @@ function EggDailyTracker(props) {
                                     </Row>
 
                                     <Row className="mb-12">
-                                    <InputField controlId="FeedConsume"
+                                        <InputField controlId="FeedConsume"
                                             label="Feed Consume (bags)*"
                                             type="text"
                                             value={eggdata.FeedConsume}
@@ -1055,7 +1069,7 @@ function EggDailyTracker(props) {
                                             onChange={onFeedIntechChange}
                                         />
 
-                                    <InputField controlId="BirdWeight"
+                                        <InputField controlId="BirdWeight"
                                             label="Bird weight (gm)"
                                             type="text"
                                             value={eggdata.BirdWeight}
@@ -1066,9 +1080,9 @@ function EggDailyTracker(props) {
                                             disabled={false}
                                             onChange={onBirdWeightChange}
                                         />
-                                       
+
                                     </Row>
-{/* <Row>
+                                    {/* <Row>
 <EggCategoryWiseCount data={data} onChange={handleChange} handleClick={handleClick}
 handleDelete={handleDelete}/>
 </Row> */}

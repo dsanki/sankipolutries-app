@@ -5,8 +5,10 @@ import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
 import DateComponent from '../DateComponent';
 import InputField from '../ReuseableComponent/InputField'
-import { GetCustomerByTypeId, dateyyyymmdd, 
-    HandleLogout, downloadExcel } from './../../Utility'
+import {
+    GetCustomerByTypeId, dateyyyymmdd, FecthStockListById,
+    HandleLogout, downloadExcel
+} from './../../Utility'
 import Loading from '../Loading/Loading'
 //
 function RawMaterials(props) {
@@ -26,6 +28,8 @@ function RawMaterials(props) {
     const [totalPages, setTotalPages] = useState(0);
     const [addModalShow, setAddModalShow] = useState(false);
     const [producttypes, setProductType] = useState([]);
+
+    const [stockList, setStockList] = useState([]);
 
     let addModalClose = () => {
         setAddModalShow(false);
@@ -47,9 +51,10 @@ function RawMaterials(props) {
         Due: "",
         PaymentDate: "",
         Comments: "",
-        InvoiceDate:"",
-        InvoiceNo:"",
-        ExtraCharge:""
+        InvoiceDate: "",
+        InvoiceNo: "",
+        ExtraCharge: "",
+        GST: ""
 
     };
 
@@ -72,9 +77,11 @@ function RawMaterials(props) {
             Due: "",
             PaymentDate: "",
             Comments: "",
-            InvoiceDate:"",
-            InvoiceNo:"",
-            ExtraCharge:""
+            InvoiceDate: "",
+            InvoiceNo: "",
+            ExtraCharge: "",
+            GST: ""
+
         })
     }
 
@@ -95,9 +102,11 @@ function RawMaterials(props) {
             Due: md.Due,
             PaymentDate: md.PaymentDate,
             Comments: md.Comments,
-            InvoiceDate:md.InvoiceDate,
-            InvoiceNo:md.InvoiceNo,
-            ExtraCharge:md.ExtraCharge
+            InvoiceDate: md.InvoiceDate,
+            InvoiceNo: md.InvoiceNo,
+            ExtraCharge: md.ExtraCharge,
+            GST: md.GST
+
         })
     }
 
@@ -129,9 +138,10 @@ function RawMaterials(props) {
         setMaterialsData({
             ...materialsdata,
             Quantity: e.target.value,
-            TotalAmount:Math.round((e.target.value * materialsdata.Rate) + parseFloat(materialsdata.ExtraCharge||0)).toFixed(2),
-            Due: Math.round(((e.target.value * materialsdata.Rate)+ 
-            parseFloat(materialsdata.ExtraCharge||0)) - materialsdata.Paid).toFixed(2)
+            TotalAmount: Math.round((e.target.value * materialsdata.Rate) +
+                parseFloat(materialsdata.ExtraCharge || 0)).toFixed(2),
+            Due: Math.round(((e.target.value * materialsdata.Rate) +
+                parseFloat(materialsdata.ExtraCharge || 0)) - materialsdata.Paid).toFixed(2)
         });
     }
 
@@ -140,35 +150,96 @@ function RawMaterials(props) {
     }
 
     const rateChange = (e) => {
+
+        //let data = [...materialsdata];
+        let gstpercentage = parseFloat(materialsdata.GST || 0) / 100;
+        let totalamount = parseFloat(materialsdata.Quantity || 0) * parseFloat(e.target.value || 0);
+        let totalgst = totalamount * gstpercentage;
+        let totalinclGST = Math.round(totalamount + totalgst
+            + parseFloat(materialsdata.ExtraCharge || 0)).toFixed(2);
+
+        // materialsdata.Rate= e.target.value;
+        // materialsdata.TotalAmount=totalinclGST;
+        // materialsdata.Due=Math.round(totalinclGST - parseFloat(materialsdata.Paid||0)).toFixed(2);
+
+        setMaterialsData(materialsdata);
         setMaterialsData({
-            ...materialsdata,
-            Rate: e.target.value,
-            TotalAmount: Math.round((materialsdata.Quantity * e.target.value)+ parseFloat(materialsdata.ExtraCharge||0)).toFixed(2),
-            Due: Math.round(((materialsdata.Quantity * e.target.value)+ parseFloat(materialsdata.ExtraCharge||0)) 
-            - materialsdata.Paid).toFixed(2)
+            ...materialsdata, Rate: e.target.value,
+            TotalAmount: totalinclGST, Due: Math.round(totalinclGST -
+                parseFloat(materialsdata.Paid || 0)).toFixed(2)
+
         });
+        // setMaterialsData({
+        //     ...materialsdata,
+        //     Rate: e.target.value,
+        //     TotalAmount: Math.round((materialsdata.Quantity * e.target.value) + parseFloat(materialsdata.ExtraCharge || 0)).toFixed(2),
+        //     Due: Math.round(((materialsdata.Quantity * e.target.value) + parseFloat(materialsdata.ExtraCharge || 0))
+        //         - materialsdata.Paid).toFixed(2)
+        // });
+    }
+
+    const gstChange = (e) => {
+
+        //let data = [...materialsdata];
+        let gstpercentage = parseFloat(e.target.value || 0) / 100;
+        let totalamount = parseFloat(materialsdata.Quantity || 0) * parseFloat(materialsdata.Rate || 0);
+        let totalgst = totalamount * gstpercentage;
+        let totalinclGST = Math.round(totalamount + totalgst
+            + parseFloat(materialsdata.ExtraCharge || 0)).toFixed(2);
+
+        //  materialsdata.GST= e.target.value;
+        // materialsdata.TotalAmount=totalinclGST;
+        // materialsdata.Due=Math.round(totalinclGST - parseFloat(materialsdata.Paid||0)).toFixed(2);
+
+        setMaterialsData({
+            ...materialsdata, GST: e.target.value,
+            TotalAmount: totalinclGST, Due: Math.round(totalinclGST - parseFloat(materialsdata.Paid || 0)).toFixed(2)
+        });
+
+        // setMaterialsData({
+        //     ...materialsdata,
+        //     GST: e.target.value,
+        //     TotalAmount: totalinclGST,
+        //     Due: Math.round(totalinclGST - materialsdata.Paid).toFixed(2)
+
+        //     // Math.round(((materialsdata.Quantity * e.target.value)+ 
+        //     // parseFloat(materialsdata.ExtraCharge||0)) 
+        //     // - materialsdata.Paid).toFixed(2)
+        // });
     }
 
     const totalAmountChange = (e) => {
         setMaterialsData({
             ...materialsdata,
-            TotalAmount:Math.round(e.target.value).toFixed(2),
-            Due:Math.round((e.target.value+  parseFloat(materialsdata.ExtraCharge||0)) - materialsdata.Paid).toFixed(2)
+            TotalAmount: Math.round(e.target.value).toFixed(2),
+            Due: Math.round((e.target.value + parseFloat(materialsdata.ExtraCharge || 0)) - materialsdata.Paid).toFixed(2)
         });
     }
 
     const extraAmountChange = (e) => {
+
+        let gstpercentage = parseFloat(materialsdata.GST || 0) / 100;
+        let totalamount = parseFloat(materialsdata.Quantity || 0) * parseFloat(materialsdata.Rate || 0);
+        let totalgst = totalamount * gstpercentage;
+        let totalinclGST = Math.round(totalamount + totalgst
+            + parseFloat(e.target.value || 0)).toFixed(2);
+
+
         setMaterialsData({
             ...materialsdata,
             ExtraCharge: e.target.value,
-            TotalAmount: Math.round((materialsdata.Quantity * materialsdata.Rate)+ parseFloat(e.target.value||0)).toFixed(2),
-            Due: Math.round(((materialsdata.Quantity * materialsdata.Rate)+ parseFloat(e.target.value||0)) - materialsdata.Paid).toFixed(2)
+            TotalAmount: totalinclGST,//Math.round((materialsdata.Quantity * materialsdata.Rate) 
+            Due: Math.round(totalinclGST - parseFloat(materialsdata.Paid || 0)).toFixed(2)
+
+            //Math.round(((materialsdata.Quantity * materialsdata.Rate) + parseFloat(e.target.value || 0)) - materialsdata.Paid).toFixed(2)
         });
     }
 
     const paidChange = (e) => {
-        setMaterialsData({ ...materialsdata, Paid: e.target.value, 
-            Due: Math.round(parseFloat(materialsdata.TotalAmount) - parseFloat(e.target.value||0)).toFixed(2) });
+        setMaterialsData({
+            ...materialsdata, Paid: e.target.value,
+            Due: Math.round(parseFloat(materialsdata.TotalAmount) - parseFloat(e.target.value || 0)).toFixed(2)
+        });
     }
     const paymentDateChange = (e) => {
         setMaterialsData({ ...materialsdata, PaymentDate: e.target.value });
@@ -183,7 +254,8 @@ function RawMaterials(props) {
             fetchUnit();
             fetchClient();
             fetchRawMaterials();
-            fetchMaterialsTypes();
+            //fetchMaterialsTypes();
+            fetchStockByCatId();
         }
         else {
 
@@ -191,10 +263,10 @@ function RawMaterials(props) {
         }
     }, [obj]);
 
-    
+
 
     const fetchRawMaterials = async () => {
-        fetch(process.env.REACT_APP_API + 'RawMaterials/GetRawMaterials',
+        fetch(process.env.REACT_APP_API + 'RawMaterials/GetRawMaterials?CompanyId=' + localStorage.getItem('companyid'),
             {
                 method: 'GET',
                 headers: {
@@ -223,20 +295,14 @@ function RawMaterials(props) {
             });
     }
 
-    const fetchMaterialsTypes = async () => {
-        fetch(process.env.REACT_APP_API+ 'RawMaterials/GetRawMaterialsTypes',
-            {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                }
-            })
-            .then(response => response.json())
+    //FecthStockListById
+
+    const fetchStockByCatId = async () => {
+        FecthStockListById(process.env.REACT_APP_STOCK_CAT_RAW_MATERIALS,
+            process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
-                    setRawMaterialsTypes(data.Result);
+                    setStockList(data.Result);
                 }
                 else if (data.StatusCode === 401) {
                     history("/login")
@@ -249,6 +315,33 @@ function RawMaterials(props) {
                 }
             });
     }
+
+    // const fetchMaterialsTypes = async () => {
+    //     fetch(process.env.REACT_APP_API + 'RawMaterials/GetRawMaterialsTypes',
+    //         {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': localStorage.getItem('token')
+    //             }
+    //         })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             if (data.StatusCode === 200) {
+    //                 setRawMaterialsTypes(data.Result);
+    //             }
+    //             else if (data.StatusCode === 401) {
+    //                 history("/login")
+    //             }
+    //             else if (data.StatusCode === 404) {
+    //                 props.showAlert("Data not found!!", "danger")
+    //             }
+    //             else {
+    //                 props.showAlert("Error occurred!!", "danger")
+    //             }
+    //         });
+    // }
 
     const fetchUnit = async () => {
         fetch(process.env.REACT_APP_API + 'Unit',
@@ -306,24 +399,25 @@ function RawMaterials(props) {
     }
 
 
-    const fetchClient = async () => { GetCustomerByTypeId(process.env.REACT_APP_CUST_TYPE_ID,
-        process.env.REACT_APP_API)
-        .then(data => {
-            if (data.StatusCode === 200) {
-                setClientList(data.Result);
-            }
-            else if (data.StatusCode === 401) {
-                HandleLogout();
-                history("/login")
-            }
-            else if (data.StatusCode === 404) {
-                props.showAlert("Data not found to fetch sheds!!", "danger")
-            }
-            else {
-                props.showAlert("Error occurred to fetch sheds!!", "danger")
-            }
+    const fetchClient = async () => {
+        GetCustomerByTypeId(process.env.REACT_APP_CUST_TYPE_ID,
+            process.env.REACT_APP_API)
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setClientList(data.Result);
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found to fetch sheds!!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred to fetch sheds!!", "danger")
+                }
 
-        });
+            });
     }
 
 
@@ -359,9 +453,11 @@ function RawMaterials(props) {
                     Due: materialsdata.Due,
                     PaymentDate: materialsdata.PaymentDate,
                     Comments: materialsdata.Comments,
-                    InvoiceDate:materialsdata.InvoiceDate,
-                    InvoiceNo:materialsdata.InvoiceNo,
-                    ExtraCharge:materialsdata.ExtraCharge
+                    InvoiceDate: materialsdata.InvoiceDate,
+                    InvoiceNo: materialsdata.InvoiceNo,
+                    ExtraCharge: materialsdata.ExtraCharge,
+                    GST: materialsdata.GST,
+                    CompanyId: localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -369,21 +465,24 @@ function RawMaterials(props) {
                     if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
 
                         addCount(count);
-                        setAddModalShow(false);
+                       // setAddModalShow(false);
+                       // setValidated(false);  
+                       
+                       addModalClose();
 
                         props.showAlert("Successfully updated", "info")
                     }
                     else {
                         props.showAlert("Error occurred!!", "danger")
+                        setValidated(true);
                     }
 
                 },
                     (error) => {
                         props.showAlert("Error occurred!!", "danger")
+                        setValidated(true);
                     });
         }
-
-        setValidated(true);
     }
 
     // const dateForPicker = (dateString) => {
@@ -425,33 +524,69 @@ function RawMaterials(props) {
                     Due: materialsdata.Due,
                     PaymentDate: materialsdata.PaymentDate,
                     Comments: materialsdata.Comments,
-                    InvoiceDate:materialsdata.InvoiceDate,
-                    InvoiceNo:materialsdata.InvoiceNo,
-                    ExtraCharge:materialsdata.ExtraCharge
+                    InvoiceDate: materialsdata.InvoiceDate,
+                    InvoiceNo: materialsdata.InvoiceNo,
+                    ExtraCharge: materialsdata.ExtraCharge,
+                    GST: materialsdata.GST,
+                    CompanyId: localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
                 .then((result) => {
                     if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
                         addCount(count);
-                        setAddModalShow(false);
+                        //setAddModalShow(false);
                         props.showAlert("Successfully added", "info")
+                       // setValidated(false);
+                       addModalClose();
                     }
                     else {
                         props.showAlert("Error occurred!!", "danger")
+                        setValidated(true);
                     }
 
                 },
                     (error) => {
                         props.showAlert("Error occurred!!", "danger")
+                        setValidated(true);
                     });
         }
 
-        setValidated(true);
+        
     }
 
-    const deleteMaterials = () => {
+    const deleteMaterials = (id) => {
+        if (window.confirm('Are you sure?')) {
+            fetch(process.env.REACT_APP_API + 'RawMaterials/' + id, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            }).then(res => res.json())
+                .then((result) => {
 
+                    if (result.StatusCode === 200) {
+                        
+                        props.showAlert("Successfully deleted", "info")
+                        addCount(count);
+                    }
+                    else if (result.StatusCode === 401) {
+                        HandleLogout();
+                        history("/login")
+                    }
+                    else if (result.StatusCode === 404) {
+                        props.showAlert("Data not found!!", "danger")
+                    }
+                    else {
+                        props.showAlert("Error occurred!!", "danger")
+                    }
+                },
+                    (error) => {
+                        props.showAlert("Error occurred!!", "danger")
+                    });
+        }
     }
 
     const filterSupplierChange = (e) => {
@@ -465,7 +600,7 @@ function RawMaterials(props) {
         }
     }
 
-   
+
 
     const handlePageChange = (newPage) => {
         setCurrentPage(newPage)
@@ -494,21 +629,21 @@ function RawMaterials(props) {
     return (
         <div>
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '30px', marginBottom: '30px' }}>
-                <h2>Raw Materials</h2>
+                <h4>Raw Materials</h4>
             </div>
 
             <div className="row">
                 <div className="col">
                     <p><strong>Supplier</strong></p>
-                    <select className="form-select" aria-label="Default select example" 
-                    onChange={filterSupplierChange} style={{fontSize:13}}>
+                    <select className="form-select" aria-label="Default select example"
+                        onChange={filterSupplierChange} style={{ fontSize: 13 }}>
                         <option selected>--Select Supplier--</option>
                         {
-                           
+
                             clientlist.map((item) => {
 
-                                   let fullname=(item.MiddleName!="" && item.MiddleName!=null) ? item.FirstName+" "+item.MiddleName+" "+item.LastName: 
-                                   item.FirstName+" "+item.LastName;
+                                let fullname = (item.MiddleName != "" && item.MiddleName != null) ? item.FirstName + " " + item.MiddleName + " " + item.LastName :
+                                    item.FirstName + " " + item.LastName;
                                 return (
                                     <option value={item.ID} key={item.ID}>{fullname}</option>)
                             }
@@ -533,6 +668,7 @@ function RawMaterials(props) {
                         <th>Broker</th>
                         <th>Quantity</th>
                         <th>Rate</th>
+                        <th>GST</th>
                         <th>Total amount</th>
                         <th>Extra Charge</th>
                         <th>Paid</th>
@@ -551,26 +687,27 @@ function RawMaterials(props) {
                             const _uname = _unit.length > 0 ? _unit[0].UnitName : "";
 
                             const _supp = clientlist.filter((c) => c.ID === p.ClientId);
-                           // const _suppname = _supp.length > 0 ? _supp[0].ClientName : "";
-                            let _suppname= _supp.length > 0 ?(_supp[0].MiddleName!="" && _supp[0].MiddleName!=null) ? 
-                            _supp[0].FirstName+" "+_supp[0].MiddleName+" "+_supp[0].LastName: 
-                            _supp[0].FirstName+" "+_supp[0].LastName:"";
-                            const _mat = rawMaterialsTypes.filter((c) => c.Id === p.MaterialTypeId);
-                            const _matname = _mat.length > 0 ? _mat[0].Name : "";
+                            // const _suppname = _supp.length > 0 ? _supp[0].ClientName : "";
+                            let _suppname = _supp.length > 0 ? (_supp[0].MiddleName != "" && _supp[0].MiddleName != null) ?
+                                _supp[0].FirstName + " " + _supp[0].MiddleName + " " + _supp[0].LastName :
+                                _supp[0].FirstName + " " + _supp[0].LastName : "";
+                            const _mat = stockList.filter((c) => c.ItemId === p.MaterialTypeId);
+                            const _matname = _mat.length > 0 ? _mat[0].ItemName : "";
 
                             return (
-                                <tr align='center' key={p.Id} style={{fontSize:13}} >
+                                <tr align='center' key={p.Id} style={{ fontSize: 13 }} >
                                     <td align='left'>{moment(p.BillingDate).format('DD-MMM-YYYY')}</td>
                                     <td align='left'>{_suppname}</td>
                                     <td align='left'>{_matname}</td>
                                     <td align='left'>{p.Broker}</td>
                                     <td align='left'>{p.Quantity + " " + _uname}</td>
                                     <td align='left'>{p.Rate}</td>
+                                    <td align='left'>{p.GST}</td>
                                     <td align='left'>{p.TotalAmount.toFixed(2)}</td>
-                                    <td align='left'>{parseFloat(p.ExtraCharge||0).toFixed(2)}</td>
+                                    <td align='left'>{parseFloat(p.ExtraCharge || 0).toFixed(2)}</td>
                                     <td align='left'>{p.Paid.toFixed(2)}</td>
                                     <td align='left'>{p.Due.toFixed(2)}</td>
-                                    <td align='left'>{p.PaymentDate!=null?moment(p.PaymentDate).format('DD-MMM-YYYY'):""}</td>
+                                    <td align='left'>{p.PaymentDate != null ? moment(p.PaymentDate).format('DD-MMM-YYYY') : ""}</td>
                                     <td align='left'>{p.Comments}</td>
                                     <td align='center'>
                                         {
@@ -636,7 +773,7 @@ function RawMaterials(props) {
                     centered
                 >
                     <Modal.Header>
-                        <Modal.Title id="contained-modal-title-vcenter">
+                        <Modal.Title id="contained-modal-title-vcenter" style={{ fontSize: '18px' }}>
                             {materialsdata.modaltitle}
                         </Modal.Title>
                         <button type="button" class="btn-close" aria-label="Close" onClick={addModalClose}> </button>
@@ -646,13 +783,13 @@ function RawMaterials(props) {
                             <Col sm={12}>
                                 <div>
                                     <Form noValidate validated={validated} className="needs-validation">
-                                    <Row className="mb-12">
+                                        <Row className="mb-12">
                                             <Form.Group as={Col} controlId="InvoiceDate">
-                                                <Form.Label style={{fontSize:13}}>Invoice Date</Form.Label>
-                                                <DateComponent date={null} onChange={invoiceDateChange} isRequired={true} 
-                                                value={materialsdata.InvoiceDate} />
+                                                <Form.Label style={{ fontSize: 13 }}>Invoice Date</Form.Label>
+                                                <DateComponent date={null} onChange={invoiceDateChange} isRequired={true}
+                                                    value={materialsdata.InvoiceDate} />
                                                 <Form.Control.Feedback type="invalid">
-                                                    Please add invoice date
+                                                    Select invoice date
                                                 </Form.Control.Feedback>
                                             </Form.Group>
                                             <InputField controlId="InvoiceNo" label="Invoice no"
@@ -660,69 +797,69 @@ function RawMaterials(props) {
                                                 value={materialsdata.InvoiceNo}
                                                 name="InvoiceNo"
                                                 placeholder="Invoice no"
-                                                errormessage="Please enter Invoice no"
+                                                errormessage="Enter Invoice no"
                                                 onChange={invoiceNoChange}
                                                 required={true}
                                                 disabled={false}
                                             />
-                                    </Row>
+                                        </Row>
                                         <Row className="mb-12">
 
                                             <Form.Group as={Col} controlId="Date">
-                                                <Form.Label style={{fontSize:13}}>Date</Form.Label>
-                                                <DateComponent date={null} onChange={billingDateChange} isRequired={true} 
-                                                value={materialsdata.BillingDate} />
+                                                <Form.Label style={{ fontSize: 13 }}>Date</Form.Label>
+                                                <DateComponent date={null} onChange={billingDateChange} isRequired={true}
+                                                    value={materialsdata.BillingDate} />
                                                 <Form.Control.Feedback type="invalid">
-                                                    Please select date
+                                                    Select date
                                                 </Form.Control.Feedback>
                                             </Form.Group>
                                         </Row>
                                         <Row className="mb-12">
                                             <Form.Group controlId="MaterialTypeId" as={Col} >
-                                                <Form.Label style={{fontSize:13}}>Material</Form.Label>
+                                                <Form.Label style={{ fontSize: 13 }}>Material</Form.Label>
                                                 <Form.Select aria-label="Default select example"
-                                                    onChange={materialTypeChange} required style={{fontSize:13}}>
+                                                    onChange={materialTypeChange} required style={{ fontSize: 13 }}>
                                                     <option selected disabled value="">Choose...</option>
                                                     {
-                                                        rawMaterialsTypes.map((item) => {
+                                                        stockList.map((item) => {
                                                             return (
                                                                 <option
-                                                                    key={item.Id}
-                                                                    defaultValue={item.Id == null ? null : item.Id}
-                                                                    selected={item.Id === materialsdata.MaterialTypeId}
-                                                                    value={item.Id}
-                                                                >{item.Name}</option>
+                                                                    key={item.ItemId}
+                                                                    defaultValue={item.ItemId == null ? null : item.ItemId}
+                                                                    selected={item.ItemId === materialsdata.MaterialTypeId}
+                                                                    value={item.ItemId}
+                                                                >{item.ItemName}</option>
                                                             );
                                                         })
                                                     }
                                                 </Form.Select>
                                                 <Form.Control.Feedback type="invalid">
-                                                    Please select material
+                                                    Select material
                                                 </Form.Control.Feedback>
                                             </Form.Group>
 
                                             <Form.Group controlId="ClientId" as={Col} >
-                                                <Form.Label style={{fontSize:13}}>Supplier</Form.Label>
+                                                <Form.Label style={{ fontSize: 13 }}>Supplier</Form.Label>
                                                 <Form.Select aria-label="Default select example"
-                                                    onChange={clientIdChange} required style={{fontSize:13}}>
+                                                    onChange={clientIdChange} required style={{ fontSize: 13 }}>
                                                     <option selected disabled value="">Choose...</option>
                                                     {
 
                                                         clientlist.map((item) => {
 
-                                                            let fullname=(item.MiddleName!="" && item.MiddleName!=null) ? item.FirstName+" "+item.MiddleName+" "+item.LastName: 
-                                                            item.FirstName+" "+item.LastName;
-                                                        return (
-                                                            <option value={item.ID}
-                                                             key={item.ID}
-                                                             defaultValue={item.ID == null ? null : item.ID}
-                                                             selected={item.ID === materialsdata.ClientId}>{fullname}</option>)
+                                                            let fullname = (item.MiddleName != "" && item.MiddleName != null) ? item.FirstName + " " + item.MiddleName + " " + item.LastName :
+                                                                item.FirstName + " " + item.LastName;
+                                                            return (
+                                                                <option value={item.ID}
+                                                                    key={item.ID}
+                                                                    defaultValue={item.ID == null ? null : item.ID}
+                                                                    selected={item.ID === materialsdata.ClientId}>{fullname}</option>)
                                                         })
-                                                       
+
                                                     }
                                                 </Form.Select>
                                                 <Form.Control.Feedback type="invalid">
-                                                    Please select supplier
+                                                    Select supplier
                                                 </Form.Control.Feedback>
                                             </Form.Group>
 
@@ -731,7 +868,7 @@ function RawMaterials(props) {
                                                 value={materialsdata.Broker}
                                                 name="Broker"
                                                 placeholder="Broker"
-                                                errormessage="Please enter broker name"
+                                                errormessage="Enter broker name"
                                                 onChange={brokerChange}
                                                 required={false}
                                                 disabled={false}
@@ -753,7 +890,7 @@ function RawMaterials(props) {
                                                 value={materialsdata.Quantity}
                                                 name="Quantity"
                                                 placeholder="Quantity"
-                                                errormessage="Please enter quantity"
+                                                errormessage="Enter quantity"
                                                 required={true}
                                                 disabled={false}
                                                 onChange={quantityChange}
@@ -768,9 +905,9 @@ function RawMaterials(props) {
                                             </Form.Group> */}
 
                                             <Form.Group controlId="UnitId" as={Col} >
-                                                <Form.Label style={{fontSize:13}}>Unit</Form.Label>
+                                                <Form.Label style={{ fontSize: 13 }}>Unit</Form.Label>
                                                 <Form.Select aria-label="Default select example"
-                                                    onChange={unitIdChange} required style={{fontSize:13}}>
+                                                    onChange={unitIdChange} required style={{ fontSize: 13 }}>
                                                     <option selected disabled value="">Choose...</option>
                                                     {
                                                         unitlist.map((item) => {
@@ -786,7 +923,7 @@ function RawMaterials(props) {
                                                     }
                                                 </Form.Select>
                                                 <Form.Control.Feedback type="invalid">
-                                                    Please select customer type
+                                                    Select customer type
                                                 </Form.Control.Feedback>
                                             </Form.Group>
 
@@ -795,22 +932,35 @@ function RawMaterials(props) {
                                                 value={materialsdata.Rate}
                                                 name="Rate"
                                                 placeholder="Rate"
-                                                errormessage="Please enter rate"
+                                                errormessage="Enter rate"
                                                 required={true}
                                                 disabled={false}
                                                 onChange={rateChange}
                                             />
 
-                                        <InputField controlId="ExtraCharge" label="ExtraCharge"
+                                            <InputField controlId="GST" label="GST"
+                                                type="number"
+                                                value={materialsdata.GST}
+                                                name="GST"
+                                                placeholder="GST"
+                                                errormessage="Enter GST"
+                                                required={false}
+                                                disabled={false}
+                                                onChange={gstChange}
+                                            />
+
+
+
+                                            <InputField controlId="ExtraCharge" label="Extra charge"
                                                 type="number"
                                                 value={materialsdata.ExtraCharge}
                                                 name="ExtraCharge"
-                                                placeholder="ExtraCharge"
+                                                placeholder="Extra charge"
                                                 errormessage="Extra amount"
                                                 required={false}
                                                 disabled={false}
                                                 onChange={extraAmountChange}
-                                            />                        
+                                            />
 
 
                                         </Row>
@@ -820,7 +970,7 @@ function RawMaterials(props) {
                                                 value={materialsdata.TotalAmount}
                                                 name="TotalAmount"
                                                 placeholder="Total amount"
-                                                errormessage="Please enter total amount"
+                                                errormessage="Enter total amount"
                                                 required={true}
                                                 disabled={true}
                                                 onChange={totalAmountChange}
@@ -839,7 +989,7 @@ function RawMaterials(props) {
                                                 value={materialsdata.Paid}
                                                 name="Paid"
                                                 placeholder="Paid"
-                                                errormessage="Please enter paid amount"
+                                                errormessage="Enter paid amount"
                                                 required={true}
                                                 disabled={false}
                                                 onChange={paidChange}
@@ -858,7 +1008,7 @@ function RawMaterials(props) {
                                                 value={materialsdata.Due}
                                                 name="Due"
                                                 placeholder="Due"
-                                                errormessage="Please enter due amount"
+                                                errormessage="Enter due amount"
                                                 required={true}
                                                 disabled={true}
                                             />
@@ -876,9 +1026,9 @@ function RawMaterials(props) {
 
 
                                             <Form.Group as={Col} controlId="PaymentDate">
-                                                <Form.Label style={{fontSize:13}}>Payment date</Form.Label>
-                                                <DateComponent date={null} onChange={paymentDateChange} 
-                                                value={materialsdata.PaymentDate} isRequired={false} />
+                                                <Form.Label style={{ fontSize: 13 }}>Payment date</Form.Label>
+                                                <DateComponent date={null} onChange={paymentDateChange}
+                                                    value={materialsdata.PaymentDate} isRequired={false} />
                                                 {/* <Form.Control.Feedback type="invalid">
                                                     Please select payment date
                                                 </Form.Control.Feedback> */}
@@ -891,9 +1041,9 @@ function RawMaterials(props) {
                                         </Row>
                                         <Row className="mb-12">
                                             <Form.Group controlId="Comments" as={Col} >
-                                                <Form.Label style={{fontSize:13}}>Comments</Form.Label>
+                                                <Form.Label style={{ fontSize: 13 }}>Comments</Form.Label>
                                                 <Form.Control as="textarea" rows={3} name="Comments" onChange={commentsChange} value={materialsdata.Comments}
-                                                    placeholder="Comments"  style={{fontSize:13}}/>
+                                                    placeholder="Comments" style={{ fontSize: 13 }} />
                                             </Form.Group>
                                         </Row>
 

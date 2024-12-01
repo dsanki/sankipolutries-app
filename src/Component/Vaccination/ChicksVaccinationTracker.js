@@ -15,7 +15,7 @@ function ChicksVaccinationTracker(props) {
     let history = useNavigate();
 
     const [vaccinationtrackerlist, setVaccinationTrackerList] = useState([]);
-    const [vaccinationtypelist, setVaccinationTypeList] = useState([]);
+    //const [vaccinationtypelist, setVaccinationTypeList] = useState([]);
     const [vaccinationroutelist, setVaccinationRouteList] = useState([]);
     const [vaccinationlist, setVaccinationList] = useState([]);
     const [vaccinationagelist, setVaccinationAgeList] = useState([]);
@@ -40,7 +40,7 @@ function ChicksVaccinationTracker(props) {
         if (localStorage.getItem('token')) {
             fetchVaccinationRoute();
             fetchVaccinationAgeList();
-            fetchVaccinationType();
+            //fetchVaccinationType();
             fetchSheds();
             fetchShedLotsMapList();
             fetchVaccinationList();
@@ -67,7 +67,8 @@ function ChicksVaccinationTracker(props) {
 
     const fetchVaccinationTracker = async () => {
         setIsLoaded(true);
-        fetch(process.env.REACT_APP_API + 'VaccinationTracker/GetVaccinationTracker',
+        fetch(process.env.REACT_APP_API + 'VaccinationTracker/GetVaccinationTrackerByCompanyId?CompanyId='+
+            localStorage.getItem('companyid'),
             {
                 method: 'GET',
                 headers: {
@@ -99,33 +100,33 @@ function ChicksVaccinationTracker(props) {
     }
 
 
-    const fetchVaccinationType = async () => {
-        fetch(process.env.REACT_APP_API + 'VaccinationTracker/GetVaccinationType',
-            {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.StatusCode === 200) {
-                    setVaccinationTypeList(data.Result);
-                }
-                else if (data.StatusCode === 401) {
-                    HandleLogout();
-                    history("/login")
-                }
-                else if (data.StatusCode === 404) {
-                    props.showAlert("Data not found!!", "danger")
-                }
-                else {
-                    props.showAlert("Error occurred!!", "danger")
-                }
-            });
-    }
+    // const fetchVaccinationType = async () => {
+    //     fetch(process.env.REACT_APP_API + 'VaccinationTracker/GetVaccinationType',
+    //         {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': localStorage.getItem('token')
+    //             }
+    //         })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             if (data.StatusCode === 200) {
+    //                 setVaccinationTypeList(data.Result);
+    //             }
+    //             else if (data.StatusCode === 401) {
+    //                 HandleLogout();
+    //                 history("/login")
+    //             }
+    //             else if (data.StatusCode === 404) {
+    //                 props.showAlert("Data not found!!", "danger")
+    //             }
+    //             else {
+    //                 props.showAlert("Error occurred!!", "danger")
+    //             }
+    //         });
+    // }
 
 
     const fetchVaccinationRoute = async () => {
@@ -264,7 +265,7 @@ function ChicksVaccinationTracker(props) {
         LotNo: "",
         VaccinationID: "",
         AgeID: "",
-        TypeID: "",
+        Dose: "",
         RouteID: "",
         Date: "",
         Comments: "",
@@ -287,7 +288,7 @@ function ChicksVaccinationTracker(props) {
             LotNo: "",
             VaccinationID: "",
             AgeID: "",
-            TypeID: "",
+            Dose: "",
             RouteID: "",
             Date: "",
             Comments: "",
@@ -309,7 +310,7 @@ function ChicksVaccinationTracker(props) {
             LotNo: md.LotId,
             VaccinationID: md.VaccinationID,
             AgeID: md.AgeID,
-            TypeID: md.TypeID,
+            Dose: md.Dose,
             RouteID: md.RouteID,
             Date: md.Date,
             Comments: md.Comments,
@@ -330,8 +331,8 @@ function ChicksVaccinationTracker(props) {
         setVaccTrackerData({ ...vacctrackerdata, AgeID: e.target.value });
     }
 
-    const onTypeChange = (e) => {
-        setVaccTrackerData({ ...vacctrackerdata, TypeID: e.target.value });
+    const onDoseChange = (e) => {
+        setVaccTrackerData({ ...vacctrackerdata, Dose: e.target.value });
     }
 
     const onRouteChange = (e) => {
@@ -462,10 +463,11 @@ function ChicksVaccinationTracker(props) {
                     LotNo: vacctrackerdata.LotNo,
                     VaccinationID: vacctrackerdata.VaccinationID,
                     AgeID: vacctrackerdata.AgeID,
-                    TypeID: vacctrackerdata.TypeID,
+                    Dose: vacctrackerdata.Dose,
                     RouteID: vacctrackerdata.RouteID,
                     Date: vacctrackerdata.Date,
-                    Comments: vacctrackerdata.Comments
+                    Comments: vacctrackerdata.Comments,
+                    CompanyId:localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -516,10 +518,11 @@ function ChicksVaccinationTracker(props) {
                     LotNo: vacctrackerdata.LotNo,
                     VaccinationID: vacctrackerdata.VaccinationID,
                     AgeID: vacctrackerdata.AgeID,
-                    TypeID: vacctrackerdata.TypeID,
+                    Dose: vacctrackerdata.Dose,
                     RouteID: vacctrackerdata.RouteID,
                     Date: vacctrackerdata.Date,
-                    Comments: vacctrackerdata.Comments
+                    Comments: vacctrackerdata.Comments,
+                    CompanyId:localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -595,8 +598,8 @@ function ChicksVaccinationTracker(props) {
             const filterByVccId = vaccinationlist.filter((c) => c.id === p.VaccinationID);
             const vccname = filterByVccId.length > 0 ? filterByVccId[0].VaccinationName : "";
 
-            const filterByVccTypeId = vaccinationtypelist.filter((c) => c.id === p.TypeID);
-            const vcctypename = filterByVccTypeId.length > 0 ? filterByVccTypeId[0].TypeName : "";
+            //const filterByVccTypeId = vaccinationtypelist.filter((c) => c.id === p.TypeID);
+            //const vcctypename = filterByVccTypeId.length > 0 ? filterByVccTypeId[0].TypeName : "";
 
             const filterByVccAgeId = vaccinationagelist.filter((c) => c.id === p.AgeID);
             const vccage = filterByVccAgeId.length > 0 ? filterByVccAgeId[0].Age : "";
@@ -609,7 +612,7 @@ function ChicksVaccinationTracker(props) {
 
             return ({
                 Date: moment(p.Date).format('DD-MMM-YYYY'),
-                ShedName: shedname, LotName: p.LotName, Vaccination: vccname, Age: vccage, Type: vcctypename,
+                ShedName: shedname, LotName: p.LotName, Vaccination: vccname, Age: vccage, Dose: p.Dose,
                 Route: vccroute, Comments: p.Comments
             });
         });
@@ -625,17 +628,17 @@ function ChicksVaccinationTracker(props) {
             </div>
             <div className="container" style={{ marginTop: '30px' }}>
                 <div className="row align-items-center">
-                    <div className="col">
-                        <p><strong>From</strong></p>
+                    <div className="col-2">
+                        <p style={{fontSize:13}}><strong>From</strong></p>
                         <DateComponent date={null} onChange={onDateFilterFromChange} isRequired={false} value={filterFromDate} />
                     </div>
-                    <div className="col">
-                        <p><strong>To</strong></p>
+                    <div className="col-2">
+                        <p style={{fontSize:13}}><strong>To</strong></p>
                         <DateComponent date={null} onChange={onDateFilterToChange} isRequired={false} value={filterToDate} />
                     </div>
-                    <div className="col">
-                        <p><strong>Shed</strong></p>
-                        <Form.Select aria-label="Default select example"
+                    <div className="col-2">
+                        <p style={{fontSize:13}}><strong>Shed</strong></p>
+                        <Form.Select aria-label="Default select example" style={{fontSize:13}}
                             onChange={onShedFilterChange}>
                             <option selected value="">Choose...</option>
                             {
@@ -652,20 +655,25 @@ function ChicksVaccinationTracker(props) {
                             }
                         </Form.Select>
                     </div>
-                </div>
-            </div>
-
-            <div className="row">
-                <div className="col" style={{ textAlign: 'left', marginTop: '20px' }}>
-                    <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2' }} onClick={() => onDownloadExcel()} ></i>
-                </div>
-                <div className="col" style={{ textAlign: 'right', marginTop: '20px' }}>
-                    <Button className="mr-2 btn-primary btn-primary-custom" variant="primary"
+                    <div className="col-6" style={{textAlign:'right',marginTop:'38px'}}>
+                    <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2', marginRight: 30  }} 
+                    onClick={() => onDownloadExcel()} ></i>
+                     <Button className="mr-2 btn-primary btn-primary-custom" variant="primary"
                         style={{ marginRight: "17.5px" }}
                         onClick={() => clickAddVaccTracker()}>Add</Button>
+                    </div>
+                </div>
+            </div>
+
+            {/* <div className="row">
+                <div className="col" style={{ textAlign: 'left', marginTop: '20px' }}>
+                   
+                </div>
+                <div className="col" style={{ textAlign: 'right', marginTop: '20px' }}>
+                   
                 </div>
 
-            </div>
+            </div> */}
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
@@ -675,7 +683,7 @@ function ChicksVaccinationTracker(props) {
                         <th>Lot name</th>
                         <th>Vaccination</th>
                         <th>Age</th>
-                        <th>Type</th>
+                        <th>Dose</th>
                         <th>Route</th>
                         <th>Comments</th>
                         <th>Options</th>
@@ -692,8 +700,8 @@ function ChicksVaccinationTracker(props) {
                             const filterByVccId = vaccinationlist.filter((c) => c.id === p.VaccinationID);
                             const vccname = filterByVccId.length > 0 ? filterByVccId[0].VaccinationName : "";
 
-                            const filterByVccTypeId = vaccinationtypelist.filter((c) => c.id === p.TypeID);
-                            const vcctypename = filterByVccTypeId.length > 0 ? filterByVccTypeId[0].TypeName : "";
+                           // const filterByVccTypeId = vaccinationtypelist.filter((c) => c.id === p.TypeID);
+                            //const vcctypename = filterByVccTypeId.length > 0 ? filterByVccTypeId[0].TypeName : "";
 
                             const filterByVccAgeId = vaccinationagelist.filter((c) => c.id === p.AgeID);
                             const vccage = filterByVccAgeId.length > 0 ? filterByVccAgeId[0].Age : "";
@@ -705,7 +713,7 @@ function ChicksVaccinationTracker(props) {
 
                             VccListDowanloadArr.push({
                                 Date: moment(p.Date).format('DD-MMM-YYYY'),
-                                ShedName: shedname, LotName: p.LotName, Vaccination: vccname, Age: vccage, Type: vcctypename,
+                                ShedName: shedname, LotName: p.LotName, Vaccination: vccname, Age: vccage, Dose: p.Dose,
                                 Route: vccroute, Comments: p.Comments
                             });
 
@@ -716,7 +724,7 @@ function ChicksVaccinationTracker(props) {
                                     <td >{p.LotName}</td>
                                     <td >{vccname}</td>
                                     <td >{vccage}</td>
-                                    <td >{vcctypename}</td>
+                                    <td >{p.Dose}</td>
                                     <td >{vccroute}</td>
                                     <td >{p.Comments}</td>
                                     <td align='center'>
@@ -792,18 +800,19 @@ function ChicksVaccinationTracker(props) {
                                 <Form noValidate validated={validated} className="needs-validation">
                                     <Row className="mb-12">
                                         <Form.Group controlId="Date" as={Col} >
-                                            <Form.Label>Date*</Form.Label>
+                                            <Form.Label style={{fontSize:'13px'}}>Date*</Form.Label>
                                             <Form.Control type="text" name="Id" hidden disabled value={vacctrackerdata.Id} />
-                                            <DateComponent date={null} onChange={onDateChange} isRequired={true} value={vacctrackerdata.Date} />
+                                            <DateComponent date={null} onChange={onDateChange} isRequired={true} 
+                                            value={vacctrackerdata.Date} />
                                             <Form.Control.Feedback type="invalid">
                                                 Please select date
                                             </Form.Control.Feedback>
                                         </Form.Group>
 
                                         <Form.Group controlId="ShedId" as={Col} >
-                                            <Form.Label>Shed*</Form.Label>
+                                            <Form.Label style={{fontSize:'13px'}}>Shed*</Form.Label>
                                             <Form.Select aria-label="Default select example"
-                                                onChange={onShedChange} required>
+                                                onChange={onShedChange} required style={{fontSize:'13px'}}>
                                                 <option selected disabled value="">Choose...</option>
                                                 {
                                                     shedlist.map((item) => {
@@ -860,9 +869,9 @@ function ChicksVaccinationTracker(props) {
                                     </Row>
                                     <Row className="mb-12">
                                         <Form.Group controlId="VaccinationID" as={Col} >
-                                            <Form.Label>Vaccination*</Form.Label>
+                                            <Form.Label style={{fontSize:'13px'}}>Vaccination*</Form.Label>
                                             <Form.Select aria-label="Default select example"
-                                                onChange={onVaccinationChange} required>
+                                                onChange={onVaccinationChange} required style={{fontSize:'13px'}}>
                                                 <option selected disabled value="">Choose...</option>
                                                 {
                                                     vaccinationlist.map((item) => {
@@ -883,9 +892,9 @@ function ChicksVaccinationTracker(props) {
                                         </Form.Group>
 
                                         <Form.Group controlId="AgeID" as={Col} >
-                                            <Form.Label>Age*</Form.Label>
+                                            <Form.Label style={{fontSize:'13px'}}>Age*</Form.Label>
                                             <Form.Select aria-label="Default select example"
-                                                onChange={onAgeChange} required>
+                                                onChange={onAgeChange} required style={{fontSize:'13px'}}>
                                                 <option selected disabled value="">Choose...</option>
                                                 {
                                                     vaccinationagelist.map((item) => {
@@ -905,7 +914,19 @@ function ChicksVaccinationTracker(props) {
                                             </Form.Control.Feedback>
                                         </Form.Group>
 
-                                        <Form.Group controlId="TypeID" as={Col} >
+                                        <InputField controlId="Dose"
+                                            label="Dose"
+                                            type="text"
+                                            value={vacctrackerdata.Dose}
+                                            name="Dose"
+                                            placeholder="Dose"
+                                            errormessage="Please enter Dose"
+                                            required={false}
+                                            disabled={false}
+                                            onChange={onDoseChange}
+                                        />
+
+                                        {/* <Form.Group controlId="TypeID" as={Col} >
                                             <Form.Label>Type*</Form.Label>
                                             <Form.Select aria-label="Default select example"
                                                 onChange={onTypeChange} required>
@@ -926,15 +947,15 @@ function ChicksVaccinationTracker(props) {
                                             <Form.Control.Feedback type="invalid">
                                                 Please select type
                                             </Form.Control.Feedback>
-                                        </Form.Group>
+                                        </Form.Group> */}
 
                                     </Row>
 
                                     <Row className="mb-12">
                                         <Form.Group controlId="RouteID" as={Col} >
-                                            <Form.Label>Route*</Form.Label>
+                                            <Form.Label style={{fontSize:'13px'}}>Route*</Form.Label>
                                             <Form.Select aria-label="Default select example"
-                                                onChange={onRouteChange} required>
+                                                onChange={onRouteChange} required style={{fontSize:'13px'}}>
                                                 <option selected disabled value="">Choose...</option>
                                                 {
                                                     vaccinationroutelist.map((item) => {
@@ -957,9 +978,9 @@ function ChicksVaccinationTracker(props) {
 
                                     <Row className="mb-12">
                                         <Form.Group controlId="Comments" as={Col} >
-                                            <Form.Label>Comments</Form.Label>
+                                            <Form.Label style={{fontSize:'13px'}}>Comments</Form.Label>
                                             <Form.Control as="textarea" rows={3} name="Comments" onChange={onCommentsChange} value={vacctrackerdata.Comments}
-                                                placeholder="Comments" />
+                                                placeholder="Comments" style={{fontSize:'13px'}} />
                                         </Form.Group>
                                     </Row>
 

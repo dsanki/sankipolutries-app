@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
 const InvoiceEggSale = (props) => (
     <Document>
         <Page size="A4" style={styles.page}>
-            <InvoiceTitle title='Invoice' eggsaledata={props.eggsaledata} 
+            <InvoiceTitle title='Invoice' eggsaledata={props.eggsaledata} companydetails={props.companydetails}
              invoiceno={props.eggsaledata.InvoiceNo} date={props.eggsaledata.PurchaseDate} />
             {/* <InvoiceNo invoice={props.eggsaledata} /> */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
@@ -110,7 +110,8 @@ const InvoiceEggSale = (props) => (
             <InvoiceItemsTable eggsaledata={props.eggsaledata} 
             eggcategory={props.eggcategory} />
             
-            <InvoiceThankYouMsg bankdetails={props.bankdetails}/>
+            <InvoiceThankYouMsg bankdetails={props.bankdetails} 
+            companydetails={props.companydetails}/>
         </Page>
     </Document>
 );

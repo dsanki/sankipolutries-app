@@ -69,7 +69,8 @@ export const NumberInputKeyDown = (e) => {
 
 export const FetchMortalityList = async (apiurl) => {
 
-  const response = await fetch(apiurl + 'Mortality/GetMortalityShedLotMapList',
+  const response = await fetch(apiurl + 'Mortality/GetMortalityShedLotMapList?CompanyId='
+    +localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
@@ -95,7 +96,8 @@ export const FetchPaymentMode = async (apiurl) => {
 }
 
 export const FetchShedsList = async (apiurl) => {
-  const response = await fetch(apiurl + 'ChicksMaster/GetShedList',
+  const response = await fetch(apiurl + 'ChicksMaster/GetShedList?CompanyId='
+    +localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
@@ -108,7 +110,8 @@ export const FetchShedsList = async (apiurl) => {
 }
 
 export const FetchShedLotMapList = async (apiurl) => {
-  const response = await fetch(apiurl + 'ChicksMaster/GetShedLotMapList',
+  const response = await fetch(apiurl + 'ChicksMaster/GetShedLotMapList?CompanyId='
+    +localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
@@ -121,8 +124,8 @@ export const FetchShedLotMapList = async (apiurl) => {
 }
 
 
-export const FetchChicks = async (apiurl) => {
-  const response = await fetch(apiurl + 'ChicksMaster',
+export const FetchChicks = async (companyid,apiurl) => {
+  const response = await fetch(apiurl + 'ChicksMaster/GetChicksByCompanyId?CompanyId='+companyid,
     {
       method: 'GET',
       headers: {
@@ -159,7 +162,8 @@ export const FetchUnit = async (apiurl) => {
 }
 
 export const FetchLots = async (apiurl) => {
-  const response = await fetch(apiurl + 'ChicksMaster/GetLots',
+  const response = await fetch(apiurl + 'ChicksMaster/GetLots?CompanyId='
+    +localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
@@ -186,7 +190,8 @@ export const downloadExcel = (data, name) => {
 };
 
 export const FetchBirdSaleList = async (uid,id,apiurl) => {
-  const response =await fetch(apiurl + 'BirdSale/GetBirdSale?uid='+uid,
+  const response =await fetch(apiurl + 'BirdSale/GetBirdSale?uid='
+    +uid +'&CompanyId='+localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
@@ -198,12 +203,13 @@ export const FetchBirdSaleList = async (uid,id,apiurl) => {
 }
 
 export const FetchCompanyDetails = async (apiurl) => {
-  const response =await fetch(apiurl + 'CompanyDetails/GetCompanyDetails',
+  const response =await fetch(apiurl + 'CompanyDetails/GetCompanyDetailsByCompanyId',
     {
       method: 'GET',
-      headers: {
-        'Authorization': localStorage.getItem('token')
-      }
+      // headers: {
+      //  // 'Access-Control-Allow-Origin':'http://localhost:16619',
+      //  // 'Authorization': localStorage.getItem('token')
+      // }
     });
   const data = await response.json();
   return data;
@@ -223,12 +229,13 @@ export const FecthEggCategory = async (apiurl) => {
 
 
 export const FectAllEggSaleInvoiceList = async (fromdate,todate, apiurl) => {
-  const response =await fetch(apiurl + 'EggSale/GetAllEggSaleInvoiceList?fromdate='+fromdate +'&todate='+todate,
+  const response =await fetch(apiurl + 'EggSale/GetAllEggSaleInvoiceList?fromdate='
+    +fromdate +'&todate='+todate +'&CompanyId='+localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
-        'Authorization': localStorage.getItem('token'),
-        'Access-Control-Allow-Origin':'http://spapi.local:85'
+        'Authorization': localStorage.getItem('token')
+        //'Access-Control-Allow-Origin':'http://spapi.local:85'
        // 'Access-Control-Allow-Credentials':'true'
       }
     });
@@ -237,7 +244,8 @@ export const FectAllEggSaleInvoiceList = async (fromdate,todate, apiurl) => {
 }
 
 export const FecthEggSaleInvoiceList = async (custid, apiurl) => {
-  const response =await fetch(apiurl + 'EggSale/GetEggSaleInvoiceList?CustId='+custid,
+  const response =await fetch(apiurl + 'EggSale/GetEggSaleInvoiceList?CustId='
+    +custid+'&CompanyId='+localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
@@ -247,6 +255,20 @@ export const FecthEggSaleInvoiceList = async (custid, apiurl) => {
   const data = await response.json();
   return data;
 }
+
+export const FecthEggStockInventory = async (apiurl) => {
+  const response =await fetch(apiurl + 'EggStockInventory/GetEggStockInventoryCompanyId?CompanyId='+localStorage.getItem('companyid'),
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+  const data = await response.json();
+  return data;
+}
+
+//FecthEggCategory
 
 export const FecthEggSaleInvoiceById = async (id, apiurl) => {
   const response =await fetch(apiurl + 'EggSale/GetEggSaleInvoiceById?id='+id,
@@ -284,102 +306,6 @@ export const GetCustomerByTypeId = async (custtypeid, apiurl) => {
   return data;
 }
 
-
-
-
-
-
-// export function   FetchData() {
-//   return new Promise((resolve, reject) => {
-//     fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedLotMapList',
-//     {
-//       method: 'GET',
-//       headers: {
-//         'Authorization': localStorage.getItem('token')
-//       }
-//     })
-//       .then(response => {
-//         return response.json();
-//       })
-//       .then(data => resolve(data))
-//       .catch(error => reject(error));
-//   });
-// }
-
-// export const FetchShedLotMapListTest = async () => {
-//   const response = await fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedLotMapList',
-//     {
-//       method: 'GET',
-//       headers: {
-//         'Authorization': localStorage.getItem('token')
-//       }
-//     });
-
-//   const data = await response.json();
-//   return data;
-// }
-
-// export const FetchSheds = async () => {
-//   const response = await fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedList',
-//     {
-//       method: 'GET',
-//       headers: {
-//         'Accept': 'application/json',
-//         'Content-Type': 'application/json',
-//         'Authorization': localStorage.getItem('token')
-//       }
-//     });
-//   const data = await response.json();
-//   return data;
-// }
-
-
-
-
-
-// export const FetchMortalityList = async () => {
-
-
-//   const response = await fetch("https://jsonplaceholder.typicode.com/todos/1")
-//   const data = await response.json()
-
-
-//  await fetch(variables.REACT_APP_API + 'Mortality/GetMortalityShedLotMapList',
-//     {
-//       method: 'GET',
-//       headers: {
-//         'Authorization': localStorage.getItem('token')
-//       }
-//     })
-//     .then(response => await response.json())
-//     .then(data => {
-//       if(data.StatusCode===200)
-//       {
-
-//       }
-//       return data;
-//     });
-// }
-
-
-
-//  export const fetchShedsList = async () => {
-//     fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedList')
-//         .then(response => response.json())
-//         .then(data => {
-//             setShedList(data);
-//         });
-// }
-
-// const fetchShedLotMapList = async () => {
-//     fetch(variables.REACT_APP_API + 'ChicksMaster/GetShedLotMapList')
-//         .then(response => response.json())
-//         .then(data => {
-//             setShedLotMapList(data);
-//         });
-// }
-
-
 export const ReplaceNonNumeric=(numStr)=> {
   return String(numStr).replace(/[^0-9]/g, '')
 }
@@ -387,14 +313,6 @@ export const Commarize=(numStr) =>{//
   return Number(ReplaceNonNumeric(numStr)).toLocaleString(navigator.language, { minimumFractionDigits: 0 })
 }
 
-// new Intl.NumberFormat('en-IN', {
-// }).format(finalAmount)
-
-// var NUMBER2TEXT = {
-//   ones: ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'],
-//   tens: ['', '', 'twenty', 'thirty', 'fourty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'],
-//   sep: ['', ' thousand ', ' million ', ' billion ', ' trillion ', ' quadrillion ', ' quintillion ', ' sextillion ']
-// };
 
 const units = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
 const tens = ["", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
@@ -501,48 +419,4 @@ while ( arr.length ) {
 
 return str;
 }
-
-
-// (function( ones, tens, sep ) {
-
-//   // var input = document.getElementById( 'input' ),
-//   //     output = document.getElementById( 'output' );
-  
-//   //input.onkeyup = function() {
-//       var val = this.value,
-//           arr = [],
-//           str = '',
-//           i = 0;
-      
-//       if ( val.length === 0 ) {
-//           output.textContent = 'Please type a number into the text-box.';
-//           return;  
-//       }
-      
-//       val = parseInt( val, 10 );
-//       if ( isNaN( val ) ) {
-//           output.textContent = 'Invalid input.';
-//           return;   
-//       }
-      
-//       while ( val ) {
-//           arr.push( val % 1000 );
-//           val = parseInt( val / 1000, 10 );   
-//       }
-      
-//       while ( arr.length ) {
-//           str = (function( a ) {
-//               var x = Math.floor( a / 100 ),
-//                   y = Math.floor( a / 10 ) % 10,
-//                   z = a % 10;
-              
-//               return ( x > 0 ? ones[x] + ' hundred ' : '' ) +                 
-//                      ( y >= 2 ? tens[y] + ' ' + ones[z] : ones[10*y + z] ); 
-//           })( arr.shift() ) + sep[i++] + str;                     
-//       }
-      
-//       output.textContent = str;        
-//   //};
-  
-// })( NUMBER2TEXT.ones, NUMBER2TEXT.tens, NUMBER2TEXT.sep );
 

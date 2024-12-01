@@ -16,11 +16,25 @@ function EggSalePaymentIn(props) {
     const [uid, setUid] = useState(new URLSearchParams(search).get('uid'));
     const [paymentamount, setPaymentAmount] = useState(0);
     const [duelist, setEggSaleDueList] = useState([]);
+    const [paymenthistorylist, setPaymentHistoryList] = useState([]);
+    const [customerdetails, setCustomerDetails] = useState([]);
     const [validated, setValidated] = useState(false);
 
     let addCount = (num) => {
         setCount(num + 1);
     };
+
+    const _paymenthistory=
+    {
+        Id:"",
+        CustomerId: "",
+        Amount: "",
+        Date: "",
+        PaymentMode: "",
+        CompanyId: ""
+    }
+
+    const [paymenthistorydata, setPaymentHistoryData] = useState(_paymenthistory);
 
     const _paymentDetails = {
         CustomerId: "",
@@ -42,6 +56,7 @@ function EggSalePaymentIn(props) {
 
         if (localStorage.getItem('token')) {
             setPaymentDetails({ ...paymentDetails, CustomerId: uid });
+            fetchCustomerDetails(uid);
         }
         else {
             HandleLogout();
@@ -53,12 +68,41 @@ function EggSalePaymentIn(props) {
 
         if (localStorage.getItem('token')) {
             fetchPendingEggSaleInvoiceList(uid);
+            fetchEggSalePaymentHistory(uid);
         }
         else {
             HandleLogout();
             history("/login")
         }
     }, [obj]);
+
+    const fetchCustomerDetails = async (custid) => {
+        fetch(process.env.REACT_APP_API + 'Customer/GetCustomerById?id=' + custid,
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setCustomerDetails(data.Result);
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found!!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                }
+            });
+    }
 
     const amountChange = (e) => {
         const re = /^\d*\.?\d{0,2}$/
@@ -110,13 +154,48 @@ function EggSalePaymentIn(props) {
         // }
     }
 
+
+    const fetchEggSalePaymentHistory = async (uid) => {
+        setIsLoaded(true);
+        fetch(process.env.REACT_APP_API + 'EggSale/GetPaymentHistoryByCustId?CustId=' 
+            + uid +'&CompanyId='+localStorage.getItem('companyid'),
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setPaymentHistoryList(data.Result);
+                    setIsLoaded(false);
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found !!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred !!", "danger")
+                }
+            });
+
+        setIsLoaded(false);
+    }
+
     const commentsChange = (e) => {
         setPaymentDetails({ ...paymentDetails, Comments: e.target.value });
     }
 
     const fetchPendingEggSaleInvoiceList = async (uid) => {
         setIsLoaded(true);
-        fetch(process.env.REACT_APP_API + 'EggSale/GetPendingEggSaleInvoiceListByCustId?CustId=' + uid,
+        fetch(process.env.REACT_APP_API + 'EggSale/GetPendingEggSaleInvoiceListByCustId?CustId=' 
+            + uid +'&CompanyId='+localStorage.getItem('companyid'),
             {
                 method: 'GET',
                 headers: {
@@ -148,6 +227,32 @@ function EggSalePaymentIn(props) {
 
     const [totalamt, setTotalAmt] = useState(0);
     let newVal = totalamt;
+
+    const UpdatePaymentHistory=async ()=>
+    {
+                        const response = await fetch(process.env.REACT_APP_API + 'EggSale/UpdatePaymentHistory', {
+                            method: 'PUT',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'Authorization': localStorage.getItem('token')
+                            },
+                            body: JSON.stringify({
+                                Amount: paymentDetails.Amount,
+                                Date: paymentDetails.PaymentDate,
+                                PaymentMode:paymentDetails.PaymentMode,
+                                CustomerId:uid,
+                                CompanyId:localStorage.getItem('companyid')
+                            })
+                        });
+                            const todo = await response.json()
+                            .then((result) => {
+                                if (result.StatusCode === 200) {
+                                    addCount(count);
+                                }
+                            });
+                       
+    }
 
     const handleSettle = async (e) => {
 
@@ -181,7 +286,8 @@ function EggSalePaymentIn(props) {
                                 NetBanking: paymentDetails.NetBanking,
                                 UPI: paymentDetails.UPI,
                                 Cheque: paymentDetails.Cheque,
-                                Due: 0
+                                Due: 0,
+                                PaymentMode:paymentDetails.PaymentMode
                             })
                         });
 
@@ -204,14 +310,16 @@ function EggSalePaymentIn(props) {
                             },
                             body: JSON.stringify({
                                 Id: p.Id,
-                                Amount: totalamt,
+                                Amount: newVal,
                                 PaymentDate: paymentDetails.PaymentDate,
                                 Cash: paymentDetails.Cash,
                                 PhonePay: paymentDetails.PhonePay,
                                 NetBanking: paymentDetails.NetBanking,
                                 UPI: paymentDetails.UPI,
                                 Cheque: paymentDetails.Cheque,
-                                Due: parseFloat(p.Due) - parseFloat(totalamt)
+                                Due: parseFloat(p.Due) - parseFloat(newVal),
+                                PaymentMode:paymentDetails.PaymentMode
+
                             })
                         });
                         const todo = await response.json()
@@ -226,6 +334,9 @@ function EggSalePaymentIn(props) {
                     break;
                 }
             }
+
+            UpdatePaymentHistory();
+
             addCount(count);
 
             setIsLoaded(false);
@@ -331,6 +442,46 @@ function EggSalePaymentIn(props) {
                                         maximumFractionDigits: 2
                                     }).format(parseFloat(p.Due).toFixed(2))}</td>
                                     {/* <td>{ }</td> */}
+                                    {/* <td> </td> */}
+
+                                </tr>
+                            )
+                        }) : <tr>
+                            <td style={{ textAlign: "center" }} colSpan={14}>
+                                No Records
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </Table>
+            <div className="row justify-content-center"
+                style={{ textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
+                <h4>Payment History</h4>
+            </div>
+            <Table className="mt-4" striped bordered hover size="sm">
+                <thead>
+                    <tr className="tr-custom" align='center'>
+                        <th>Date</th>
+                        <th>Amount (<span>&#8377;</span>)</th>
+                        <th>Mode </th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        paymenthistorylist && paymenthistorylist.length > 0 ? paymenthistorylist.map((p) => {
+                            return (
+                                !isloaded && <tr align='center' style={{ fontSize: 13 }} key={p.Id}>
+
+                                    <td align='center'>{moment(p.Date).format('DD-MMM-YYYY')}</td>
+                                    <td align='center'>
+                                        {new Intl.NumberFormat('en-IN', {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
+                                        }).format(parseFloat(p.Amount).toFixed(2))}
+                                    </td>
+                                    
+                                    <td>{p.PaymentMode }</td>
                                     {/* <td> </td> */}
 
                                 </tr>

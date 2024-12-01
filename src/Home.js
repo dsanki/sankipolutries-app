@@ -4,8 +4,8 @@ import BannerCarousel from './Component/Carousel/BannerCarousel';
 
 
 const Home = () => (
+  
   <React.Fragment>
-  {/* <p>Welcome to SANKI POULTRIES Online Portal</p> */}
   <BannerCarousel/>
   </React.Fragment>
 

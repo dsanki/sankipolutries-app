@@ -283,7 +283,8 @@ function MortalityList(props) {
           Date: mortalitydata.Date,
           ShedId: mortalitydata.ShedId,
           LotId: mortalitydata.LotId,
-          MortalityNumber: mortalitydata.MortalityNumber
+          MortalityNumber: mortalitydata.MortalityNumber,
+          CompanyId:localStorage.getItem('companyid')
 
         })
       }).then(res => res.json())
@@ -338,7 +339,8 @@ function MortalityList(props) {
           Date: mortalitydata.Date,
           ShedId: mortalitydata.ShedId,
           LotId: mortalitydata.LotId,
-          MortalityNumber: mortalitydata.MortalityNumber
+          MortalityNumber: mortalitydata.MortalityNumber,
+          CompanyId:localStorage.getItem('companyid')
 
         })
       }).then(res => res.json())
@@ -433,22 +435,22 @@ function MortalityList(props) {
     <div>
       {isloaded && <Loading />}
       <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '10px' }}>
-        <h2>Mortality tracker</h2>
+        <h4>Mortality tracker</h4>
       </div>
 
       <div className="container" style={{marginTop: '30px' }}>
         <div className="row align-items-center">
-          <div className="col">
-            <p><strong>From</strong></p>
+          <div className="col-2">
+          <p style={{fontSize:'13px'}}><strong>From</strong></p>
             <DateComponent date={null} onChange={onDateFilterFromChange} isRequired={false} value={filterFromDate} />
           </div>
-          <div className="col">
-            <p><strong>To</strong></p>
+          <div className="col-2">
+          <p style={{fontSize:'13px'}}><strong>To</strong></p>
             <DateComponent date={null} onChange={onDateFilterToChange} isRequired={false} value={filterToDate} />
           </div>
-          <div className="col">
-            <p><strong>Shed</strong></p>
-            <Form.Select aria-label="Default select example"
+          <div className="col-2">
+            <p style={{fontSize:'13px'}}><strong>Shed</strong></p>
+            <Form.Select aria-label="Default select example" style={{fontSize:13}} 
               onChange={onShedFilterChange}>
               <option selected  value="">Choose...</option>
               {
@@ -465,19 +467,23 @@ function MortalityList(props) {
               }
             </Form.Select>
           </div>
-        </div>
-      </div>
-
-      <div className="row">
-        <div className="col" style={{ textAlign: 'left', marginTop: '20px' }}>
-        <i className="fa-regular fa-file-excel fa-2xl" style={{color: '#bea2a2'}} onClick={() =>onDownloadExcel() } ></i>
-        </div>
-        <div className="col" style={{ textAlign: 'right', marginTop: '20px' }}>
+          <div className="col-6" style={{ textAlign: 'right', marginTop: '38px' }}>
+          <i className="fa-regular fa-file-excel fa-2xl" style={{color: '#bea2a2',marginRight: 30  }} onClick={() =>onDownloadExcel() } ></i>
           <Button className="mr-2" variant="primary"
             style={{ marginRight: "17.5px" }}
             onClick={() => clickAddMortality()}>New</Button>
+          </div>
         </div>
       </div>
+
+      {/* <div className="row">
+        <div className="col" style={{ textAlign: 'left', marginTop: '20px' }}>
+        
+        </div>
+        <div className="col" style={{ textAlign: 'right', marginTop: '20px' }}>
+         
+        </div>
+      </div> */}
       <Table className="mt-4" striped bordered hover size="sm">
         <thead>
           <tr align='center' className="tr-custom">
@@ -494,7 +500,7 @@ function MortalityList(props) {
 
             itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => (
 
-              !isloaded && <tr key={p.id} align='center' style={{fontSize:14}} >
+              !isloaded && <tr key={p.id} align='center' style={{fontSize:13}} >
                 <td align='center'>{Moment(p.date).format('DD-MMM-YYYY')}</td>
                 <td align='center'>{p.shedname}</td>
                 <td align='center'>{p.lotname}</td>
@@ -576,7 +582,7 @@ function MortalityList(props) {
                   <Row className="mb-12">
                     <Form.Group as={Col} controlId="Date">
 
-                      <Form.Label>Date</Form.Label>
+                      <Form.Label  style={{fontSize:13}}>Date</Form.Label>
                       <Form.Control type="text" name="LotId" hidden disabled value={mortalitydata.LotId} />
                       <DateComponent date={null} onChange={dateChange} isRequired={true} value={mortalitydata.Date} />
                       <Form.Control.Feedback type="invalid">
@@ -585,8 +591,8 @@ function MortalityList(props) {
                     </Form.Group>
 
                     <Form.Group controlId="ShedId" as={Col} >
-                      <Form.Label>Shed</Form.Label>
-                      <Form.Select aria-label="Default select example"
+                      <Form.Label style={{fontSize:13}}>Shed</Form.Label>
+                      <Form.Select aria-label="Default select example" style={{fontSize:13}}
                         onChange={onShedChange} required>
                         <option selected disabled value="">Choose...</option>
                         {

@@ -29,8 +29,8 @@ function ChicksMasterComponent(props) {
         Due: "",
         PaymentDate: "",
         LotName: "",
-        IsActive:"",
-        ExtraChicksPercentage:""
+        IsActive: "",
+        ExtraChicksPercentage: ""
     };
 
     const [chicksdata, setChicksData] = useState(initialvalues);
@@ -53,8 +53,8 @@ function ChicksMasterComponent(props) {
             Due: "",
             PaymentDate: "",
             LotName: "",
-            IsActive:true,
-            ExtraChicksPercentage:""
+            IsActive: true,
+            ExtraChicksPercentage: ""
         })
     }
 
@@ -76,8 +76,8 @@ function ChicksMasterComponent(props) {
             Due: chicks.Due,
             PaymentDate: chicks.PaymentDate,
             LotName: chicks.LotName,
-            IsActive:chicks.IsActive,
-            ExtraChicksPercentage:chicks.ExtraChicksPercentage
+            IsActive: chicks.IsActive,
+            ExtraChicksPercentage: chicks.ExtraChicksPercentage
         })
     }
 
@@ -87,30 +87,30 @@ function ChicksMasterComponent(props) {
 
     const chicksChange = (e) => {
 
-        const percentage=chicksdata.ExtraChicksPercentage;
-        const _inputextraTotals = parseInt(e.target.value) * (parseInt(percentage)>0 ?percentage : 0)/100;
+        const percentage = chicksdata.ExtraChicksPercentage;
+        const _inputextraTotals = parseInt(e.target.value) * (parseInt(percentage) > 0 ? percentage : 0) / 100;
 
         setChicksData({
-            ...chicksdata, Chicks: parseInt(e.target.value), 
-            ExtraChicks:  parseInt(_inputextraTotals), 
+            ...chicksdata, Chicks: parseInt(e.target.value),
+            ExtraChicks: parseInt(_inputextraTotals),
             TotalChicks: parseInt(parseInt(e.target.value) + _inputextraTotals),
-            TotalAmount: parseInt(e.target.value) * chicksdata.Rate, 
+            TotalAmount: parseInt(e.target.value) * chicksdata.Rate,
             Due: (parseInt(e.target.value) * chicksdata.Rate) - chicksdata.Paid
         });
     }
 
     const extraChicksPercentageChange = (e) => {
         const percentage = e.target.value;
-        const _inputextraTotals = chicksdata.Chicks * ((percentage>0 ? percentage : 0)/100);
+        const _inputextraTotals = chicksdata.Chicks * ((percentage > 0 ? percentage : 0) / 100);
 
-        setChicksData({ 
-            ...chicksdata, ExtraChicksPercentage:percentage,
-            Chicks: chicksdata.Chicks, 
-            ExtraChicks:  parseInt(_inputextraTotals), 
+        setChicksData({
+            ...chicksdata, ExtraChicksPercentage: percentage,
+            Chicks: chicksdata.Chicks,
+            ExtraChicks: parseInt(_inputextraTotals),
             TotalChicks: parseInt(chicksdata.Chicks) + parseInt(_inputextraTotals),
-            TotalAmount: chicksdata.Chicks * chicksdata.Rate, 
+            TotalAmount: chicksdata.Chicks * chicksdata.Rate,
             Due: (chicksdata.Chicks * chicksdata.Rate) - chicksdata.Paid
-            
+
         });
     }
 
@@ -128,7 +128,7 @@ function ChicksMasterComponent(props) {
     }
 
 
-    
+
 
     const lambChange = (e) => {
         const lamb = e.target.value === "" ? 0 : parseInt(e.target.value);
@@ -178,7 +178,7 @@ function ChicksMasterComponent(props) {
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
-            fetchChicks();
+            fetchChicks(localStorage.getItem('companyid'));
         }
         else {
             HandleLogout();
@@ -186,9 +186,9 @@ function ChicksMasterComponent(props) {
         }
     }, [obj]);
 
-    const fetchChicks = async () => {
-       
-        FetchChicks(process.env.REACT_APP_API)
+    const fetchChicks = async (companyid) => {
+
+        FetchChicks(companyid, process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setChicks(data.Result);
@@ -291,8 +291,9 @@ function ChicksMasterComponent(props) {
                     Due: chicksdata.Due,
                     PaymentDate: chicksdata.PaymentDate,
                     LotName: chicksdata.LotName,
-                    IsActive:chicksdata.IsActive,
-                    ExtraChicksPercentage:chicksdata.ExtraChicksPercentage
+                    IsActive: chicksdata.IsActive,
+                    ExtraChicksPercentage: chicksdata.ExtraChicksPercentage,
+                    CompanyId: localStorage.getItem('companyid')
                 })
             })
                 .then(res => res.json())
@@ -347,8 +348,9 @@ function ChicksMasterComponent(props) {
                     Due: chicksdata.Due,
                     PaymentDate: chicksdata.PaymentDate,
                     LotName: chicksdata.LotName,
-                    IsActive:chicksdata.IsActive,
-                    ExtraChicksPercentage:chicksdata.ExtraChicksPercentage
+                    IsActive: chicksdata.IsActive,
+                    ExtraChicksPercentage: chicksdata.ExtraChicksPercentage,
+                    CompanyId: localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -375,7 +377,7 @@ function ChicksMasterComponent(props) {
     return (
         <div className="ContainerOverride">
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
-                <h2>Chicks/ Lot List</h2>
+                <h4>Chicks/ Lot List</h4>
             </div>
             <div className="row">
                 <div className="col" style={{ textAlign: 'right' }}>
@@ -408,7 +410,7 @@ function ChicksMasterComponent(props) {
                 <tbody>
                     {
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => (
-                            <tr key={p.Id} align='center' style={{fontSize:14}} >
+                            <tr key={p.Id} align='center' style={{ fontSize: '13px' }} >
                                 <td align='left'>{p.LotName}</td>
                                 <td align='center'>{Moment(p.Date).format('DD-MMM-YYYY')}</td>
                                 <td align='center'>{p.Chicks}</td>
@@ -489,6 +491,7 @@ function ChicksMasterComponent(props) {
                             display: "flex",
                             justifyContent: "center",
                             alignItems: "center",
+                            fontSize:'18px'
                         }}>
                             {chicksdata.modaltitle}
                         </Modal.Title>
@@ -524,7 +527,7 @@ function ChicksMasterComponent(props) {
                                             disabled={false}
                                         />
 
-<InputField controlId="ExtraChicksPercentage"
+                                        <InputField controlId="ExtraChicksPercentage"
                                             label="Extra %"
                                             type="number"
                                             value={chicksdata.ExtraChicksPercentage}
@@ -593,7 +596,7 @@ function ChicksMasterComponent(props) {
 
                                     <Row className="mb-12">
                                         <Form.Group as={Col} controlId="date">
-                                            <Form.Label>Date</Form.Label>
+                                            <Form.Label style={{fontSize:'13px'}}>Date</Form.Label>
                                             <DateComponent date={null} onChange={dateChange} isRequired={true} value={chicksdata.Date} />
                                             <Form.Control.Feedback type="invalid">
                                                 Please select date
@@ -613,8 +616,6 @@ function ChicksMasterComponent(props) {
                                     </Row>
 
                                     <Row className="mb-12">
-
-
                                         <InputField controlId="TotalAmount" label="Total Amount"
                                             type="number"
                                             value={chicksdata.TotalAmount}
@@ -648,25 +649,26 @@ function ChicksMasterComponent(props) {
                                     </Row>
                                     <Form.Group><br /></Form.Group>
                                     <Row className="mb-12">
-                                    <Form.Group controlId="PaymentDate" as={Row} className="mb-3">
-                                        <Form.Label column sm={3}>Payment date</Form.Label>
-                                        <Col sm={4}>
-                                            <DateComponent date={null} isRequired={true} onChange={paymentDateChange} value={chicksdata.PaymentDate} />
-                                        </Col>
-                                        <Col sm={4}>
-                                        <Form.Check 
-            type="checkbox"
-            id="chkIsActive"
-            label="Is Active"
-            onChange={isActiveChange}
-            value={chicksdata.IsActive}
-            checked={chicksdata.IsActive}
-          />
-           </Col>
-                                    </Form.Group>
-                                   
-                                    
-      </Row>
+                                        <Form.Group controlId="PaymentDate" as={Row} className="mb-3">
+                                            <Form.Label  style={{fontSize:'13px'}} column sm={3}>Payment date</Form.Label>
+                                            <Col sm={4}>
+                                                <DateComponent date={null} isRequired={true} onChange={paymentDateChange} value={chicksdata.PaymentDate} />
+                                            </Col>
+                                            <Col sm={4}>
+                                                <Form.Check
+                                                    type="checkbox"
+                                                    id="chkIsActive"
+                                                    label="Is Active"
+                                                    onChange={isActiveChange}
+                                                    value={chicksdata.IsActive}
+                                                    checked={chicksdata.IsActive}
+                                                    style={{fontSize:'13px'}}
+                                                />
+                                            </Col>
+                                        </Form.Group>
+
+
+                                    </Row>
 
                                     <Form.Group as={Col}>
                                         {chicksdata.Id <= 0 ?

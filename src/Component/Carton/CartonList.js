@@ -32,7 +32,9 @@ const CartonList = (props) => {
         PaymentDate: "",
         UnloadingCharge: "",
         ClientId: "",
-        ClientName: ""
+        ClientName: "",
+        GST: "",
+        Due: ""
     };
 
     const [cartonsdata, setCartonsData] = useState(initialvalues);
@@ -43,7 +45,6 @@ const CartonList = (props) => {
         setCartonsData({
             modaltitle: "Add Carton",
             Id: 0,
-            Id: 0,
             Quantity: "",
             BillingDate: "",
             Rate: "",
@@ -52,7 +53,9 @@ const CartonList = (props) => {
             PaymentDate: "",
             UnloadingCharge: "",
             ClientId: "",
-            ClientName: ""
+            ClientName: "",
+            GST: "",
+            Due: ""
         })
     }
 
@@ -69,7 +72,9 @@ const CartonList = (props) => {
             PaymentDate: cart.PaymentDate,
             UnloadingCharge: cart.UnloadingCharge,
             ClientId: cart.ClientId,
-            ClientName: cart.ClientName
+            ClientName: cart.ClientName,
+            GST: cart.GST,
+            Due: cart.Due
         })
     }
 
@@ -110,7 +115,8 @@ const CartonList = (props) => {
 
     const fetchCarton = async () => {
         setIsLoaded(true);
-        await fetch(process.env.REACT_APP_API + 'carton',
+        await fetch(process.env.REACT_APP_API + 'carton/GetCartonByCompanyId?CompanyId='
+            + localStorage.getItem('companyid'),
             {
                 method: 'GET',
                 headers: {
@@ -124,8 +130,11 @@ const CartonList = (props) => {
 
                 if (result.StatusCode === 200) {
                     setCartons(result.Result);
-                    setCount(result.Result.length);
-                    setTotalPages(Math.ceil(result.Result.length / itemsPerPage));
+                    if (result.Result.length > 0) {
+                        setCount(result.Result.length);
+                        setTotalPages(Math.ceil(result.Result.length / itemsPerPage));
+                    }
+
                     setIsLoaded(false);
                 }
                 else if (result.StatusCode === 401) {
@@ -239,7 +248,10 @@ const CartonList = (props) => {
                     Rate: cartonsdata.Rate,
                     UnloadingCharge: cartonsdata.UnloadingCharge,
                     ClientId: cartonsdata.ClientId,
-                    PaymentDate: cartonsdata.PaymentDate
+                    PaymentDate: cartonsdata.PaymentDate,
+                    GST: cartonsdata.GST,
+                    CompanyId: localStorage.getItem('companyid'),
+                    Due: cartonsdata.Due
                 })
             })
                 .then(res => res.json())
@@ -294,7 +306,10 @@ const CartonList = (props) => {
                     Rate: cartonsdata.Rate,
                     UnloadingCharge: cartonsdata.UnloadingCharge,
                     ClientId: cartonsdata.ClientId,
-                    PaymentDate: cartonsdata.PaymentDate
+                    PaymentDate: cartonsdata.PaymentDate,
+                    GST: cartonsdata.GST,
+                    CompanyId: localStorage.getItem('companyid'),
+                    Due: cartonsdata.Due
                 })
             })
                 .then(res => res.json())
@@ -333,19 +348,46 @@ const CartonList = (props) => {
     const quantityChange = (e) => {
         setCartonsData({
             ...cartonsdata, Quantity: e.target.value,
-            TotalAmount: (e.target.value * cartonsdata.Rate)
+            TotalAmount: (e.target.value * cartonsdata.Rate),
+            Due: (e.target.value * cartonsdata.Rate) - parseFloat(cartonsdata.Payment || 0)
         });
     }
 
     const cartonsRateChange = (e) => {
         setCartonsData({
             ...cartonsdata, Rate: e.target.value,
-            TotalAmount: (e.target.value * cartonsdata.Quantity)
+            TotalAmount: (e.target.value * cartonsdata.Quantity),
+            Due: (e.target.value * cartonsdata.Quantity) - parseFloat(cartonsdata.Payment || 0)
         });
     }
 
+
+    const gstChange = (e) => {
+        let gstpercentage = parseFloat(e.target.value || 0) / 100;
+
+        let totalamount = parseFloat(cartonsdata.Quantity || 0) *
+            parseFloat(cartonsdata.Rate || 0);
+
+        let totalgst = totalamount * gstpercentage;
+
+        let totalinclGST = Math.round(totalamount + totalgst).toFixed(2);
+
+        setCartonsData({
+            ...cartonsdata, GST: e.target.value,
+            TotalAmount: totalinclGST,
+
+            Due: totalinclGST - parseFloat(cartonsdata.Payment || 0)
+        });
+    }
+
+
+
+
     const paidChange = (e) => {
-        setCartonsData({ ...cartonsdata, Payment: e.target.value });
+        setCartonsData({
+            ...cartonsdata, Payment: e.target.value,
+            Due: parseFloat(cartonsdata.TotalAmount || 0) - parseFloat(e.target.value || 0)
+        });
     }
 
     const unloadingChargeChange = (e) => {
@@ -366,7 +408,9 @@ const CartonList = (props) => {
                 TotalAmount: p.TotalAmount.toFixed(2),
                 Payment: p.Payment.toFixed(2),
                 UnloadingCharge: p.UnloadingCharge.toFixed(2),
-                PaymentDate: moment(p.PaymentDate).format('DD-MMM-YYYY')
+                PaymentDate: moment(p.PaymentDate).format('DD-MMM-YYYY'),
+                Due: p.Due.toFixed(2)
+
             });
         });
 
@@ -378,7 +422,7 @@ const CartonList = (props) => {
         <>
             {isloaded && <Loading />}
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
-                <h2>Welcome to Carton List Page</h2>
+                <h4>Cartons</h4>
             </div>
 
             <div class="row">
@@ -405,9 +449,11 @@ const CartonList = (props) => {
                         <th>Billing Date</th>
                         <th>Client Name</th>
                         <th>Rate (<span>&#8377;</span>)</th>
+                        <th>GST</th>
                         <th>Total Amount (<span>&#8377;</span>)</th>
                         <th>Payment (<span>&#8377;</span>)</th>
                         <th>Unloading Charge (<span>&#8377;</span>)</th>
+                        <th>Due (<span>&#8377;</span>)</th>
                         <th>Payment Date</th>
                         <th>Options</th>
                     </tr>
@@ -421,16 +467,20 @@ const CartonList = (props) => {
                                 _supp[0].FirstName + " " + _supp[0].LastName : "";
                             carton.ClientName = filterByClientName;
 
-                            
+
+
                             return (
-                                !isloaded && <tr key={carton.Id} align='center' style={{fontSize:14}}>
+                                !isloaded && <tr key={carton.Id} align='center' style={{ fontSize: '13px' }}>
+                                 
                                     <td>{carton.Quantity}</td>
                                     <td>{Moment(carton.BillingDate).format('DD-MMM-YYYY')}</td>
                                     <td>{filterByClientName}</td>
-                                    <td>{carton.Rate.toFixed(2)}</td>
-                                    <td>{carton.TotalAmount.toFixed(2)}</td>
-                                    <td>{carton.Payment.toFixed(2)}</td>
-                                    <td>{carton.UnloadingCharge.toFixed(2)}</td>
+                                    <td>{parseFloat(carton.Rate||0).toFixed(2)}</td>
+                                    <td>{parseFloat(carton.GST || 0).toFixed(2)}</td>
+                                    <td>{parseFloat(carton.TotalAmount||0).toFixed(2)}</td>
+                                    <td>{parseFloat(carton.Payment||0).toFixed(2)}</td>
+                                    <td>{parseFloat(carton.UnloadingCharge||0).toFixed(2)}</td>
+                                    <td>{parseFloat(carton.Due||0).toFixed(2)}</td>
                                     <td>{Moment(carton.PaymentDate).format('DD-MMM-YYYY')}</td>
                                     <td>
                                         {
@@ -498,7 +548,7 @@ const CartonList = (props) => {
                     centered
                 >
                     <Modal.Header>
-                        <Modal.Title id="contained-modal-title-vcenter">
+                        <Modal.Title id="contained-modal-title-vcenter" style={{ fontSize: '18px' }}>
                             Add Carton
                         </Modal.Title>
                         <button type="button" class="btn-close" aria-label="Close" onClick={addModalClose}> </button>
@@ -510,10 +560,10 @@ const CartonList = (props) => {
                                 <Form className="needs-validation" noValidate validated={validated}>
                                     <Row className="mb-12">
                                         <Form.Group controlId="ClientId" as={Col}>
-                                            <Form.Label>Client</Form.Label>
+                                            <Form.Label style={{ fontSize: '13px' }}>Client</Form.Label>
                                             <Col>
 
-                                                <Form.Select aria-label="Default select example"
+                                                <Form.Select aria-label="Default select example" style={{ fontSize: '13px' }}
                                                     onChange={clientChange} required>
                                                     <option selected disabled value="">Choose...</option>
                                                     {
@@ -538,7 +588,7 @@ const CartonList = (props) => {
                                         </Form.Group>
 
                                         <Form.Group controlId="BillingDate" as={Col} >
-                                            <Form.Label>Billing Date</Form.Label>
+                                            <Form.Label style={{ fontSize: '13px' }}>Billing Date</Form.Label>
                                             <Col >
                                                 <DateComponent date={null} isRequired={true} onChange={billingDateChange} value={cartonsdata.BillingDate} />
                                                 <Form.Control.Feedback type="invalid">
@@ -569,10 +619,20 @@ const CartonList = (props) => {
                                             disabled={false}
                                             onChange={cartonsRateChange}
                                         />
+                                        <InputField controlId="GST" label="GST"
+                                            type="number"
+                                            value={cartonsdata.GST}
+                                            name="GST"
+                                            placeholder="GST"
+                                            errormessage="Please enter GST"
+                                            required={false}
+                                            disabled={false}
+                                            onChange={gstChange}
+                                        />
 
                                         <InputField controlId="TotalAmount" label="Total amount"
                                             type="number"
-                                            value={cartonsdata.TotalAmount !== "" ? cartonsdata.TotalAmount.toFixed(2) : cartonsdata.TotalAmount}
+                                            value={cartonsdata.TotalAmount}
                                             name="TotalAmount"
                                             placeholder="Total amount"
                                             errormessage="Please provide total amount"
@@ -604,10 +664,21 @@ const CartonList = (props) => {
                                             disabled={false}
                                             onChange={unloadingChargeChange}
                                         />
+
+                                        <InputField controlId="Due" label="Due"
+                                            type="number"
+                                            value={cartonsdata.Due}
+                                            name="Due"
+                                            placeholder="Due"
+                                            errormessage="Due"
+                                            required={false}
+                                            disabled={false}
+                                        // onChange={unloadingChargeChange}
+                                        />
                                     </Row>
 
                                     <Form.Group controlId="PaymentDate" as={Col} >
-                                        <Form.Label>Payment Date</Form.Label>
+                                        <Form.Label style={{ fontSize: '13px' }}>Payment Date</Form.Label>
                                         <Col >
                                             <DateComponent date={null} isRequired={true} onChange={paymentDateChange} value={cartonsdata.PaymentDate} />
                                             <Form.Control.Feedback type="invalid">

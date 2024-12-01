@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
@@ -7,15 +7,19 @@ import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 function Navigation() {
 
     let history = useNavigate();
+    const [companydetails, setCompanyDetails] = useState(JSON.parse(localStorage.getItem('companydetails')));
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         localStorage.removeItem('isadmin');
+        localStorage.removeItem('companyid');
+        localStorage.removeItem('companydetails');
         history('/login')
     }
-
+    
     let location = useLocation();
     useEffect(() => {
+      setCompanyDetails(JSON.parse(localStorage.getItem('companydetails')));
     }, [location])
 
     return (
@@ -23,8 +27,16 @@ function Navigation() {
 
             <nav className="navbar navbar-expand-lg sticky-top bg-body-tertiary">
                 <div className="container-fluid">
-                    <a className="navbar-brand" href="/">SANKI POULTRIES</a>
-                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    {
+                        companydetails != null && companydetails.CompanyName != "" ?
+
+                            <a className="navbar-brand" href="/">
+                                {companydetails.CompanyName.toUpperCase()}</a> : ""
+
+                    }
+                    {/* <a className="navbar-brand" href="/">{(companydetails!=typeof('undefined')?(companydetails["CompanyName"]).toUpperCase():"")}</a> */}
+                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
                     </button>
@@ -56,7 +68,7 @@ function Navigation() {
                                         </li>
 
                                         <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/medicine" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/medicine">Medicine
+                                            <a className={`nav-link ${location.pathname === "/medicine" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/medicine">Medicine/Vaccine
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
 
@@ -99,6 +111,13 @@ function Navigation() {
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
 
+                                        <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/shedmedicinetracker" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/shedmedicinetracker">Medicine Tracker
+                                                <span className="sr-only">(current)</span></a>
+                                        </li>
+
+
+
                                     </ul>
                                 </li>
 
@@ -131,6 +150,34 @@ function Navigation() {
                                             <a className={`nav-link ${location.pathname === "/test" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/test">test
                                                 <span className="sr-only">(current)</span></a>
                                         </li> */}
+                                        {
+                                            localStorage.getItem('isadmin') == 'true' ?
+                                                <li className="nav-item">
+                                                    <a className={`nav-link ${location.pathname === "/companyselection" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/companyselection">Company Selection
+                                                        <span className="sr-only">(current)</span></a>
+                                                </li> : ""
+                                        }
+
+                                        {
+                                            localStorage.getItem('isadmin') == 'true' ?
+                                                <li className="nav-item">
+                                                    <a className={`nav-link ${location.pathname === "/registration" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/registration">Add User
+                                                        <span className="sr-only">(current)</span></a>
+                                                </li> : ""
+                                        }
+
+                                        {/* <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/eggstockinventory" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/eggstockinventory">Egg Stock Inventory
+                                                <span className="sr-only">(current)</span></a>
+                                        </li> */}
+
+                                        <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/paymentout" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/paymentout">Payment out
+                                                <span className="sr-only">(current)</span></a>
+                                        </li>
+
+
+
 
 
 

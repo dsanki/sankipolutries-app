@@ -3,6 +3,7 @@ import { Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import InvoiceNo from './InvoiceNo'
 import moment from 'moment';
 import logo from '../../image/SPLogo1.png'
+import logoKP from '../../image/kpf/kalandi_logo.jpg'
 
 const styles = StyleSheet.create({
   row: {
@@ -40,6 +41,13 @@ logo: {
   //marginBottom: 10
   // marginLeft: 'auto',
   // marginRight: 'auto'
+},
+logokp: {
+  width: 80,
+  height: 80,
+  //marginBottom: 10
+  // marginLeft: 'auto',
+  // marginRight: 'auto'
 }
 });
 
@@ -48,7 +56,11 @@ function leftFillNum(num, targetLength) {
 }
 const InvoiceTitle = (props) => (
   <View style={styles.row}>
- <Image style={styles.logo} src={logo} />
+    {
+      props.companydetails[0].Id==1 ?  <Image style={styles.logo} src={logo} /> :
+      <Image style={styles.logokp} src={logoKP} />
+    }
+
     <Text style={styles.reportTitle}>{props.title}</Text>
     <Fragment style={styles.date}>
         <View style={styles.invoiceDateContainer}>

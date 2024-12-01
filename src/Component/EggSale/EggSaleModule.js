@@ -41,7 +41,9 @@ function EggSaleModule(props) {
     const [filterToDate, setFilterToDate] = useState("");
     const [isloaded, setIsLoaded] = useState(true);
     const [eggsalelistfilter, setEggSaleListFilter] = useState([]);
-    const [companydetails, setCompanyDetails] = useState([]);
+   // const [companydetails, setCompanyDetails] = useState([]);
+
+    const [companydetails, setCompanyDetails] = useState([JSON.parse(localStorage.getItem('companydetails'))]);
     const [eggcategory, setEggCategory] = useState([]);
 
     const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -100,7 +102,7 @@ function EggSaleModule(props) {
         UPI: "",
         Cheque: "",
         Advance: "",
-
+        Complimentary: ""
     };
 
     const [eggsaleinvdata, setEggSaleInvoiceData] = useState(initialeggsaleinvoicevalues);
@@ -138,7 +140,8 @@ function EggSaleModule(props) {
             NetBanking: eggsaleinvdata.NetBanking,
             UPI: eggsaleinvdata.UPI,
             Cheque: eggsaleinvdata.Cheque,
-            Advance: eggsaleinvdata.Advance
+            Advance: eggsaleinvdata.Advance,
+            Complimentary: eggsaleinvdata.Complimentary
 
         })
     }
@@ -198,10 +201,12 @@ function EggSaleModule(props) {
         setEggSaleInvoiceData({
             ...eggsaleinvdata, AdditionalCharge: e.target.value,
 
-            Due: (parseFloat(eggsaleinvdata.TotalCost || 0) - parseFloat(eggsaleinvdata.TotalDiscount)) + addch,
+            Due: (parseFloat(eggsaleinvdata.TotalCost || 0) - 
+            parseFloat(eggsaleinvdata.TotalDiscount) -parseFloat(eggsaleinvdata.Paid || 0)) + addch,
             //Due:parseFloat(eggsaleinvdata.Due||0)+addch,
             //FinalCostInvoice:(e.target.value * eggsaledata.EggRate) - (e.target.value * eggsaledata.DiscountPerEgg)
-            FinalCostInvoice: (parseFloat(eggsaleinvdata.TotalCost || 0) - parseFloat(eggsaleinvdata.TotalDiscount)) + addch
+            FinalCostInvoice: (parseFloat(eggsaleinvdata.TotalCost || 0) - 
+            parseFloat(eggsaleinvdata.TotalDiscount)) + addch
         });
 
         //setAdditionalCharge(addch);
@@ -221,8 +226,10 @@ function EggSaleModule(props) {
         const re = /^\d*\.?\d{0,2}$/
         if (e.target.value === '' || re.test(e.target.value)) {
             setEggSaletData({
-                ...eggsaledata, EggRate: e.target.value, TotalCost: e.target.value * eggsaledata.Quantity,
-                FinalCost: (e.target.value * eggsaledata.Quantity) - (eggsaledata.TotalDiscount > 0 ? eggsaledata.TotalDiscount : 0)
+                ...eggsaledata, EggRate: e.target.value, 
+                TotalCost: e.target.value * eggsaledata.Quantity,
+                FinalCost: (e.target.value * eggsaledata.Quantity) - 
+                (eggsaledata.TotalDiscount > 0 ? eggsaledata.TotalDiscount : 0)
             });
         }
     }
@@ -230,7 +237,9 @@ function EggSaleModule(props) {
     const discountChange = (e) => {
         const re = /^\d*\.?\d{0,2}$/
         if (e.target.value === '' || re.test(e.target.value)) {
-            setEggSaletData({ ...eggsaledata, DiscountPerEgg: e.target.value, TotalDiscount: (eggsaledata.Quantity * e.target.value), FinalCost: (eggsaledata.TotalCost - (eggsaledata.Quantity * e.target.value)) });
+            setEggSaletData({ ...eggsaledata, DiscountPerEgg: e.target.value, 
+                TotalDiscount: (eggsaledata.Quantity * e.target.value), 
+                FinalCost: (eggsaledata.TotalCost - (eggsaledata.Quantity * e.target.value)) });
         }
     }
 
@@ -382,18 +391,29 @@ function EggSaleModule(props) {
         }
     }
 
+    const complimentaryChange = (e) => {
+        //let due=eggsaleinvdata.Due;
+        const re = /^\d*\.?\d{0,2}$/;
+        if (e.target.value === '' || re.test(e.target.value)) {
+            let due = Math.round(eggsaleinvdata.FinalCostInvoice -
+                (parseFloat(eggsaleinvdata.Cheque || 0) + parseFloat(eggsaleinvdata.Cash || 0) +
+                    parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
+                    + parseFloat(eggsaleinvdata.UPI || 0))
+            )
 
-
-
-
-
+            setEggSaleInvoiceData({
+                ...eggsaleinvdata, Complimentary: e.target.value,
+                Due: parseFloat(due) - parseFloat(e.target.value||0)
+            });
+        }
+    }
 
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
             setEggSaletData({ ...eggsaledata, CustomerId: uid });
             fetchCustomerDetails(uid);
-            fetchCompanyDetails();
+           // fetchCompanyDetails(localStorage.getItem('companyid'));
             fetchEggCategory();
             setBankDetails({
                 ...bankdetails, BankName: process.env.REACT_APP_BANK_NAME,
@@ -462,24 +482,24 @@ function EggSaleModule(props) {
             })
     }
 
-    const fetchCompanyDetails = async (invid) => {
-        FetchCompanyDetails(invid, process.env.REACT_APP_API)
-            .then(data => {
-                if (data.StatusCode === 200) {
-                    setCompanyDetails(data.Result);
-                }
-                else if (data.StatusCode === 401) {
-                    HandleLogout();
-                    history("/login")
-                }
-                else if (data.StatusCode === 404) {
-                    props.showAlert("Data not found!!", "danger")
-                }
-                else {
-                    props.showAlert("Error occurred!!", "danger")
-                }
-            })
-    }
+    // const fetchCompanyDetails = async (invid) => {
+    //     FetchCompanyDetails(invid, process.env.REACT_APP_API)
+    //         .then(data => {
+    //             if (data.StatusCode === 200) {
+    //                 setCompanyDetails(data.Result);
+    //             }
+    //             else if (data.StatusCode === 401) {
+    //                 HandleLogout();
+    //                 history("/login")
+    //             }
+    //             else if (data.StatusCode === 404) {
+    //                 props.showAlert("Data not found!!", "danger")
+    //             }
+    //             else {
+    //                 props.showAlert("Error occurred!!", "danger")
+    //             }
+    //         })
+    // }
 
     const fecthEggSaleInvoiceById = async (id) => {
         FecthEggSaleInvoiceById(id, process.env.REACT_APP_API)
@@ -562,6 +582,8 @@ function EggSaleModule(props) {
         }
         else {
 
+
+            var count =tmpidcount + 1;
             const newData = {
                 Id: eggsaledata.Id,
                 Quantity: eggsaledata.Quantity,
@@ -574,16 +596,17 @@ function EggSaleModule(props) {
                 FinalCost: eggsaledata.FinalCost,
                 EggSaleInvoiceId: eggsaledata.EggSaleInvoiceId,
                 Comments: eggsaledata.Comments,
-                tempid: tmpidcount + 1,
+                tempid: count,
                 EggPack: eggsaledata.EggPack,
                 EggLose: eggsaledata.EggLose
             };
 
-            setTempIdCount(tmpidcount);
+
+            setTempIdCount(count);
             setValidated(true);
-            console.log(eggsalearr);
+            //console.log(eggsalearr);
             setEggSaleArr(prevState => [...prevState, newData]);
-            console.log(eggsalearr);
+            //console.log(eggsalearr);
             addUCount(ucount);
             addModalClose();
         }
@@ -611,7 +634,7 @@ function EggSaleModule(props) {
                 FinalCost: eggsaledata.FinalCost,
                 EggSaleInvoiceId: eggsaledata.EggSaleInvoiceId,
                 Comments: eggsaledata.Comments,
-                tempid: tmpidcount,
+                tempid: eggsaledata.tempid,
                 EggPack: eggsaledata.EggPack,
                 EggLose: eggsaledata.EggLose
             };
@@ -621,6 +644,8 @@ function EggSaleModule(props) {
                 let _eggsalearr = eggsalearr;
                 eggsalearr[index] = newData;
                 setEggSaleArr(eggsalearr);
+
+                //setEggSaleArr(prevState => [...prevState, newData]);
             }
             else {
                 const index = eggsalearr.findIndex(eg => eg.tempid === eggsaledata.tempid);
@@ -629,9 +654,9 @@ function EggSaleModule(props) {
                 setEggSaleArr(eggsalearr);
             }
 
-            setTempIdCount(tmpidcount + 1);
+           // setTempIdCount(tmpidcount + 1);
             setValidated(true);
-            console.log(eggsalearr);
+            //console.log(eggsalearr);
             addUCount(ucount);
             addModalClose();
         }
@@ -731,7 +756,9 @@ function EggSaleModule(props) {
                     NetBanking: eggsaleinvdata.NetBanking,
                     UPI: eggsaleinvdata.UPI,
                     Cheque: eggsaleinvdata.Cheque,
-                    Advance: eggsaleinvdata.Advance
+                    Advance: eggsaleinvdata.Advance,
+                    Complimentary:eggsaleinvdata.Complimentary,
+                    CompanyId:localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -797,7 +824,9 @@ function EggSaleModule(props) {
                     NetBanking: eggsaleinvdata.NetBanking,
                     UPI: eggsaleinvdata.UPI,
                     Cheque: eggsaleinvdata.Cheque,
-                    Advance: eggsaleinvdata.Advance
+                    Advance: eggsaleinvdata.Advance,
+                    Complimentary:eggsaleinvdata.Complimentary,
+                    CompanyId:localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -840,7 +869,7 @@ function EggSaleModule(props) {
         <div>
             {/* {isloaded && <Loading />} */}
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
-                <h2>Egg sale</h2>
+                <h4>Egg sale</h4>
             </div>
 
             {/* <div className="container" style={{ marginTop: '30px', marginBottom: '15px' }}>
@@ -909,18 +938,18 @@ function EggSaleModule(props) {
                                     <td align='center'>{new Intl.NumberFormat('en-IN', {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2
-                                    }).format(parseFloat(parseFloat(p.TotalCost).toFixed(2)))}</td>
+                                    }).format(parseFloat(parseFloat(p.TotalCost||0).toFixed(2)))}</td>
 
 
 
                                     {/* <td align='center'> {p.TotalCost !== "" ?  parseFloat(p.TotalCost).toFixed(2) : p.TotalCost}
                                     </td> */}
 
-                                    <td align='center'>{p.DiscountPerEgg}</td>
+                                    <td align='center'>{parseFloat(p.DiscountPerEgg||0).toFixed(2)}</td>
 
-                                    <td align='center'>{p.TotalDiscount}</td>
+                                    <td align='center'>{parseFloat(p.TotalDiscount||0).toFixed(2)}</td>
                                     <td align='center'>
-                                        {p.FinalCost !== "" ? parseFloat(p.FinalCost).toFixed(2) : p.FinalCost}
+                                        {p.FinalCost !== "" ? parseFloat(p.FinalCost||0).toFixed(2) : p.FinalCost}
                                     </td>
 
                                     <td align='left'>{p.Comments}</td>
@@ -967,7 +996,7 @@ function EggSaleModule(props) {
                         <td align='center'>{new Intl.NumberFormat('en-IN', {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2
-                        }).format(parseFloat(parseFloat(eggsaleinvdata.TotalDiscount).toFixed(2)))}</td>
+                        }).format(parseFloat(parseFloat(eggsaleinvdata.TotalDiscount||0).toFixed(2)))}</td>
                         {/* <td align='center'>{eggsaleinvdata.TotalDiscount}</td> */}
 
                         <td align='center'>{new Intl.NumberFormat('en-IN', {
@@ -1123,6 +1152,17 @@ function EggSaleModule(props) {
 
                         />
 
+                        <InputField controlId="Complimentary" label="Complimentary"
+                            type="number"
+                            value={eggsaleinvdata.Complimentary}
+                            name="Complimentary"
+                            placeholder="Complimentary"
+                            errormessage="Enter amount"
+                            required={false}
+                            disabled={false}
+                            onChange={complimentaryChange}
+                        />
+
                         <InputField controlId="Advance" label="Advance"
                             type="number"
                             value={eggsaleinvdata.Advance}
@@ -1148,7 +1188,7 @@ function EggSaleModule(props) {
                         />
 
                     </Row>
-                   
+
                     <Form.Group as={Col} style={{ textAlign: 'center' }}>
                         {eggsaleinvdata.Id <= 0 ?
                             <Button variant="primary" type="submit" style={{ marginTop: "30px" }}
@@ -1258,8 +1298,8 @@ function EggSaleModule(props) {
                                     <Form noValidate validated={validated} className="needs-validation">
                                         <Row className="mb-12">
                                             <Form.Group controlId="Id" as={Col} >
-                                                <Form.Label>Category*</Form.Label>
-                                                <Form.Select aria-label="Default select example"
+                                                <Form.Label style={{fontSize:'13px'}}>Category*</Form.Label>
+                                                <Form.Select aria-label="Default select example" style={{fontSize:'13px'}}
                                                     onChange={eggCategoryChange} required>
                                                     <option selected disabled value="">Choose...</option>
                                                     {
@@ -1279,22 +1319,22 @@ function EggSaleModule(props) {
                                                     Please select egg category
                                                 </Form.Control.Feedback>
                                             </Form.Group>
-                                            <InputField controlId="EggPack" label="Egg Pack"
+                                            <InputField controlId="EggPack" label="Egg pack"
                                                 type="number"
                                                 value={eggsaledata.EggPack}
                                                 name="EggPack"
-                                                placeholder="EggPack"
+                                                placeholder="Egg pack"
                                                 errormessage="Please enter no of Egg Pack"
                                                 required={false}
                                                 disabled={false}
                                                 onChange={eggpackChange}
                                             />
 
-                                            <InputField controlId="EggLose" label="Egg Lose"
+                                            <InputField controlId="EggLose" label="Egg lose"
                                                 type="number"
                                                 value={eggsaledata.EggLose}
                                                 name="EggLose"
-                                                placeholder="EggLose"
+                                                placeholder="Egg lose"
                                                 errormessage="Please enter no of Egg Lose"
                                                 required={false}
                                                 disabled={false}
@@ -1350,7 +1390,7 @@ function EggSaleModule(props) {
                                             />
 
 
-                                            <InputField controlId="TotalDiscount" label="TotalDiscount"
+                                            <InputField controlId="TotalDiscount" label="Total discount"
                                                 type="text"
                                                 value={eggsaledata.TotalDiscount > 0 ? parseFloat(eggsaledata.TotalDiscount).toFixed(2) : eggsaledata.TotalDiscount}
                                                 name="TotalDiscount"
@@ -1374,8 +1414,8 @@ function EggSaleModule(props) {
 
                                         <Row className="mb-12">
                                             <Form.Group controlId="Comments" as={Col} >
-                                                <Form.Label>Comments</Form.Label>
-                                                <Form.Control as="textarea" rows={3} name="Comments" onChange={commentsChange} value={eggsaledata.Comments}
+                                                <Form.Label style={{fontSize:'13px'}}>Comments</Form.Label>
+                                                <Form.Control  style={{fontSize:'13px'}} as="textarea" rows={3} name="Comments" onChange={commentsChange} value={eggsaledata.Comments}
                                                     placeholder="Comments" />
 
                                             </Form.Group>
