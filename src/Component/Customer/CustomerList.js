@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { variables } from '../../Variables';
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form, Alert } from 'react-bootstrap';
-import { useNavigate,useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import moment from 'moment';
 import InputField from '../ReuseableComponent/InputField'
 import DateComponent from '../DateComponent';
@@ -27,7 +27,7 @@ function CustomerList(props) {
     const search = useLocation().search;
     const [_type, setType] = useState(new URLSearchParams(search).get('customertype'));
 
-    
+
 
     let addModalClose = () => {
         setAddModalShow(false);
@@ -46,7 +46,7 @@ function CustomerList(props) {
         Email: "",
         IsActive: true,
         ProfileImageUrl: "annonymous.jpg",
-        Address:""
+        Address: ""
     };
 
     const [custdata, setCustData] = useState(initialvalues);
@@ -65,7 +65,8 @@ function CustomerList(props) {
             Email: "",
             IsActive: true,
             ProfileImageUrl: "annonymous.jpg",
-            Address:""
+            Address: "",
+            CustomerId:""
         })
     }
 
@@ -83,7 +84,8 @@ function CustomerList(props) {
             Email: customerData.Email,
             IsActive: customerData.IsActive,
             ProfileImageUrl: customerData.ProfileImageUrl,
-            Address:customerData.Address
+            Address: customerData.Address,
+            CustomerId:customerData.CustomerId
         })
     }
 
@@ -99,6 +101,10 @@ function CustomerList(props) {
 
     const emailChange = (e) => {
         setCustData({ ...custdata, Email: e.target.value });
+    }
+
+    const customerChange = (e) => {
+        setCustData({ ...custdata, CustomerId: e.target.value });
     }
 
     const mobileNoChange = (e) => {
@@ -117,7 +123,7 @@ function CustomerList(props) {
         setCustData({ ...custdata, Address: e.target.value });
     }
 
-    
+
 
     const deleteCustomer = (id) => {
 
@@ -177,13 +183,13 @@ function CustomerList(props) {
             .then(response => response.json())
             .then(data => {
                 if (data.StatusCode === 200) {
-                    var filterList=data.Result;
+                    var filterList = data.Result;
                     //var custype=producttypes.filter(x=>x.ProductName==_type);
-                    if (typeof(_type) !== 'undefined' && _type != null) {
+                    if (typeof (_type) !== 'undefined' && _type != null) {
                         setFilterCutomerType(_type);
                         filterList = data.Result.filter((c) => c.CustomerTypeId == _type);
                     }
-                   
+
                     setCustomerList(filterList);
                     setCustomerListForFilter(data.Result);
                     setTotalPages(Math.ceil(filterList.length / process.env.REACT_APP_PAGE_PAGINATION_NO));
@@ -282,7 +288,7 @@ function CustomerList(props) {
                     Email: custdata.Email,
                     IsActive: custdata.IsActive,
                     ProfileImageUrl: custdata.ProfileImageUrl,
-                    Address:custdata.Address
+                    Address: custdata.Address
 
                 })
             }).then(res => res.json())
@@ -341,12 +347,12 @@ function CustomerList(props) {
                     MiddleName: custdata.MiddleName,
                     LastName: custdata.LastName,
                     MobileNo: custdata.MobileNo,
-                   // DOB: custdata.DOB,
+                    // DOB: custdata.DOB,
                     CustomerTypeId: custdata.CustomerTypeId,
                     Email: custdata.Email,
                     IsActive: custdata.IsActive,
                     ProfileImageUrl: custdata.ProfileImageUrl,
-                    Address:custdata.Address
+                    Address: custdata.Address
 
                 })
             }).then(res => res.json())
@@ -397,7 +403,7 @@ function CustomerList(props) {
 
     const onCustomerTypeChange = (e) => {
         setFilterCutomerType(e.target.value);
-        getFilterCustomerListData(filterCutomerName,e.target.value);
+        getFilterCustomerListData(filterCutomerName, e.target.value);
 
         const url = new URL(window.location.href);
         url.searchParams.set('customertype', e.target.value);
@@ -406,15 +412,15 @@ function CustomerList(props) {
 
     const customerNameSearch = (e) => {
         setFilterCutomerName(e.target.value);
-        getFilterCustomerListData(e.target.value,filterCutomerType);
+        getFilterCustomerListData(e.target.value, filterCutomerType);
     }
 
     const getFilterCustomerListData = (custname, custType) => {
         let _filterList = [];
         if (custname !== "") {
             _filterList = customerListForFilter.filter(((c) => c.FirstName
-            .toLowerCase().includes(custname.toLowerCase()) || 
-            c.LastName.toLowerCase().includes(custname.toLowerCase())) 
+                .toLowerCase().includes(custname.toLowerCase()) ||
+                c.LastName.toLowerCase().includes(custname.toLowerCase()))
             );
         }
         else {
@@ -432,30 +438,30 @@ function CustomerList(props) {
 
     return (
         <div>
-            <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px'}}>
+            <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
                 <h2>Customer List</h2>
             </div>
             <div className="container" style={{ marginTop: '10px', width: '50%' }}>
                 <div className="row align-items-center">
                     <div className="col">
-                        <InputField  label="Customer name"
-                                                type="text"
-                                                value={filterCutomerName}
-                                                name="CustomerName"
-                                                placeholder="Search customer"
-                                                onChange={customerNameSearch}
-                                                required={false}
-                                                disabled={false}
-                                                
-                                            />
+                        <InputField label="Customer name"
+                            type="text"
+                            value={filterCutomerName}
+                            name="CustomerName"
+                            placeholder="Search customer"
+                            onChange={customerNameSearch}
+                            required={false}
+                            disabled={false}
+
+                        />
                     </div>
-                   
+
                     <div className="col">
-                        
-                    <label class="form-label" style={{fontSize:13}}>Customer Type</label>
-                        
+
+                        <label class="form-label" style={{ fontSize: 13 }}>Customer Type</label>
+
                         <Form.Select aria-label="Default select example"
-                            onChange={onCustomerTypeChange} style={{fontSize:13}}>
+                            onChange={onCustomerTypeChange} style={{ fontSize: 13 }}>
                             <option selected value="">Choose...</option>
                             {
                                 producttypes.map((item) => {
@@ -466,17 +472,17 @@ function CustomerList(props) {
                                             selected={item.ProductId === parseInt(filterCutomerType)}
                                             value={item.ProductId}
                                         >{item.ProductName}</option>
-                                       
+
                                     );
                                 })
                             }
                         </Form.Select>
                     </div>
-                    <div className="col" style={{ textAlign: 'right', marginTop: '30px'}}>
-                    <Button className="mr-2" variant="primary"
-                        style={{ marginRight: "17.5px" }}
-                        onClick={() => clickAddCustomer()}>Add</Button>
-                </div>
+                    <div className="col" style={{ textAlign: 'right', marginTop: '30px' }}>
+                        <Button className="mr-2" variant="primary"
+                            style={{ marginRight: "17.5px" }}
+                            onClick={() => clickAddCustomer()}>Add</Button>
+                    </div>
                 </div>
             </div>
             {/* <div className="row">
@@ -504,19 +510,19 @@ function CustomerList(props) {
                             //console.log(itemsToDiaplay.length);
                             const ctype = producttypes.filter((c) => c.ProductId === p.CustomerTypeId);
                             const cname = ctype.length > 0 ? ctype[0].ProductName : "";
-                            let fullname=(p.MiddleName!="" && p.MiddleName!=null) ? p.FirstName+" "+p.MiddleName+" "+p.LastName: 
-                            p.FirstName+" "+p.LastName;
+                            let fullname = (p.MiddleName != "" && p.MiddleName != null) ? p.FirstName + " " + p.MiddleName + " " + p.LastName :
+                                p.FirstName + " " + p.LastName;
                             return (
-                                <tr align='center' key={p.ID} style={{fontSize:13}} >
+                                <tr align='center' key={p.ID} style={{ fontSize: 13 }} >
                                     <td align='left'>
                                         {
 
 
-                                            p.CustomerTypeId===4 ?  
-                                            <a href={`/birdsale/?uid=${p.ID}`}>{fullname}
-                                            <span className="sr-only">(current)</span></a>
-                                            : <a href={`/eggsale/?uid=${p.ID}`}>{fullname}
-                                            <span className="sr-only">(current)</span></a>
+                                            p.CustomerTypeId === 4 ?
+                                                <a href={`/birdsale/?uid=${p.ID}`}>{fullname}
+                                                    <span className="sr-only">(current)</span></a>
+                                                : <a href={`/eggsale/?uid=${p.ID}`}>{fullname}
+                                                    <span className="sr-only">(current)</span></a>
                                         }
                                         {/* <a href={`/eggsale/${p.ID}`}>{p.FirstName}
                                             <span className="sr-only">(current)</span></a> */}
@@ -551,46 +557,46 @@ function CustomerList(props) {
                                 </tr>
                             )
                         }) : <tr>
-                        <td style={{ textAlign: "center" }} colSpan={14}>
-                            No Records
-                        </td>
-                    </tr>
+                            <td style={{ textAlign: "center" }} colSpan={14}>
+                                No Records
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </Table >
             {
- customerlist && customerlist.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
- <>
- <button
-     onClick={handlePrevClick}
-     disabled={preDisabled}
- >
-     Prev
- </button>
- {
-     Array.from({ length: totalPages }, (_, i) => {
-         return (
-             <button
-                 onClick={() => handlePageChange(i + 1)}
-                 key={i}
-                 disabled={i + 1 === currentPage}
-             >
-                 {i + 1}
-             </button>
-         )
-     })
- }
+                customerlist && customerlist.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
+                <>
+                    <button
+                        onClick={handlePrevClick}
+                        disabled={preDisabled}
+                    >
+                        Prev
+                    </button>
+                    {
+                        Array.from({ length: totalPages }, (_, i) => {
+                            return (
+                                <button
+                                    onClick={() => handlePageChange(i + 1)}
+                                    key={i}
+                                    disabled={i + 1 === currentPage}
+                                >
+                                    {i + 1}
+                                </button>
+                            )
+                        })
+                    }
 
 
- <button
-     onClick={handleNextClick}
-     disabled={nextDisabled}
- >
-     Next
- </button>
- </>
+                    <button
+                        onClick={handleNextClick}
+                        disabled={nextDisabled}
+                    >
+                        Next
+                    </button>
+                </>
             }
-           
+
 
             <div className="ContainerOverride" id="exampleModal">
                 <Modal
@@ -612,6 +618,7 @@ function CustomerList(props) {
 
                                 <div>
                                     <Form noValidate validated={validated} className="needs-validation">
+                                        
                                         <Row className="mb-12">
 
                                             <InputField controlId="FirstName" label="First name"
@@ -673,7 +680,7 @@ function CustomerList(props) {
                                             />
 
                                             <Form.Group controlId="CustomerTypeId" as={Col} >
-                                                <Form.Label style={{fontSize:13}}>Customer type</Form.Label>
+                                                <Form.Label style={{ fontSize: 13 }}>Customer type</Form.Label>
                                                 <Form.Select aria-label="Default select example"
                                                     onChange={custTypeChange} required>
                                                     <option selected disabled value="">Choose...</option>
@@ -698,7 +705,7 @@ function CustomerList(props) {
                                             </Form.Group>
                                         </Row>
                                         <Row className="mb-12">
-                                        <InputField controlId="Address" label="Address"
+                                            <InputField controlId="Address" label="Address"
                                                 type="text"
                                                 value={custdata.Address}
                                                 name="Address"
@@ -708,7 +715,7 @@ function CustomerList(props) {
                                                 required={true}
                                                 disabled={false}
                                             />
-                                            </Row>
+                                        </Row>
 
                                         {/* <Row className="mb-3">
                                             <Form.Group as={Col} controlId="DOB">
@@ -722,10 +729,10 @@ function CustomerList(props) {
                                         </Row> */}
                                         <Row className="mb-12">
                                             <Form.Group as={Col} controlId="ProfileImageUrl">
-                                                <Form.Label style={{fontSize:13}}>Customer photo</Form.Label>
-                                                <input class="form-control" type="file" id="formFile" 
-                                                onChange={profileImageUpload} multiple="false" accept="image/*" style={{fontSize:13}} />
-                                                <Form.Control.Feedback type="invalid" style={{fontSize:13}}>
+                                                <Form.Label style={{ fontSize: 13 }}>Customer photo</Form.Label>
+                                                <input class="form-control" type="file" id="formFile"
+                                                    onChange={profileImageUpload} multiple="false" accept="image/*" style={{ fontSize: 13 }} />
+                                                <Form.Control.Feedback type="invalid" style={{ fontSize: 13 }}>
                                                     Please select image
                                                 </Form.Control.Feedback>
                                             </Form.Group>

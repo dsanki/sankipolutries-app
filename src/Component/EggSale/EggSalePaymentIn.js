@@ -4,8 +4,10 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import moment from 'moment';
 import InputField from '../ReuseableComponent/InputField'
 import DateComponent from '../DateComponent';
-import { HandleLogout } from './../../Utility'
+import { HandleLogout, FetchAdvanceListByCustId } from './../../Utility'
 import Loading from '../Loading/Loading'
+
+
 
 function EggSalePaymentIn(props) {
     let history = useNavigate();
@@ -19,15 +21,16 @@ function EggSalePaymentIn(props) {
     const [paymenthistorylist, setPaymentHistoryList] = useState([]);
     const [customerdetails, setCustomerDetails] = useState([]);
     const [validated, setValidated] = useState(false);
+    const [advancedata, setAdvanceData] = useState([]);
 
     let addCount = (num) => {
         setCount(num + 1);
     };
 
-    const _paymenthistory=
+    const _paymenthistory =
     {
-        Id:"",
-        CustomerId: "",
+        Id: "",
+        CustomerId: uid,
         Amount: "",
         Date: "",
         PaymentMode: "",
@@ -37,7 +40,7 @@ function EggSalePaymentIn(props) {
     const [paymenthistorydata, setPaymentHistoryData] = useState(_paymenthistory);
 
     const _paymentDetails = {
-        CustomerId: "",
+        CustomerId: uid,
         Amount: "",
         PaymentDate: "",
         PaymentMode: "",
@@ -57,6 +60,7 @@ function EggSalePaymentIn(props) {
         if (localStorage.getItem('token')) {
             setPaymentDetails({ ...paymentDetails, CustomerId: uid });
             fetchCustomerDetails(uid);
+            fetchAdvanceListByCustId(uid);
         }
         else {
             HandleLogout();
@@ -116,9 +120,9 @@ function EggSalePaymentIn(props) {
         setPaymentDetails({ ...paymentDetails, PaymentDate: e.target.value });
     }
 
-    const assignPaymentDetails=(val, amt)=>{
+    const assignPaymentDetails = (val, amt) => {
         if (val == "Cash") {
-            setPaymentDetails({ ...paymentDetails, Cash: amt, PaymentMode: val});
+            setPaymentDetails({ ...paymentDetails, Cash: amt, PaymentMode: val });
         }
         else if (val == "PhonePay") {
             setPaymentDetails({ ...paymentDetails, PhonePay: amt, PaymentMode: val });
@@ -136,7 +140,7 @@ function EggSalePaymentIn(props) {
 
     const paymentModeChange = (e) => {
         let paymentMode = e.target.value;
-        assignPaymentDetails(paymentMode,paymentDetails.Amount);
+        assignPaymentDetails(paymentMode, paymentDetails.Amount);
         // if (e.target.value == "Cash") {
         //     setPaymentDetails({ ...paymentDetails, Cash: paymentDetails.Amount });
         // }
@@ -157,8 +161,8 @@ function EggSalePaymentIn(props) {
 
     const fetchEggSalePaymentHistory = async (uid) => {
         setIsLoaded(true);
-        fetch(process.env.REACT_APP_API + 'EggSale/GetPaymentHistoryByCustId?CustId=' 
-            + uid +'&CompanyId='+localStorage.getItem('companyid'),
+        fetch(process.env.REACT_APP_API + 'EggSale/GetPaymentHistoryByCustId?CustId='
+            + uid + '&CompanyId=' + localStorage.getItem('companyid'),
             {
                 method: 'GET',
                 headers: {
@@ -194,8 +198,8 @@ function EggSalePaymentIn(props) {
 
     const fetchPendingEggSaleInvoiceList = async (uid) => {
         setIsLoaded(true);
-        fetch(process.env.REACT_APP_API + 'EggSale/GetPendingEggSaleInvoiceListByCustId?CustId=' 
-            + uid +'&CompanyId='+localStorage.getItem('companyid'),
+        fetch(process.env.REACT_APP_API + 'EggSale/GetPendingEggSaleInvoiceListByCustId?CustId='
+            + uid + '&CompanyId=' + localStorage.getItem('companyid'),
             {
                 method: 'GET',
                 headers: {
@@ -228,30 +232,30 @@ function EggSalePaymentIn(props) {
     const [totalamt, setTotalAmt] = useState(0);
     let newVal = totalamt;
 
-    const UpdatePaymentHistory=async ()=>
-    {
-                        const response = await fetch(process.env.REACT_APP_API + 'EggSale/UpdatePaymentHistory', {
-                            method: 'PUT',
-                            headers: {
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                                'Authorization': localStorage.getItem('token')
-                            },
-                            body: JSON.stringify({
-                                Amount: paymentDetails.Amount,
-                                Date: paymentDetails.PaymentDate,
-                                PaymentMode:paymentDetails.PaymentMode,
-                                CustomerId:uid,
-                                CompanyId:localStorage.getItem('companyid')
-                            })
-                        });
-                            const todo = await response.json()
-                            .then((result) => {
-                                if (result.StatusCode === 200) {
-                                    addCount(count);
-                                }
-                            });
-                       
+    const UpdatePaymentHistory = async (val) => {
+        const response = await fetch(process.env.REACT_APP_API + 'EggSale/UpdatePaymentHistory', {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
+            },
+            body: JSON.stringify({
+
+                Amount: paymentDetails.Amount || val,
+                Date: paymentDetails.PaymentDate || new Date(),
+                PaymentMode: paymentDetails.PaymentMode || 'Cash',
+                CustomerId: paymentDetails.CustomerId,
+                CompanyId: localStorage.getItem('companyid')
+            })
+        });
+        const todo = await response.json()
+            .then((result) => {
+                if (result.StatusCode === 200) {
+                    addCount(count);
+                }
+            });
+
     }
 
     const handleSettle = async (e) => {
@@ -265,12 +269,12 @@ function EggSalePaymentIn(props) {
         }
         else {
             e.preventDefault();
-            //  var form = e.target.closest('.needs-validation');
             setIsLoaded(true);
             for (const p of duelist) {
                 if (newVal !== 0) {
                     if (parseFloat(p.Due) < parseFloat(newVal)) {
-                        const response = await fetch(process.env.REACT_APP_API + 'EggSale/EggSaleInvoicePaymentUpdate', {
+                        const response = await fetch(process.env.REACT_APP_API 
+                            + 'EggSale/EggSaleInvoicePaymentUpdate', {
                             method: 'PUT',
                             headers: {
                                 'Accept': 'application/json',
@@ -287,7 +291,7 @@ function EggSalePaymentIn(props) {
                                 UPI: paymentDetails.UPI,
                                 Cheque: paymentDetails.Cheque,
                                 Due: 0,
-                                PaymentMode:paymentDetails.PaymentMode
+                                PaymentMode: paymentDetails.PaymentMode
                             })
                         });
 
@@ -300,7 +304,7 @@ function EggSalePaymentIn(props) {
                     }
                     else {
 
-                        assignPaymentDetails(paymentDetails.PaymentMode,newVal);
+                        assignPaymentDetails(paymentDetails.PaymentMode, newVal);
                         const response = await fetch(process.env.REACT_APP_API + 'EggSale/EggSaleInvoicePaymentUpdate', {
                             method: 'PUT',
                             headers: {
@@ -318,7 +322,7 @@ function EggSalePaymentIn(props) {
                                 UPI: paymentDetails.UPI,
                                 Cheque: paymentDetails.Cheque,
                                 Due: parseFloat(p.Due) - parseFloat(newVal),
-                                PaymentMode:paymentDetails.PaymentMode
+                                PaymentMode: paymentDetails.PaymentMode
 
                             })
                         });
@@ -335,7 +339,11 @@ function EggSalePaymentIn(props) {
                 }
             }
 
-            UpdatePaymentHistory();
+            if (newVal > 0) {
+                addAdvancePayment(newVal)
+            }
+
+            UpdatePaymentHistory(totalamt);
 
             addCount(count);
 
@@ -346,6 +354,162 @@ function EggSalePaymentIn(props) {
 
     }
 
+    const addAdvancePayment = async (val) => {
+        const response = await fetch(process.env.REACT_APP_API
+            + 'AdvancePayment/AddAdvancePayment', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
+            },
+            body: JSON.stringify({
+                Id: 0,
+                Amount: val,
+                Date: paymentDetails.PaymentDate || new Date(),
+                PaymentMode: paymentDetails.PaymentMode || 'Cash',
+                CustomerId: paymentDetails.CustomerId,
+                CompanyId: localStorage.getItem('companyid'),
+                AdvanceSettlement: false
+            })
+        });
+
+        const todo = await response.json()
+            .then((result) => {
+                if (result.StatusCode === 200) {
+                    addCount(count);
+                }
+            });
+
+        //setIsLoaded(false);
+
+    }
+
+    const fetchAdvanceListByCustId = async (custid) => {
+
+        FetchAdvanceListByCustId(custid)
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setAdvanceData(data.Result);
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    setIsLoaded(false);
+                    setAdvanceData("");
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                    setIsLoaded(false);
+                    setAdvanceData("");
+                }
+            });
+    }
+
+    const settleAdvancePayment = async (e) => {
+        let newAdvVal = advancedata.Amount;
+        e.preventDefault();
+        setIsLoaded(true);
+        for (const p of duelist) {
+            if (newAdvVal !== 0) {
+                if (parseFloat(p.Due) < parseFloat(newAdvVal)) {
+                    const response = await fetch(process.env.REACT_APP_API
+                        + 'EggSale/EggSalePaymentUpdate', {
+                        method: 'PUT',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'Authorization': localStorage.getItem('token')
+                        },
+                        body: JSON.stringify({
+                            Id: p.Id,
+                            Amount: p.Due,
+                            PaymentDate: new Date(),
+                            Due: 0,
+                            PaymentMode:'Cash'
+                        })
+                    });
+
+                    const todo = await response.json()
+                        .then((result) => {
+                            if (result.StatusCode === 200) {
+
+                                updateAdvancePayment(p.Due);
+                                UpdatePaymentHistory(p.Due);
+                                newAdvVal = parseFloat(newAdvVal) - parseFloat(p.Due);
+                            }
+                        });
+                }
+                else {
+                    const response = await fetch(process.env.REACT_APP_API
+                        + 'EggSale/EggSalePaymentUpdate', {
+                        method: 'PUT',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'Authorization': localStorage.getItem('token')
+                        },
+                        body: JSON.stringify({
+                            Id: p.Id,
+                            Amount: newAdvVal,
+                            PaymentDate: new Date(),
+                            Due: parseFloat(p.Due) - parseFloat(newAdvVal),
+                             PaymentMode:'Cash'
+                        })
+                    });
+                    const todo = await response.json()
+                        .then((result) => {
+                            if (result.StatusCode === 200) {
+                                updateAdvancePayment(newAdvVal);
+                                UpdatePaymentHistory(newAdvVal);
+                                newAdvVal = 0;
+                            }
+                        })
+                }
+            }
+            else {
+                break;
+            }
+        }
+
+        addCount(count);
+        setIsLoaded(false);
+    }
+
+
+    const updateAdvancePayment = async (val) => {
+        const response = await fetch(process.env.REACT_APP_API
+            + 'AdvancePayment/UpdateAdvancePayment', {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
+            },
+            body: JSON.stringify({
+                Id: 0,
+                Amount: val,
+                Date: paymentDetails.PaymentDate || new Date(),
+                PaymentMode: paymentDetails.PaymentMode || 'Cash',
+                CustomerId: paymentDetails.CustomerId,
+                CompanyId: localStorage.getItem('companyid'),
+                AdvanceSettlement: true
+            })
+        });
+
+        const todo = await response.json()
+            .then((result) => {
+                if (result.StatusCode === 200) {
+                    //addUCount(count);
+                }
+            });
+
+        //setIsLoaded(false);
+
+    }
 
     return (
 
@@ -356,51 +520,228 @@ function EggSalePaymentIn(props) {
                 <h2>Payment In</h2>
             </div>
 
-            <div className="container" style={{ marginTop: '20px', marginBottom: '10px' }}>
+            {/* {
+                        advancedata != null && advancedata.Amount > 0 && <div className="row justify-content-center">
+                            <div className="alert alert-success" role="alert">
+                                <strong>  Advance payment done of Rs: {parseFloat(advancedata.Amount || 0).toFixed(2)}</strong>
+                                {
+                                    medicinependinglist && medicinependinglist.length > 0 &&
+                                    <Button variant="primary" type="submit" style={{ marginLeft: '20px' }} onClick={(e) => settleAdvancePayment(e)}>
+                                        Settle
+                                    </Button>
+                                }
+
+                            </div>
+                        </div>
+                    } */}
+
+            <div class="row justify-content-center">
+                <div class="col-4">
+                    <Form noValidate validated={validated} className="needs-validation">
+                        <div class="overflow-y-visible" style={{ backgroundColor: '#dee2e6', padding: '7px' }}>
+                            <div class="row justify-content-start">
+
+                                <InputField label="Amount"
+                                    type="text"
+                                    value={paymentDetails.Amount}
+                                    name="Amount"
+                                    placeholder="Amount"
+                                    onChange={amountChange}
+                                    required={true}
+                                    disabled={false}
+                                    errormessage="Enter amount"
+                                />
+
+                            </div>
+
+                            <div class="row justify-content-start">
+
+                                <Form.Group controlId="PaymentDate" as={Col} >
+                                    <Form.Label>Payment Date *</Form.Label>
+                                    <DateComponent date={null} onChange={paymentDateChange}
+                                        isRequired={true} value={paymentDetails.PaymentDate} />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please select date
+                                    </Form.Control.Feedback>
+                                </Form.Group>
+
+                            </div>
+                            <div class="row justify-content-start">
+
+                                <Form.Group controlId="PaymentMode" as={Col} >
+                                    <Form.Label>Payment Mode *</Form.Label>
+                                    <Form.Select
+                                        onChange={paymentModeChange} required style={{ width: "150px", fontSize: 13 }}>
+                                        <option selected disabled value="">Choose...</option>
+                                        <option value="Cash">Cash</option>
+                                        <option value="PhonePay">PhonePay</option>
+                                        <option value="NetBanking">NetBanking</option>
+                                        <option value="UPI">UPI</option>
+                                        <option value="Cheque">Cheque</option>
+                                    </Form.Select>
+                                    <Form.Control.Feedback type="invalid">
+                                        Please select payment mode
+                                    </Form.Control.Feedback>
+                                </Form.Group>
+
+                            </div>
+                            {/* <div class="row justify-content-start">
+
+                                <Form.Group controlId="PaymentMode" as={Col} >
+                                    <Form.Label style={{ fontSize: '13px' }}>Payment Mode *</Form.Label>
+                                    <Form.Select
+                                        onChange={paymentModeChange} required style={{ width: "150px", fontSize: 13 }}>
+                                        <option selected disabled value="">Choose...</option>
+                                        <option value="Cash">Cash</option>
+                                        <option value="PhonePay">PhonePay</option>
+                                        <option value="NetBanking">NetBanking</option>
+                                        <option value="UPI">UPI</option>
+                                        <option value="Cheque">Cheque</option>
+                                    </Form.Select>
+                                    <Form.Control.Feedback type="invalid">
+                                        Please select payment mode
+                                    </Form.Control.Feedback>
+                                </Form.Group>
+
+                            </div> */}
+
+                            <div class="row justify-content-start">
+                                <div className="col-2">
+                                    <Button variant="primary" type="submit"
+                                        style={{ marginTop: "25px" }} onClick={(e) => handleSettle(e)}>
+                                        Pay
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </Form>
+                </div>
+
+                <div class="col-8">
+                    {
+                        advancedata != null && advancedata.Amount > 0 && <div className="row justify-content-center">
+                            <div className="alert alert-success" role="alert">
+                                <strong>  Advance payment done of Rs: {parseFloat(advancedata.Amount || 0).toFixed(2)}</strong>
+                                {
+                                    duelist && duelist.length > 0 &&
+                                    <Button variant="primary" type="submit" style={{ marginLeft: '20px' }} 
+                                    onClick={(e) => settleAdvancePayment(e)}>
+                                        Settle
+                                    </Button>
+                                }
+
+                            </div>
+                        </div>
+                    }
+
+                    <div className="row justify-content-center"
+                        style={{ textAlign: 'center', marginTop: '10px', marginBottom: '10px' }}>
+
+                    </div>
+                    <div className="row justify-content-center">
+                        <p style={{ fontSize: '18px', textAlign: 'center' }}><strong>Due List</strong></p>
+                        <div class="overflow-y-visible">
+                            <Table className="mt-4" striped bordered hover size="sm">
+                                <thead>
+                                    <tr className="tr-custom" align='center'>
+                                        <th>Invoice Date</th>
+                                        <th>Invoice No</th>
+                                        <th>Total Amount (<span>&#8377;</span>)</th>
+                                        <th>Due Amount (<span>&#8377;</span>)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        duelist && duelist.length > 0 ? duelist.map((p) => {
+                                            return (
+                                                !isloaded && <tr align='center' style={{ fontSize: 13 }} key={p.Id}>
+
+                                                    <td align='center'>{moment(p.PurchaseDate).format('DD-MMM-YYYY')}</td>
+                                                    <td align='center'>{p.InvoiceNo}</td>
+                                                    <td align='center'>
+                                                        {new Intl.NumberFormat('en-IN', {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2
+                                                        }).format(parseFloat(p.FinalCostInvoice).toFixed(2))}
+                                                    </td>
+                                                    <td align='center' style={{ color: '#ff0000' }}>{new Intl.NumberFormat('en-IN', {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2
+                                                    }).format(parseFloat(p.Due).toFixed(2))}</td>
+                                                </tr>
+                                            )
+                                        }) : <tr>
+                                            <td style={{ textAlign: "center" }} colSpan={14}>
+                                                No Records
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </Table>
+                        </div>
+                    </div>
+
+                    <div className="row justify-content-center">
+                        {
+                            paymenthistorylist && paymenthistorylist.length > 0 &&
+                            <>
+                                <div className="row justify-content-center"
+                                    style={{ textAlign: 'center', marginTop: '10px', marginBottom: '10px' }}>
+
+                                    <p style={{ fontSize: '18px' }}><strong>Payment History</strong></p>
+                                </div>
+                                <div class="overflow-y-visible">
+                                    <Table striped bordered hover size="sm">
+                                        <thead>
+                                            <tr className="tr-custom" align='center'>
+                                                <th>Date</th>
+                                                <th>Amount (<span>&#8377;</span>)</th>
+                                                <th>Mode </th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                paymenthistorylist && paymenthistorylist.length > 0 ? paymenthistorylist.map((p) => {
+                                                    return (
+                                                        !isloaded && <tr align='center' style={{ fontSize: 13 }} key={p.Id}>
+
+                                                            <td align='center'>{moment(p.Date).format('DD-MMM-YYYY')}</td>
+                                                            <td align='center'>
+                                                                {new Intl.NumberFormat('en-IN', {
+                                                                    minimumFractionDigits: 2,
+                                                                    maximumFractionDigits: 2
+                                                                }).format(parseFloat(p.Amount).toFixed(2))}
+                                                            </td>
+
+                                                            <td>{p.PaymentMode}</td>
+                                                            {/* <td> </td> */}
+
+                                                        </tr>
+                                                    )
+                                                }) : <tr>
+                                                    <td style={{ textAlign: "center", fontSize: '13px' }} colSpan={14}>
+                                                        No Records
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </Table>
+                                </div>
+                            </>
+                        }
+                    </div>
+
+                </div>
+            </div>
+            {/* <div className="container" style={{ marginTop: '20px', marginBottom: '10px' }}>
                 <div className="row align-items-center" style={{ fontSize: 13 }}>
                     <Form noValidate validated={validated} className="needs-validation">
                         <Row className="mb-12">
-                            <InputField label="Amount"
-                                type="text"
-                                value={paymentDetails.Amount}
-                                name="Amount"
-                                placeholder="Amount"
-                                onChange={amountChange}
-                                required={true}
-                                disabled={false}
-                                errormessage="Enter amount"
-                            />
+                           
 
-                            <Form.Group controlId="PaymentDate" as={Col} >
-                                <Form.Label>Payment Date *</Form.Label>
-                                <DateComponent date={null} onChange={paymentDateChange}
-                                    isRequired={true} value={paymentDetails.PaymentDate} />
-                                     <Form.Control.Feedback type="invalid">
-                                                Please select date
-                                            </Form.Control.Feedback>
-                            </Form.Group>
-                            <Form.Group controlId="PaymentMode" as={Col} >
-                                <Form.Label>Payment Mode *</Form.Label>
-                                <Form.Select
-                                    onChange={paymentModeChange} required style={{ width: "150px", fontSize: 13 }}>
-                                    <option selected disabled value="">Choose...</option>
-                                    <option value="Cash">Cash</option>
-                                    <option value="PhonePay">PhonePay</option>
-                                    <option value="NetBanking">NetBanking</option>
-                                    <option value="UPI">UPI</option>
-                                    <option value="Cheque">Cheque</option>
-                                </Form.Select>
-                                <Form.Control.Feedback type="invalid">
-                                    Please select payment mode
-                                </Form.Control.Feedback>
-                            </Form.Group>
-                            {/* <div className="col-2">
-                                <p><strong>Payment Mode</strong></p>
-                                <select className="form-select" required aria-label="Default select example"
-                                    style={{ width: "150px", fontSize: 13 }} onChange={paymentModeChange}>
-                                    
-                                </select>
-                            </div> */}
+                           
+                          
                             <div className="col-2">
                                 <Button variant="primary" type="submit" style={{ marginTop: "30px" }} onClick={(e) => handleSettle(e)}>
                                     Settle
@@ -410,51 +751,10 @@ function EggSalePaymentIn(props) {
                         </Row>
                     </Form>
                 </div>
-            </div>
+            </div> */}
 
-            <Table className="mt-4" striped bordered hover size="sm">
-                <thead>
-                    <tr className="tr-custom" align='center'>
-                        <th>Invoice Date</th>
-                        <th>Invoice No</th>
-                        <th>Total Amount (<span>&#8377;</span>)</th>
-                        <th>Due Amount (<span>&#8377;</span>)</th>
-                        {/* <th>Amount Settled (<span>&#8377;</span>)</th> */}
 
-                    </tr>
-                </thead>
-                <tbody>
-                    {
-                        duelist && duelist.length > 0 ? duelist.map((p) => {
-                            return (
-                                !isloaded && <tr align='center' style={{ fontSize: 13 }} key={p.Id}>
-
-                                    <td align='center'>{moment(p.PurchaseDate).format('DD-MMM-YYYY')}</td>
-                                    <td align='center'>{p.InvoiceNo}</td>
-                                    <td align='center'>
-                                        {new Intl.NumberFormat('en-IN', {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2
-                                        }).format(parseFloat(p.FinalCostInvoice).toFixed(2))}
-                                    </td>
-                                    <td align='center' style={{ color: '#ff0000' }}>{new Intl.NumberFormat('en-IN', {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2
-                                    }).format(parseFloat(p.Due).toFixed(2))}</td>
-                                    {/* <td>{ }</td> */}
-                                    {/* <td> </td> */}
-
-                                </tr>
-                            )
-                        }) : <tr>
-                            <td style={{ textAlign: "center" }} colSpan={14}>
-                                No Records
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </Table>
-            <div className="row justify-content-center"
+            {/* <div className="row justify-content-center"
                 style={{ textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
                 <h4>Payment History</h4>
             </div>
@@ -480,9 +780,8 @@ function EggSalePaymentIn(props) {
                                             maximumFractionDigits: 2
                                         }).format(parseFloat(p.Amount).toFixed(2))}
                                     </td>
-                                    
-                                    <td>{p.PaymentMode }</td>
-                                    {/* <td> </td> */}
+
+                                    <td>{p.PaymentMode}</td>
 
                                 </tr>
                             )
@@ -493,7 +792,7 @@ function EggSalePaymentIn(props) {
                         </tr>
                     }
                 </tbody>
-            </Table>
+            </Table> */}
 
         </div>
     )

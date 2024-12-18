@@ -44,7 +44,7 @@
   padding-left: var(--bs-gutter-x, .75rem);
   margin-right: auto;
   margin-left: auto;
-  max-width: 1900px;
+  /* max-width: 1900px; */
   background-color: transparent !important;
 }
 

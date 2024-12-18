@@ -9,7 +9,8 @@ import DateComponent from '../DateComponent';
 import {
     dateyyyymmdd, HandleLogout, downloadExcel,
     FetchCompanyDetails, AmountInWords, ReplaceNonNumeric, Commarize,
-    FecthEggCategory, FecthEggSaleInvoiceList, FecthEggSaleInvoiceById
+    FecthEggCategory, FecthEggSaleInvoiceList, FecthEggSaleInvoiceById, FetchAdvanceListByCustId,
+    FetchEggDiscountTypes
 } from './../../Utility'
 import Loading from '../Loading/Loading'
 
@@ -41,7 +42,7 @@ function EggSaleModule(props) {
     const [filterToDate, setFilterToDate] = useState("");
     const [isloaded, setIsLoaded] = useState(true);
     const [eggsalelistfilter, setEggSaleListFilter] = useState([]);
-   // const [companydetails, setCompanyDetails] = useState([]);
+    // const [companydetails, setCompanyDetails] = useState([]);
 
     const [companydetails, setCompanyDetails] = useState([JSON.parse(localStorage.getItem('companydetails'))]);
     const [eggcategory, setEggCategory] = useState([]);
@@ -53,13 +54,14 @@ function EggSaleModule(props) {
     const [tmpidcount, setTempIdCount] = useState(0);
 
     const [additionalCharge, setAdditionalCharge] = useState(0);
+    const [advancedata, setAdvanceData] = useState([]);
 
+    const [discounttypelist, setDiscountTypeList] = useState([]);
     const _bankdetails = {
         BankName: "",
         AccountNo: "",
         IfscCode: "",
         BranchName: ""
-
     }
 
     const [bankdetails, setBankDetails] = useState(_bankdetails);
@@ -77,8 +79,8 @@ function EggSaleModule(props) {
         EggCategory: "",
         tempid: 0,
         EggPack: "",
-        EggLose: ""
-
+        EggLose: "",
+        EggDiscountType: ""
     };
 
     const initialeggsaleinvoicevalues = {
@@ -113,7 +115,6 @@ function EggSaleModule(props) {
     let addModalClose = () => {
         setAddModalShow(false);
         setValidated(false);
-
         setEggSaletData(initialeggsalevalues);
     };
 
@@ -166,7 +167,8 @@ function EggSaleModule(props) {
             EggSaleInvoiceId: eggsale.EggSaleInvoiceId,
             tempid: eggsale.tempid,
             EggPack: eggsale.EggPack,
-            EggLose: eggsale.EggLose
+            EggLose: eggsale.EggLose,
+            EggDiscountType: eggsale.EggDiscountType
 
         })
     }
@@ -182,7 +184,72 @@ function EggSaleModule(props) {
         }
     }
 
+    const discountChange = (e) => {
+        const re = /^\d*\.?\d{0,2}$/
+        if (e.target.value === '' || re.test(e.target.value)) {
+            // setEggSaletData({
+            //     ...eggsaledata, DiscountPerEgg: e.target.value
+            // });
 
+            let val = eggsaledata.EggDiscountType;
+            let _totalDiscount = eggsaledata.TotalDiscount;
+
+            if (val === "1") {
+                _totalDiscount = (eggsaledata.Quantity * eggsaledata.DiscountPerEgg);
+
+                // setEggSaletData({
+                //     ...eggsaledata, DiscountPerEgg: e.target.value,
+                //     TotalDiscount: (eggsaledata.Quantity * eggsaledata.DiscountPerEgg),
+                //     FinalCost: (eggsaledata.TotalCost - (eggsaledata.Quantity * eggsaledata.DiscountPerEgg))
+                // });
+            }
+            else if (val === "2") {
+                let totalCost = eggsaledata.TotalCost;
+                _totalDiscount = totalCost * (eggsaledata.DiscountPerEgg / 100);
+                
+
+            }
+
+            setEggSaletData({
+                ...eggsaledata, DiscountPerEgg: e.target.value,
+                TotalDiscount: _totalDiscount,
+                FinalCost: (eggsaledata.TotalCost - _totalDiscount)
+            });
+            // setEggSaletData({
+            //     ...eggsaledata, DiscountPerEgg: e.target.value,
+            //     TotalDiscount: (eggsaledata.Quantity * e.target.value),
+            //     FinalCost: (eggsaledata.TotalCost - (eggsaledata.Quantity * e.target.value))
+            // });
+        }
+    }
+
+    const eggDiscountTypeChange = (e) => {
+
+        let val = e.target.value;
+        if (e.target.value !== '') {
+            if (val === "1") {
+
+                setEggSaletData({
+                    ...eggsaledata, EggDiscountType: e.target.value,
+                    TotalDiscount: (eggsaledata.Quantity * eggsaledata.DiscountPerEgg),
+                    FinalCost: (eggsaledata.TotalCost - (eggsaledata.Quantity * eggsaledata.DiscountPerEgg))
+                });
+            }
+            else if (val === "2") {
+                const re = /^\d*\.?\d{0,2}$/
+                let totalCost = eggsaledata.TotalCost;
+                let _discount = totalCost * (eggsaledata.DiscountPerEgg / 100);
+                setEggSaletData({
+                    ...eggsaledata, EggDiscountType: e.target.value,
+                    TotalDiscount: _discount,
+                    FinalCost: (eggsaledata.TotalCost - _discount)
+                });
+
+            }
+
+        }
+
+    }
 
     const eggCategoryChange = (e) => {
         setEggSaletData({ ...eggsaledata, EggCategory: e.target.value });
@@ -195,21 +262,50 @@ function EggSaleModule(props) {
         setEggSaleInvoiceData({ ...eggsaleinvdata, VehicleNo: e.target.value });
     }
 
+    // const additionalChargeChange = (e) => {
+    //     let addch = parseFloat(e.target.value || 0);
+
+    //     setEggSaleInvoiceData({
+    //         ...eggsaleinvdata, AdditionalCharge: e.target.value,
+
+    //         Due: (parseFloat(eggsaleinvdata.FinalCostInvoice || 0) -
+    //             parseFloat(eggsaleinvdata.Paid || 0)) + addch,
+    //         //Due:parseFloat(eggsaleinvdata.Due||0)+addch,
+    //         //FinalCostInvoice:(e.target.value * eggsaledata.EggRate)
+    //         // - (e.target.value * eggsaledata.DiscountPerEgg)
+    //         FinalCostInvoice: parseFloat(eggsaleinvdata.FinalCostInvoice || 0) + addch
+    //     });
+
+    //     //setAdditionalCharge(addch);
+    // }
+
     const additionalChargeChange = (e) => {
         let addch = parseFloat(e.target.value || 0);
 
+        const { totalFinalCost } = eggsalearr.reduce((accumulator, item) => {
+            accumulator.totalFinalCost += item.FinalCost;
+            return accumulator;
+        }, { totalFinalCost: 0 })
+
+        let _costInclAddCh = parseFloat(totalFinalCost || 0) + addch;
+
+        let _paid = (parseFloat(eggsaleinvdata.Cash || 0) + parseFloat(eggsaleinvdata.PhonePay || 0) +
+            parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
+            + parseFloat(eggsaleinvdata.Cheque || 0));
+
+        let _due = _costInclAddCh - _paid;
+
+
+
+
+
+        //setEggSaleInvoiceData({ ...eggsaleinvdata, FinalCostInvoice: totalFinalCost});
+
         setEggSaleInvoiceData({
             ...eggsaleinvdata, AdditionalCharge: e.target.value,
-
-            Due: (parseFloat(eggsaleinvdata.TotalCost || 0) - 
-            parseFloat(eggsaleinvdata.TotalDiscount) -parseFloat(eggsaleinvdata.Paid || 0)) + addch,
-            //Due:parseFloat(eggsaleinvdata.Due||0)+addch,
-            //FinalCostInvoice:(e.target.value * eggsaledata.EggRate) - (e.target.value * eggsaledata.DiscountPerEgg)
-            FinalCostInvoice: (parseFloat(eggsaleinvdata.TotalCost || 0) - 
-            parseFloat(eggsaleinvdata.TotalDiscount)) + addch
+            Due: _due,
+            FinalCostInvoice: _costInclAddCh
         });
-
-        //setAdditionalCharge(addch);
     }
 
 
@@ -225,24 +321,43 @@ function EggSaleModule(props) {
     const eggRateChange = (e) => {
         const re = /^\d*\.?\d{0,2}$/
         if (e.target.value === '' || re.test(e.target.value)) {
+            let val = eggsaledata.EggDiscountType;
+            let _totalDiscount = parseFloat(eggsaledata.TotalDiscount || 0);
+            //if EggDiscountType is not selected
+            let _totalCost = e.target.value * eggsaledata.Quantity;
+            //if EggDiscountType is 1
+            // if (val === 2) {
+            //     _discount = _totalCost * (eggsaledata.DiscountPerEgg / 100);
+            // }
+
+            if (val === "1") {
+                _totalDiscount = (eggsaledata.Quantity * eggsaledata.DiscountPerEgg);
+
+                // setEggSaletData({
+                //     ...eggsaledata, DiscountPerEgg: e.target.value,
+                //     TotalDiscount: (eggsaledata.Quantity * eggsaledata.DiscountPerEgg),
+                //     FinalCost: (eggsaledata.TotalCost - (eggsaledata.Quantity * eggsaledata.DiscountPerEgg))
+                // });
+            }
+            else if (val === "2") {
+                _totalDiscount = _totalCost * (eggsaledata.DiscountPerEgg / 100);
+            }
+
+            //if EggDiscountType is 2
+            // setEggSaletData({
+            //     ...eggsaledata, EggRate: e.target.value,
+            //     TotalCost: e.target.value * eggsaledata.Quantity,
+            //     FinalCost: (e.target.value * eggsaledata.Quantity) -parseFloat(eggsaledata.TotalDiscount||0)
+            // });
+
             setEggSaletData({
-                ...eggsaledata, EggRate: e.target.value, 
-                TotalCost: e.target.value * eggsaledata.Quantity,
-                FinalCost: (e.target.value * eggsaledata.Quantity) - 
-                (eggsaledata.TotalDiscount > 0 ? eggsaledata.TotalDiscount : 0)
+                ...eggsaledata, EggRate: e.target.value,
+                TotalCost: _totalCost,
+                TotalDiscount: _totalDiscount,
+                FinalCost: _totalCost - parseFloat(_totalDiscount || 0)
             });
         }
     }
-
-    const discountChange = (e) => {
-        const re = /^\d*\.?\d{0,2}$/
-        if (e.target.value === '' || re.test(e.target.value)) {
-            setEggSaletData({ ...eggsaledata, DiscountPerEgg: e.target.value, 
-                TotalDiscount: (eggsaledata.Quantity * e.target.value), 
-                FinalCost: (eggsaledata.TotalCost - (eggsaledata.Quantity * e.target.value)) });
-        }
-    }
-
 
 
     const eggpackChange = (e) => {
@@ -289,16 +404,27 @@ function EggSaleModule(props) {
 
         if (e.target.value === '' || re.test(e.target.value)) {
             let cashamt = parseFloat(e.target.value || 0);
+
+            let _paid = (cashamt + parseFloat(eggsaleinvdata.PhonePay || 0) +
+                parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
+                + parseFloat(eggsaleinvdata.Cheque || 0));
+
+            let _due = (eggsaleinvdata.FinalCostInvoice - _paid) < 0 ? 0 : (eggsaleinvdata.FinalCostInvoice - _paid);
+            let _advance = _paid > eggsaleinvdata.FinalCostInvoice
+                ? _paid - eggsaleinvdata.FinalCostInvoice : 0;
             setEggSaleInvoiceData({
                 ...eggsaleinvdata, Cash: e.target.value,
-                Paid: (cashamt + parseFloat(eggsaleinvdata.PhonePay || 0) +
-                    parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
-                    + parseFloat(eggsaleinvdata.Cheque || 0)),
-                Due: (eggsaleinvdata.FinalCostInvoice -
-                    (cashamt + parseFloat(eggsaleinvdata.PhonePay || 0) +
-                        parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
-                        + parseFloat(eggsaleinvdata.Cheque || 0))
-                )
+                Paid: _paid,
+                // Paid: (cashamt + parseFloat(eggsaleinvdata.PhonePay || 0) +
+                //     parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
+                //     + parseFloat(eggsaleinvdata.Cheque || 0)),
+                // Due: (eggsaleinvdata.FinalCostInvoice -
+                //     (cashamt + parseFloat(eggsaleinvdata.PhonePay || 0) +
+                //         parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
+                //         + parseFloat(eggsaleinvdata.Cheque || 0))
+                // )
+                Due: _due,
+                Advance: Math.round(_advance)
             });
         }
     }
@@ -308,18 +434,30 @@ function EggSaleModule(props) {
 
         if (e.target.value === '' || re.test(e.target.value)) {
             let phpayamt = parseFloat(e.target.value || 0);
+            let _paid = (phpayamt + parseFloat(eggsaleinvdata.Cash || 0) +
+                parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
+                + parseFloat(eggsaleinvdata.Cheque || 0));
+
+            let _due = (eggsaleinvdata.FinalCostInvoice - _paid) < 0 ? 0
+                : (eggsaleinvdata.FinalCostInvoice - _paid);
+
+            let _advance = _paid > eggsaleinvdata.FinalCostInvoice
+                ? _paid - eggsaleinvdata.FinalCostInvoice : 0;
             //setEggSaleInvoiceData({ ...eggsaleinvdata, VehicleNo: e.target.value });
 
             setEggSaleInvoiceData({
                 ...eggsaleinvdata, PhonePay: e.target.value,
-                Paid: (phpayamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                    parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
-                    + parseFloat(eggsaleinvdata.Cheque || 0)),
-                Due: (eggsaleinvdata.FinalCostInvoice -
-                    (phpayamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                        parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
-                        + parseFloat(eggsaleinvdata.Cheque || 0))
-                )
+                Paid: _paid,
+                // (phpayamt + parseFloat(eggsaleinvdata.Cash || 0) +
+                //     parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
+                //     + parseFloat(eggsaleinvdata.Cheque || 0)),
+                Due: _due,
+                // (eggsaleinvdata.FinalCostInvoice -
+                //     (phpayamt + parseFloat(eggsaleinvdata.Cash || 0) +
+                //         parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
+                //         + parseFloat(eggsaleinvdata.Cheque || 0))
+                //)
+                Advance:  Math.round(_advance)
             });
         }
     }
@@ -330,16 +468,30 @@ function EggSaleModule(props) {
         if (e.target.value === '' || re.test(e.target.value)) {
             let nbamt = parseFloat(e.target.value || 0);
 
+            let _paid = (nbamt + parseFloat(eggsaleinvdata.Cash || 0) +
+                parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.UPI || 0)
+                + parseFloat(eggsaleinvdata.Cheque || 0));
+
+
+            let _due = (eggsaleinvdata.FinalCostInvoice - _paid) < 0 ? 0
+                : (eggsaleinvdata.FinalCostInvoice - _paid);
+
+            let _advance = _paid > eggsaleinvdata.FinalCostInvoice
+                ? _paid - eggsaleinvdata.FinalCostInvoice : 0;
+
             setEggSaleInvoiceData({
                 ...eggsaleinvdata, NetBanking: e.target.value,
-                Paid: (nbamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                    parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.UPI || 0)
-                    + parseFloat(eggsaleinvdata.Cheque || 0)),
-                Due: (eggsaleinvdata.FinalCostInvoice -
-                    (nbamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                        parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.UPI || 0)
-                        + parseFloat(eggsaleinvdata.Cheque || 0))
-                )
+                Paid: _paid,
+                // (nbamt + parseFloat(eggsaleinvdata.Cash || 0) +
+                //     parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.UPI || 0)
+                //     + parseFloat(eggsaleinvdata.Cheque || 0)),
+                Due: _due,
+                // (eggsaleinvdata.FinalCostInvoice -
+                //     (nbamt + parseFloat(eggsaleinvdata.Cash || 0) +
+                //         parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.UPI || 0)
+                //         + parseFloat(eggsaleinvdata.Cheque || 0))
+                //)
+                Advance:  Math.round(_advance)
             });
         }
     }
@@ -357,16 +509,30 @@ function EggSaleModule(props) {
         if (e.target.value === '' || re.test(e.target.value)) {
             let upiamt = parseFloat(e.target.value || 0);
 
+            let _paid = (upiamt + parseFloat(eggsaleinvdata.Cash || 0) +
+                parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
+                + parseFloat(eggsaleinvdata.Cheque || 0));
+
+
+            let _due = (eggsaleinvdata.FinalCostInvoice - _paid) < 0 ? 0
+                : (eggsaleinvdata.FinalCostInvoice - _paid);
+
+            let _advance = _paid > eggsaleinvdata.FinalCostInvoice
+                ? _paid - eggsaleinvdata.FinalCostInvoice : 0;
+
             setEggSaleInvoiceData({
                 ...eggsaleinvdata, UPI: e.target.value,
-                Paid: (upiamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                    parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
-                    + parseFloat(eggsaleinvdata.Cheque || 0)),
-                Due: (eggsaleinvdata.FinalCostInvoice -
-                    (upiamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                        parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
-                        + parseFloat(eggsaleinvdata.Cheque || 0))
-                )
+                Paid: _paid,
+                // (upiamt + parseFloat(eggsaleinvdata.Cash || 0) +
+                //     parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
+                //     + parseFloat(eggsaleinvdata.Cheque || 0)),
+                Due: _due,
+                // (eggsaleinvdata.FinalCostInvoice -
+                //     (upiamt + parseFloat(eggsaleinvdata.Cash || 0) +
+                //         parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
+                //         + parseFloat(eggsaleinvdata.Cheque || 0))
+                //)
+                Advance:  Math.round(_advance)
             });
         }
     }
@@ -377,16 +543,30 @@ function EggSaleModule(props) {
         if (e.target.value === '' || re.test(e.target.value)) {
             let chqamt = parseFloat(e.target.value || 0);
 
+            let _paid = (chqamt + parseFloat(eggsaleinvdata.Cash || 0) +
+                parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
+                + parseFloat(eggsaleinvdata.UPI || 0));
+
+            let _due = (eggsaleinvdata.FinalCostInvoice - _paid) < 0 ? 0
+                : (eggsaleinvdata.FinalCostInvoice - _paid);
+
+            let _advance = _paid > eggsaleinvdata.FinalCostInvoice
+                ? _paid - eggsaleinvdata.FinalCostInvoice : 0;
+
+
             setEggSaleInvoiceData({
                 ...eggsaleinvdata, Cheque: e.target.value,
-                Paid: (chqamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                    parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
-                    + parseFloat(eggsaleinvdata.UPI || 0)),
-                Due: (eggsaleinvdata.FinalCostInvoice -
-                    (chqamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                        parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
-                        + parseFloat(eggsaleinvdata.UPI || 0))
-                )
+                Paid: _paid,
+                // (chqamt + parseFloat(eggsaleinvdata.Cash || 0) +
+                //     parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
+                //     + parseFloat(eggsaleinvdata.UPI || 0)),
+                Due: _due,
+                // (eggsaleinvdata.FinalCostInvoice -
+                //     (chqamt + parseFloat(eggsaleinvdata.Cash || 0) +
+                //         parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
+                //         + parseFloat(eggsaleinvdata.UPI || 0))
+                // )
+                Advance:  Math.round(_advance)
             });
         }
     }
@@ -395,17 +575,85 @@ function EggSaleModule(props) {
         //let due=eggsaleinvdata.Due;
         const re = /^\d*\.?\d{0,2}$/;
         if (e.target.value === '' || re.test(e.target.value)) {
+
             let due = Math.round(eggsaleinvdata.FinalCostInvoice -
                 (parseFloat(eggsaleinvdata.Cheque || 0) + parseFloat(eggsaleinvdata.Cash || 0) +
                     parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
                     + parseFloat(eggsaleinvdata.UPI || 0))
             )
 
+            let _duefinal = parseFloat(due) - parseFloat(e.target.value || 0) < 0 ? 0 :
+                parseFloat(due) - parseFloat(e.target.value || 0);
+
             setEggSaleInvoiceData({
                 ...eggsaleinvdata, Complimentary: e.target.value,
-                Due: parseFloat(due) - parseFloat(e.target.value||0)
+                Due: _duefinal
             });
         }
+    }
+
+    const [issettle, setIsSettle] = useState(false);
+    const [advancedataticked, setAdvanceDataTicked] = useState([]);
+
+    const isSettleChange = (e) => {
+        // setChicksData({ ...chicksdata, IsActive: !chicksdata.IsActive });
+        if (!issettle) {
+            let advance = advancedataticked.Amount,
+                finalAmt = eggsaleinvdata.FinalCostInvoice;
+            //Need to add one more payment mode Adjustment
+            if (advance > finalAmt) {
+
+                let _paid = (parseFloat(finalAmt || 0)
+                    + parseFloat(eggsaleinvdata.Cash || 0) +
+                    parseFloat(eggsaleinvdata.PhonePay || 0)
+                    + parseFloat(eggsaleinvdata.NetBanking || 0)
+                    + parseFloat(eggsaleinvdata.UPI || 0));
+
+                let _due = parseFloat(finalAmt || 0) - parseFloat(_paid || 0);
+
+                setEggSaleInvoiceData({
+                    ...eggsaleinvdata, Paid: _paid, Due: _due, Cheque: finalAmt
+                });
+
+                setAdvanceDataTicked({ ...advancedataticked, Amount: advance - finalAmt })
+            }
+            else {
+
+                if (advance < finalAmt) {
+
+                    let _paid = (parseFloat(advance || 0) + parseFloat(eggsaleinvdata.Cash || 0) +
+                        parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
+                        + parseFloat(eggsaleinvdata.UPI || 0));
+
+                    let _due = (parseFloat(finalAmt || 0)) - _paid;
+
+                    setEggSaleInvoiceData({
+                        ...eggsaleinvdata, Paid: _paid, Due: _due, Cheque: advance
+                    });
+
+                    setAdvanceDataTicked({ ...advancedataticked, Amount: 0 })
+                }
+            }
+        }
+        else {
+
+            let _paid = parseFloat(eggsaleinvdata.Cash || 0) +
+                parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
+                + parseFloat(eggsaleinvdata.UPI || 0);
+
+            let adjustment = eggsaleinvdata.Cheque;
+
+            let _due = eggsaleinvdata.FinalCostInvoice - _paid;
+            setEggSaleInvoiceData({
+                ...eggsaleinvdata, Paid: _paid, Due: _due, Cheque: 0
+            });
+
+            let da = parseFloat(advancedata.Amount || 0);
+            setAdvanceDataTicked({ ...advancedataticked, Amount: da })
+        }
+
+        setIsSettle(!issettle);
+
     }
 
     useEffect((e) => {
@@ -413,8 +661,11 @@ function EggSaleModule(props) {
         if (localStorage.getItem('token')) {
             setEggSaletData({ ...eggsaledata, CustomerId: uid });
             fetchCustomerDetails(uid);
-           // fetchCompanyDetails(localStorage.getItem('companyid'));
+            // fetchCompanyDetails(localStorage.getItem('companyid'));
             fetchEggCategory();
+            fetchAdvanceListByCustId(uid);
+
+            fetchEggDiscountTypes();
             setBankDetails({
                 ...bankdetails, BankName: process.env.REACT_APP_BANK_NAME,
                 AccountNo: process.env.REACT_APP_ACCOUNT_NO,
@@ -433,6 +684,7 @@ function EggSaleModule(props) {
         if (localStorage.getItem('token')) {
             if (invid > 0) {
                 fecthEggSaleInvoiceById(invid);
+
             }
 
         }
@@ -454,13 +706,22 @@ function EggSaleModule(props) {
                 return accumulator;
             }, { totalCost: 0, totalQuantity: 0, totalDiscount: 0, totalFinalCost: 0 })
 
-            setEggSaleInvoiceData({ ...eggsaleinvdata, TotalQuantity: totalQuantity, TotalCost: totalCost, TotalDiscount: totalDiscount, FinalCostInvoice: totalFinalCost, Due: totalFinalCost });
+            setEggSaleInvoiceData({
+                ...eggsaleinvdata, TotalQuantity: totalQuantity, TotalCost: totalCost,
+                TotalDiscount: totalDiscount, FinalCostInvoice: totalFinalCost, Due: totalFinalCost
+            });
         }
         else {
             HandleLogout();
             history("/login")
         }
     }, [objupdate]);
+
+    const fetchEggDiscountTypes = async () => {
+
+        let types = FetchEggDiscountTypes();
+        setDiscountTypeList(types);
+    };
 
 
     const fetchEggCategory = async () => {
@@ -480,6 +741,33 @@ function EggSaleModule(props) {
                     props.showAlert("Error occurred!!", "danger")
                 }
             })
+    }
+
+    const fetchAdvanceListByCustId = async (custid) => {
+
+        FetchAdvanceListByCustId(custid)
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setAdvanceData(data.Result);
+                    setAdvanceDataTicked(data.Result);
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    setIsLoaded(false);
+                    setAdvanceData("");
+                    setAdvanceDataTicked(data.Result);
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                    setIsLoaded(false);
+                    setAdvanceData("");
+                    setAdvanceDataTicked("");
+                }
+            });
     }
 
     // const fetchCompanyDetails = async (invid) => {
@@ -583,7 +871,7 @@ function EggSaleModule(props) {
         else {
 
 
-            var count =tmpidcount + 1;
+            var count = tmpidcount + 1;
             const newData = {
                 Id: eggsaledata.Id,
                 Quantity: eggsaledata.Quantity,
@@ -598,7 +886,8 @@ function EggSaleModule(props) {
                 Comments: eggsaledata.Comments,
                 tempid: count,
                 EggPack: eggsaledata.EggPack,
-                EggLose: eggsaledata.EggLose
+                EggLose: eggsaledata.EggLose,
+                EggDiscountType: eggsaledata.EggDiscountType
             };
 
 
@@ -636,7 +925,8 @@ function EggSaleModule(props) {
                 Comments: eggsaledata.Comments,
                 tempid: eggsaledata.tempid,
                 EggPack: eggsaledata.EggPack,
-                EggLose: eggsaledata.EggLose
+                EggLose: eggsaledata.EggLose,
+                EggDiscountType: eggsaledata.EggDiscountType
             };
 
             if (eggsaledata.Id > 0) {
@@ -654,7 +944,7 @@ function EggSaleModule(props) {
                 setEggSaleArr(eggsalearr);
             }
 
-           // setTempIdCount(tmpidcount + 1);
+            // setTempIdCount(tmpidcount + 1);
             setValidated(true);
             //console.log(eggsalearr);
             addUCount(ucount);
@@ -695,10 +985,13 @@ function EggSaleModule(props) {
         getFilterData(e.target.value, filterToDate);
     }
 
+
+
     const getFilterData = (fromDate, toDate) => {
         let _filterList = [];
         if (fromDate !== "" && toDate !== "") {
-            _filterList = eggsalelistfilter.filter((c) => dateyyyymmdd(c.PurchaseDate) >= dateyyyymmdd(fromDate) && dateyyyymmdd(c.PurchaseDate) <= dateyyyymmdd(toDate));
+            _filterList = eggsalelistfilter.filter((c) => dateyyyymmdd(c.PurchaseDate) >= 
+            dateyyyymmdd(fromDate) && dateyyyymmdd(c.PurchaseDate) <= dateyyyymmdd(toDate));
         }
         else if (fromDate === "" && toDate !== "") {
             _filterList = eggsalelistfilter.filter((c) => dateyyyymmdd(c.PurchaseDate) <= dateyyyymmdd(toDate));
@@ -757,8 +1050,8 @@ function EggSaleModule(props) {
                     UPI: eggsaleinvdata.UPI,
                     Cheque: eggsaleinvdata.Cheque,
                     Advance: eggsaleinvdata.Advance,
-                    Complimentary:eggsaleinvdata.Complimentary,
-                    CompanyId:localStorage.getItem('companyid')
+                    Complimentary: eggsaleinvdata.Complimentary,
+                    CompanyId: localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -825,8 +1118,8 @@ function EggSaleModule(props) {
                     UPI: eggsaleinvdata.UPI,
                     Cheque: eggsaleinvdata.Cheque,
                     Advance: eggsaleinvdata.Advance,
-                    Complimentary:eggsaleinvdata.Complimentary,
-                    CompanyId:localStorage.getItem('companyid')
+                    Complimentary: eggsaleinvdata.Complimentary,
+                    CompanyId: localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -868,9 +1161,10 @@ function EggSaleModule(props) {
 
         <div>
             {/* {isloaded && <Loading />} */}
-            <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
+            {/* <div className="row justify-content-center" 
+            style={{ textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
                 <h4>Egg sale</h4>
-            </div>
+            </div> */}
 
             {/* <div className="container" style={{ marginTop: '30px', marginBottom: '15px' }}>
                 <div className="row align-items-center">
@@ -892,9 +1186,30 @@ function EggSaleModule(props) {
             </div> */}
 
 
-            <div class="row">
+            <div class="row container" style={{ marginTop: '10px' }}>
                 <div class="col-md-6" style={{ textAlign: 'left' }}>
-                    <h5 className="card-title">Customer Name: {customerdetails.FirstName + " " + customerdetails.LastName}</h5>
+                    <h5 className="card-title">Customer Name:
+                        {customerdetails.FirstName + " " + customerdetails.LastName}</h5>
+
+                    {
+                        advancedataticked != null && advancedataticked.Amount > 0 &&
+                        <div className="alert alert-success" role="alert">
+                            <strong>  Advance of Rs:
+                                {parseFloat(advancedataticked.Amount || 0).toFixed(2)}</strong>
+                            {
+                                eggsalearr.length > 0 && <Form.Check
+                                    type="checkbox"
+                                    id="chkIsActiveSettle"
+                                    label="Settle"
+                                    onChange={isSettleChange}
+                                    value={issettle}
+                                    checked={issettle}
+                                    style={{ fontSize: '13px' }}
+                                />
+                            }
+
+                        </div>
+                    }
                 </div>
 
                 <div class="col-md-6" style={{ textAlign: 'right' }}> <Button className="mr-2" variant="primary"
@@ -911,7 +1226,7 @@ function EggSaleModule(props) {
                         <th>Rate (<span>&#8377;</span>)</th>
                         <th>Quantity </th>
                         <th>Total cost (<span>&#8377;</span>)</th>
-                        <th>Discnt/Egg (<span>&#8377;</span>)</th>
+                        <th>Discnt (<span>&#8377;</span>)</th>
                         <th>Total discnt (<span>&#8377;</span>)</th>
                         <th>Final cost (<span>&#8377;</span>)</th>
                         <th>Comments</th>
@@ -925,6 +1240,16 @@ function EggSaleModule(props) {
 
                             const filterByCategorydId = eggcategory.filter((c) => c.Id === parseInt(p.EggCategory));
                             const catname = filterByCategorydId.length > 0 ? filterByCategorydId[0].EggCategoryName : "";
+ 
+                            let _discounttype= discounttypelist.filter((c)=>c.Id===parseInt(p.EggDiscountType));
+                            let _discounttypeName=_discounttype.length > 0 ? " "+_discounttype[0].Name : "";
+
+
+
+                            if(p.EggDiscountType==1)
+                            {
+
+                            }
 
                             return (
                                 <tr align='center' key={i} style={{ fontSize: 14 }} >
@@ -938,18 +1263,19 @@ function EggSaleModule(props) {
                                     <td align='center'>{new Intl.NumberFormat('en-IN', {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2
-                                    }).format(parseFloat(parseFloat(p.TotalCost||0).toFixed(2)))}</td>
+                                    }).format(parseFloat(parseFloat(p.TotalCost || 0).toFixed(2)))}</td>
 
 
 
                                     {/* <td align='center'> {p.TotalCost !== "" ?  parseFloat(p.TotalCost).toFixed(2) : p.TotalCost}
                                     </td> */}
+                                   
 
-                                    <td align='center'>{parseFloat(p.DiscountPerEgg||0).toFixed(2)}</td>
+                                    <td align='center'>{parseFloat(p.DiscountPerEgg || 0).toFixed(2)}{_discounttypeName}</td>
 
-                                    <td align='center'>{parseFloat(p.TotalDiscount||0).toFixed(2)}</td>
+                                    <td align='center'>{parseFloat(p.TotalDiscount || 0).toFixed(2)}</td>
                                     <td align='center'>
-                                        {p.FinalCost !== "" ? parseFloat(p.FinalCost||0).toFixed(2) : p.FinalCost}
+                                        {p.FinalCost !== "" ? parseFloat(p.FinalCost || 0).toFixed(2) : p.FinalCost}
                                     </td>
 
                                     <td align='left'>{p.Comments}</td>
@@ -958,12 +1284,14 @@ function EggSaleModule(props) {
                                         {
                                             <ButtonToolbar>
 
-                                                <i className="fa-solid fa-pen-to-square" title='Edit' style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => clickEditEggSale(p)}></i>
+                                                <i className="fa-solid fa-pen-to-square" title='Edit'
+                                                    style={{ color: '#0545b3', marginLeft: '15px' }}
+                                                    onClick={() => clickEditEggSale(p)}></i>
 
                                                 {localStorage.getItem('isadmin') === 'true' &&
-                                                    <i className="fa-solid fa-trash" title='Delete' style={{ color: '#f81616', marginLeft: '15px' }} onClick={() => deleteEggSale(p)}></i>}
-
-
+                                                    <i className="fa-solid fa-trash" title='Delete'
+                                                        style={{ color: '#f81616', marginLeft: '15px' }}
+                                                        onClick={() => deleteEggSale(p)}></i>}
 
                                             </ButtonToolbar>
                                         }
@@ -996,7 +1324,7 @@ function EggSaleModule(props) {
                         <td align='center'>{new Intl.NumberFormat('en-IN', {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2
-                        }).format(parseFloat(parseFloat(eggsaleinvdata.TotalDiscount||0).toFixed(2)))}</td>
+                        }).format(parseFloat(parseFloat(eggsaleinvdata.TotalDiscount || 0).toFixed(2)))}</td>
                         {/* <td align='center'>{eggsaleinvdata.TotalDiscount}</td> */}
 
                         <td align='center'>{new Intl.NumberFormat('en-IN', {
@@ -1049,7 +1377,7 @@ function EggSaleModule(props) {
                             //     Math.round(parseFloat(eggsaleinvdata.FinalCostInvoice))
                             //     +(additionalCharge==""?0: parseFloat(additionalCharge))).toFixed(2)))
                             value={
-                                parseFloat(Math.round(parseFloat(eggsaleinvdata.FinalCostInvoice))).toFixed(2)
+                                parseFloat(Math.round(eggsaleinvdata.FinalCostInvoice)).toFixed(2)
                             }
                             name="FinalCostInvoice"
                             placeholder="Final cost"
@@ -1126,14 +1454,14 @@ function EggSaleModule(props) {
                             onChange={upiChange}
                         />
 
-                        <InputField controlId="Cheque" label="Cheque"
+                        <InputField controlId="Cheque" label="Adjustment"
                             type="text"
                             value={eggsaleinvdata.Cheque}
                             name="Cheque"
-                            placeholder="Cheque"
+                            placeholder="Adjustment"
                             errormessage="Please enter amount"
                             required={false}
-                            disabled={false}
+                            disabled={true}
                             onChange={chequeChange}
                         />
                     </Row>
@@ -1298,8 +1626,8 @@ function EggSaleModule(props) {
                                     <Form noValidate validated={validated} className="needs-validation">
                                         <Row className="mb-12">
                                             <Form.Group controlId="Id" as={Col} >
-                                                <Form.Label style={{fontSize:'13px'}}>Category*</Form.Label>
-                                                <Form.Select aria-label="Default select example" style={{fontSize:'13px'}}
+                                                <Form.Label style={{ fontSize: '13px' }}>Category*</Form.Label>
+                                                <Form.Select aria-label="Default select example" style={{ fontSize: '13px' }}
                                                     onChange={eggCategoryChange} required>
                                                     <option selected disabled value="">Choose...</option>
                                                     {
@@ -1365,23 +1693,46 @@ function EggSaleModule(props) {
                                                 disabled={false}
                                                 onChange={eggRateChange}
                                             />
-                                            <InputField controlId="DiscountPerEgg" label="Discount/Egg"
+                                            <InputField controlId="DiscountPerEgg" label="Discount"
                                                 type="text"
                                                 value={eggsaledata.DiscountPerEgg}
                                                 name="DiscountPerEgg"
-                                                placeholder="Discount/egg"
+                                                placeholder="Discount"
                                                 errormessage="Please enter Discount"
                                                 required={false}
                                                 disabled={false}
                                                 onChange={discountChange}
                                             />
+                                            <Form.Group controlId="Id" as={Col} >
+                                                <Form.Label style={{ fontSize: '13px' }}>Discount Type*</Form.Label>
+                                                <Form.Select aria-label="Default select example" style={{ fontSize: '13px' }}
+                                                    onChange={eggDiscountTypeChange} required>
+                                                    <option selected disabled value="">Choose...</option>
+                                                    {
+                                                        discounttypelist.map((item) => {
+                                                            return (
+                                                                <option
+                                                                    key={item.Id}
+                                                                    defaultValue={item.Id == null ? null : item.Id}
+                                                                    selected={item.Id === parseInt(eggsaledata.EggDiscountType)}
+                                                                    value={item.Id}
+                                                                >{item.Name}</option>
+                                                            );
+                                                        })
+                                                    }
+                                                </Form.Select>
+                                                <Form.Control.Feedback type="invalid">
+                                                    Please select egg category
+                                                </Form.Control.Feedback>
+                                            </Form.Group>
 
                                         </Row>
 
                                         <Row className="mb-12">
                                             <InputField controlId="TotalCost" label="Total cost *"
                                                 type="number"
-                                                value={eggsaledata.TotalCost >= 0 ? parseFloat(eggsaledata.TotalCost).toFixed(2) : eggsaledata.TotalCost}
+                                                value={eggsaledata.TotalCost >= 0 ? parseFloat(eggsaledata.TotalCost).toFixed(2) 
+                                                    : eggsaledata.TotalCost}
                                                 name="TotalCost"
                                                 placeholder="Total cost"
                                                 errormessage="Please enter total cost"
@@ -1414,8 +1765,9 @@ function EggSaleModule(props) {
 
                                         <Row className="mb-12">
                                             <Form.Group controlId="Comments" as={Col} >
-                                                <Form.Label style={{fontSize:'13px'}}>Comments</Form.Label>
-                                                <Form.Control  style={{fontSize:'13px'}} as="textarea" rows={3} name="Comments" onChange={commentsChange} value={eggsaledata.Comments}
+                                                <Form.Label style={{ fontSize: '13px' }}>Comments</Form.Label>
+                                                <Form.Control style={{ fontSize: '13px' }} as="textarea" rows={3} name="Comments"
+                                                    onChange={commentsChange} value={eggsaledata.Comments}
                                                     placeholder="Comments" />
 
                                             </Form.Group>

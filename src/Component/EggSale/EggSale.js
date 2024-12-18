@@ -9,7 +9,7 @@ import DateComponent from '../DateComponent';
 import {
     dateyyyymmdd, HandleLogout, downloadExcel,
     FetchCompanyDetails, AmountInWords, ConvertNumberToWords, ReplaceNonNumeric,
-    Commarize, FecthEggSaleInvoiceList, FecthEggCategory
+    Commarize, FecthEggSaleInvoiceList, FecthEggCategory, FetchAdvanceListByCustId
 } from './../../Utility'
 
 import Loading from '../Loading/Loading'
@@ -36,11 +36,11 @@ function EggSale(props) {
     const [filterToDate, setFilterToDate] = useState("");
     const [isloaded, setIsLoaded] = useState(true);
     const [eggsalelistfilter, setEggSaleListFilter] = useState([]);
-   // const [companydetails, setCompanyDetails] = useState([]);
-   const [companydetails, setCompanyDetails] = useState([JSON.parse(localStorage.getItem('companydetails'))]);
+    // const [companydetails, setCompanyDetails] = useState([]);
+    const [companydetails, setCompanyDetails] = useState([JSON.parse(localStorage.getItem('companydetails'))]);
     const [eggcategory, setEggCategory] = useState([]);
     const [itemsPerPage, setItemsPerPage] = useState(10);
-
+    const [advancedata, setAdvanceData] = useState([]);
     const initialvalues = {
         modaltitle: "",
         Id: 0,
@@ -89,7 +89,7 @@ function EggSale(props) {
         if (localStorage.getItem('token')) {
             setEggSaletData({ ...eggsaledata, CustomerId: uid });
             fetchCustomerDetails(uid);
-           // fetchCompanyDetails();
+            // fetchCompanyDetails();
             fetchEggCategory();
 
             setBankDetails({
@@ -109,6 +109,7 @@ function EggSale(props) {
 
         if (localStorage.getItem('token')) {
             fetchEggSaleDetails(uid);
+            fetchAdvanceListByCustId(uid);
         }
         else {
             HandleLogout();
@@ -162,6 +163,7 @@ function EggSale(props) {
     const [_totalPaid, _setTotalPaid] = useState(0);
     const [_totalDue, _setTotalDue] = useState(0);
     const [_totaladvance, _setTotalAdvance] = useState(0);
+    const [_totalcomplementory, _setTotalComplementory] = useState(0);
 
     const fetchEggSaleDetails = async (custid) => {
         setIsLoaded(true);
@@ -193,7 +195,7 @@ function EggSale(props) {
 
     const calculateValues = (data) => {
         const { totalCost, totalQuantity, totalDiscount, totalFinalCost,
-            totalPaid, totalDue, totalAdvance }
+            totalPaid, totalDue, totalComplementory }
             = data.reduce((accumulator, item) => {
                 accumulator.totalCost += item.TotalCost;
                 accumulator.totalQuantity += parseInt(item.TotalQuantity);
@@ -201,10 +203,12 @@ function EggSale(props) {
                 accumulator.totalFinalCost += item.FinalCostInvoice;
                 accumulator.totalPaid += item.Paid;
                 accumulator.totalDue += item.Due;
-                accumulator.totalAdvance += parseFloat(item.Advance || 0);
+                accumulator.totalComplementory += parseFloat(item.Complimentary || 0);
                 return accumulator;
-            }, { totalCost: 0, totalQuantity: 0, totalDiscount: 0, 
-                totalFinalCost: 0, totalPaid: 0, totalDue: 0, totalAdvance: 0 })
+            }, {
+                totalCost: 0, totalQuantity: 0, totalDiscount: 0,
+                totalFinalCost: 0, totalPaid: 0, totalDue: 0, totalComplementory: 0
+            })
 
         _setTotalQuantity(totalQuantity);
         _setTotalCost(totalCost);
@@ -212,7 +216,8 @@ function EggSale(props) {
         _setFinalCost(totalFinalCost);
         _setTotalPaid(totalPaid);
         _setTotalDue(totalDue);
-        _setTotalAdvance(totalAdvance);
+       // _setTotalAdvance(totalAdvance);
+        _setTotalComplementory(totalComplementory);
     }
 
     const fetchCustomerDetails = async (custid) => {
@@ -393,19 +398,59 @@ function EggSale(props) {
         setInvoiceModalShow(false);
     };
 
+    const fetchAdvanceListByCustId = async (custid) => {
+
+        FetchAdvanceListByCustId(custid)
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setAdvanceData(data.Result);
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    setIsLoaded(false);
+                    setAdvanceData("");
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                    setIsLoaded(false);
+                    setAdvanceData("");
+                }
+            });
+    }
+
     return (
 
         <div>
             {isloaded && <Loading />}
-            <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
-                <h4>Egg sale tracker</h4>
-            </div>
-            <div className="card" style={{ marginBottom: '20px', fontSize: 13 }}>
-                <div className="card-body">
-                    <h5 className="card-title" style={{ fontSize: 15, marginBottom: 2 }}>Customer Name: {customerdetails.FirstName + " " + customerdetails.LastName}</h5>
-                    <p className="card-title" style={{ marginBottom: 2 }}>Mobile no: {customerdetails.MobileNo}</p>
-                    <p className="card-title" style={{ marginBottom: 2 }}>Address: {customerdetails.Address}</p>
-                    {/* <p className="card-title" style={{ marginBottom: 2 }}>Email: {customerdetails.Email??""}</p> */}
+            <div className="container" style={{ marginTop: '10px'}}>
+                <div className="row">
+                <div className="col-6">
+                    <div className="card" style={{ fontSize: 13 }}>
+                        <div className="card-body">
+                            <h5 className="card-title" style={{ fontSize: 15, marginBottom: 2 }}>Customer Name: {customerdetails.FirstName + " " + customerdetails.LastName}</h5>
+                            <p className="card-title" style={{ marginBottom: 2 }}>Mobile no: {customerdetails.MobileNo}</p>
+                            <p className="card-title" style={{ marginBottom: 2 }}>Address: {customerdetails.Address}</p>
+                            {/* <p className="card-title" style={{ marginBottom: 2 }}>Email: {customerdetails.Email??""}</p> */}
+                        </div>
+                        </div>
+                        </div>
+                        {
+                            advancedata != null && advancedata.Amount > 0 &&
+                            <div className="row col-6">
+                                <div className="alert alert-success" role="alert">
+                                    <p><strong>Advance Rs:  
+                                        {parseFloat(advancedata.Amount || 0).toFixed(2)}</strong></p>
+
+
+                                </div>
+                            </div>
+                        }
+
+                   
                 </div>
             </div>
             <div className="container" style={{ marginTop: '20px', marginBottom: '10px' }}>
@@ -473,7 +518,6 @@ function EggSale(props) {
                         <th>Paid (<span>&#8377;</span>)</th>
                         <th>Due (<span>&#8377;</span>)</th>
                         <th>Complimentary</th>
-                        <th>Advance</th>
                         <th align='center'>Invoice</th>
                         <th>Options</th>
                     </tr>
@@ -519,8 +563,11 @@ function EggSale(props) {
                                         maximumFractionDigits: 2
                                     }).format(parseFloat(p.Complimentary || 0).toFixed(2))}</td>
 
+                                    {/* <td align='center'>{new Intl.NumberFormat('en-IN', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }).format(parseFloat(p.Advance || 0).toFixed(2))}</td> */}
 
-                                    <td align='center'>{p.Advance}</td>
                                     <td>
                                         <i className="fa-sharp fa-solid fa-receipt fa-beat" title='Invoice' style={{ color: '#086dba', marginLeft: '15px' }} onClick={() => clickInvoice(p)}></i>
                                     </td>
@@ -552,14 +599,46 @@ function EggSale(props) {
                 <tfoot style={{ backgroundColor: '#cccccc', fontWeight: 'bold', fontSize: 13 }}>
                     <td align='center'>Total</td>
 
-                    <td align='center'>{_totalquantity}</td>
-                    <td align='center'>{parseFloat(_totalcost).toFixed(2)}</td>
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                    }).format(parseInt(_totalquantity || 0))}</td>
 
-                    <td align='center'>{parseFloat(_totaldiscount).toFixed(2)}</td>
-                    <td align='center'>{parseFloat(_finalcost).toFixed(2)}</td>
-                    <td align='center'>{parseFloat(_totalPaid).toFixed(2)}</td>
-                    <td align='center'>{parseFloat(_totalDue).toFixed(2)}</td>
-                    <td align='center'>{parseFloat(_totaladvance).toFixed(2)}</td>
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(_totalcost || 0).toFixed(2))}</td>
+
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(_totaldiscount || 0).toFixed(2))}</td>
+
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(_finalcost || 0).toFixed(2))}</td>
+
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(_totalPaid || 0).toFixed(2))}</td>
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(_totalDue || 0).toFixed(2))}</td>
+
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(_totalcomplementory || 0).toFixed(2))}</td>
+
+                    {/* <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(_totaladvance || 0).toFixed(2))}</td> */}
+
+
                     <td></td>
                     <td></td>
                     <td></td>
@@ -567,7 +646,6 @@ function EggSale(props) {
             </Table >
 
             {
-
                 eggsalelist && eggsalelist.length > itemsPerPage &&
                 <>
                     <button

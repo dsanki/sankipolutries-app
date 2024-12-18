@@ -12,6 +12,8 @@ function ChicksMasterComponent(props) {
     const [chicks, setChicks] = useState([]);
     const [addModalShow, setAddModalShow] = useState(false);
     const [validated, setValidated] = useState(false);
+    const [advancedata, setAdvanceData] = useState([]);
+    const [customerlist, setCustomerList] = useState([]);
 
     const initialvalues = {
         modaltitle: "",
@@ -30,7 +32,8 @@ function ChicksMasterComponent(props) {
         PaymentDate: "",
         LotName: "",
         IsActive: "",
-        ExtraChicksPercentage: ""
+        ExtraChicksPercentage: "",
+        CustomerId: ""
     };
 
     const [chicksdata, setChicksData] = useState(initialvalues);
@@ -54,7 +57,8 @@ function ChicksMasterComponent(props) {
             PaymentDate: "",
             LotName: "",
             IsActive: true,
-            ExtraChicksPercentage: ""
+            ExtraChicksPercentage: "",
+            CustomerId: ""
         })
     }
 
@@ -77,12 +81,49 @@ function ChicksMasterComponent(props) {
             PaymentDate: chicks.PaymentDate,
             LotName: chicks.LotName,
             IsActive: chicks.IsActive,
-            ExtraChicksPercentage: chicks.ExtraChicksPercentage
+            ExtraChicksPercentage: chicks.ExtraChicksPercentage,
+            CustomerId: chicks.CustomerId
         })
+    }
+
+    const customerChange = (e) => {
+        setChicksData({ ...chicksdata, CustomerId: e.target.value });
+        addCount(count);
+
     }
 
     const lotnameChange = (e) => {
         setChicksData({ ...chicksdata, LotName: e.target.value });
+    }
+
+    const fetchCustomer = async () => {
+        fetch(process.env.REACT_APP_API + 'Customer/GetCustomer',
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    var filterList = data.Result;
+                    filterList = data.Result.filter((c) => c.CustomerTypeId == 2004);
+
+                    setCustomerList(filterList);
+                }
+                else if (data.StatusCode === 401) {
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found!!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                }
+            });
     }
 
     const chicksChange = (e) => {
@@ -173,12 +214,51 @@ function ChicksMasterComponent(props) {
     let addCount = (num) => {
         setCount(num + 1);
     };
+    const [issettle, setIsSettle] = useState(false);
+    const isSettleChange = (e) => {}
+
+    const fetchAdvanceListByCustId = async (custid) => {
+
+        fetch(process.env.REACT_APP_API + 'AdvancePayment/GetAdvancePaymentListByCustId?CustomerId=' +
+            custid + '&CompanyId=' + localStorage.getItem('companyid'),
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setAdvanceData(data.Result);
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    // props.showAlert("Data not found!!", "danger")
+                    // setIsLoaded(false);
+                    setAdvanceData("");
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                    // setIsLoaded(false);
+                    setAdvanceData("");
+                }
+            });
+    }
 
 
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
             fetchChicks(localStorage.getItem('companyid'));
+            fetchCustomer();
+            fetchAdvanceListByCustId(parseInt(chicksdata.CustomerId || 0));
         }
         else {
             HandleLogout();
@@ -380,7 +460,15 @@ function ChicksMasterComponent(props) {
                 <h4>Chicks/ Lot List</h4>
             </div>
             <div className="row">
+
                 <div className="col" style={{ textAlign: 'right' }}>
+
+                    {/* <td ><a href={`/paymentout/?uid=${p.ClientId}`}>{_suppname}
+                <span className="sr-only">(current)</span></a></td> */}
+
+
+                    <a className="mr-2 btn btn-primary"
+                        style={{ marginRight: '10px' }} href={`/paymentout/?custtype=${process.env.REACT_APP_CUST_TYPE_CHICKS}`}>Payment</a>
                     <Button className="mr-2" variant="primary"
                         style={{ marginRight: "17.5px" }}
                         onClick={() => clickAddChicks()}>Add</Button>
@@ -491,7 +579,7 @@ function ChicksMasterComponent(props) {
                             display: "flex",
                             justifyContent: "center",
                             alignItems: "center",
-                            fontSize:'18px'
+                            fontSize: '18px'
                         }}>
                             {chicksdata.modaltitle}
                         </Modal.Title>
@@ -501,7 +589,51 @@ function ChicksMasterComponent(props) {
                         <Row>
                             <Col sm={12}>
                                 <Form noValidate validated={validated} className="needs-validation">
-                                    <Row className="mb-4">
+                                    <Row className="col-12">
+                                        <Form.Group as={Col} controlId="CustomerId">
+                                            <Form.Label style={{ fontSize: '13px' }}>Supplier</Form.Label>
+                                            <Form.Select
+                                                onChange={customerChange} style={{ fontSize: 13 }}>
+                                                <option selected value="">Choose...</option>
+                                                {
+                                                    customerlist.map((item) => {
+                                                        let fullname = (item.MiddleName != "" && item.MiddleName != null) ? item.FirstName + " " + item.MiddleName + " " + item.LastName :
+                                                            item.FirstName + " " + item.LastName;
+                                                        return (
+                                                            <option
+                                                                key={item.ID}
+                                                                defaultValue={item.ID == null ? null : item.ID}
+                                                                selected={item.ID === parseInt(chicksdata.CustomerId)}
+                                                                value={item.ID}
+                                                            >{fullname}</option>
+
+                                                        );
+                                                    })
+                                                }
+                                            </Form.Select>
+                                        </Form.Group>
+                                        {
+                                            advancedata != null && advancedata.Amount > 0 && 
+                                            <div className="col-6">
+                                                <div className="alert alert-success" role="alert">
+                                                    <strong>  Advance of Rs: {parseFloat(advancedata.Amount || 0).toFixed(2)}</strong>
+                                                   
+                                                    {
+                               chicksdata.TotalAmount>0 && <Form.Check
+                                    type="checkbox"
+                                    id="chkIsActiveSettle"
+                                    label="Settle"
+                                    onChange={isSettleChange}
+                                    value={issettle}
+                                    checked={issettle}
+                                    style={{ fontSize: '13px' }}
+                                />
+                            }
+                                                </div>
+                                            </div>
+                                        }
+                                    </Row>
+                                    <Row className="col-6">
                                         <InputField controlId="LotName" label="Lot name"
                                             type="text"
                                             value={chicksdata.LotName}
@@ -596,7 +728,7 @@ function ChicksMasterComponent(props) {
 
                                     <Row className="mb-12">
                                         <Form.Group as={Col} controlId="date">
-                                            <Form.Label style={{fontSize:'13px'}}>Date</Form.Label>
+                                            <Form.Label style={{ fontSize: '13px' }}>Date</Form.Label>
                                             <DateComponent date={null} onChange={dateChange} isRequired={true} value={chicksdata.Date} />
                                             <Form.Control.Feedback type="invalid">
                                                 Please select date
@@ -650,7 +782,7 @@ function ChicksMasterComponent(props) {
                                     <Form.Group><br /></Form.Group>
                                     <Row className="mb-12">
                                         <Form.Group controlId="PaymentDate" as={Row} className="mb-3">
-                                            <Form.Label  style={{fontSize:'13px'}} column sm={3}>Payment date</Form.Label>
+                                            <Form.Label style={{ fontSize: '13px' }} column sm={3}>Payment date</Form.Label>
                                             <Col sm={4}>
                                                 <DateComponent date={null} isRequired={true} onChange={paymentDateChange} value={chicksdata.PaymentDate} />
                                             </Col>
@@ -662,7 +794,7 @@ function ChicksMasterComponent(props) {
                                                     onChange={isActiveChange}
                                                     value={chicksdata.IsActive}
                                                     checked={chicksdata.IsActive}
-                                                    style={{fontSize:'13px'}}
+                                                    style={{ fontSize: '13px' }}
                                                 />
                                             </Col>
                                         </Form.Group>

@@ -7,6 +7,8 @@ import InputField from '../ReuseableComponent/InputField'
 import DateComponent from '../DateComponent';
 import { FecthStockListById, HandleLogout, dateyyyymmdd, downloadExcel, GetCustomerByTypeId } from './../../Utility'
 import Loading from '../Loading/Loading'
+import { green } from '@material-ui/core/colors';
+import { BlobProvider } from '@react-pdf/renderer';
 
 function Medicine(props) {
 
@@ -37,6 +39,8 @@ function Medicine(props) {
 
   const [newcount, setAddNewCount] = useState(0);
   const objAddNew = useMemo(() => ({ newcount }), [newcount]);
+
+  const [advancedata, setAdvanceData] = useState([]);
 
   let addModalClose = () => {
     setAddModalShow(false);
@@ -120,6 +124,8 @@ function Medicine(props) {
     InvoiceNo: "",
     InvoiceDate: "",
     MedicineSubList: [initialMedicineSubvalues],
+    AdvanceAmount: "",
+    IsSettle: ""
   };
 
   const [meddata, setMedData] = useState(initialvalues);
@@ -141,6 +147,8 @@ function Medicine(props) {
       InvoiceNo: "",
       InvoiceDate: "",
       MedicineSubList: [initialMedicineSubvalues],
+      AdvanceAmount: "",
+      IsSettle: false
     })
   }
 
@@ -160,8 +168,9 @@ function Medicine(props) {
       Comments: md.Comments,
       InvoiceNo: md.InvoiceNo,
       InvoiceDate: md.InvoiceDate,
-      MedicineSubList: md.MedicineSubList
-
+      MedicineSubList: md.MedicineSubList,
+      AdvanceAmount: md.AdvanceAmount,
+      IsSettle: md.IsSettles
     })
   }
 
@@ -171,18 +180,18 @@ function Medicine(props) {
   const [_totalDue, _setTotalDue] = useState(0);
 
   const calculateValues = (data) => {
-    const { totalAmount,totalPaid, totalDue }
-        = data.reduce((accumulator, item) => {
-            accumulator.totalAmount += parseFloat(item.TotalAmount || 0);
-            accumulator.totalPaid +=parseFloat(item.Paid || 0);
-            accumulator.totalDue +=parseFloat(item.Due || 0);
-            return accumulator;
-        }, { totalAmount: 0,  totalPaid: 0, totalDue: 0})
+    const { totalAmount, totalPaid, totalDue }
+      = data.reduce((accumulator, item) => {
+        accumulator.totalAmount += parseFloat(item.TotalAmount || 0);
+        accumulator.totalPaid += parseFloat(item.Paid || 0);
+        accumulator.totalDue += parseFloat(item.Due || 0);
+        return accumulator;
+      }, { totalAmount: 0, totalPaid: 0, totalDue: 0 })
 
     _setTotalAmount(totalAmount);
     _setTotalPaid(totalPaid);
     _setTotalDue(totalDue);
-}
+  }
 
   const medicineNameChange = (e, index) => {
     let stk = stocklist.filter(x => x.ItemId === parseInt(e.target.value));
@@ -201,8 +210,8 @@ function Medicine(props) {
     data[index]["MedicineId"] = stk[0].ItemId;
     //data[index]["UnitPrice"] = stk[0].PurchasePrice;
 
-    let gstpercentage = parseFloat(data[index]["GST"]||0)/ 100;
-    let totalamount = (parseFloat(data[index]["UnitPrice"]||0) * parseFloat(data[index]["Quantity"] || 0));
+    let gstpercentage = parseFloat(data[index]["GST"] || 0) / 100;
+    let totalamount = (parseFloat(data[index]["UnitPrice"] || 0) * parseFloat(data[index]["Quantity"] || 0));
     let totalgst = totalamount * gstpercentage;
     let totalinclGST = totalamount + totalgst;
 
@@ -249,10 +258,10 @@ function Medicine(props) {
       data[index]["GST"] = e.target.value;
 
 
-      let gstpercentage = parseFloat(e.target.value||0) / 100;
+      let gstpercentage = parseFloat(e.target.value || 0) / 100;
 
-      let totalamount = (parseFloat(data[index]["UnitPrice"] || 0)) 
-      * parseInt(data[index]["Quantity"] || 0);
+      let totalamount = (parseFloat(data[index]["UnitPrice"] || 0))
+        * parseInt(data[index]["Quantity"] || 0);
 
       let totalgst = totalamount * gstpercentage;
       let totalinclGST = totalamount + totalgst;
@@ -270,11 +279,11 @@ function Medicine(props) {
     let data = [...formMedicineFields];
 
     if (e.target.value === '' || re.test(e.target.value)) {
-     // let stk = stocklist.filter(x => x.ItemId === parseInt(formMedicineFields[index].MedicineId));
+      // let stk = stocklist.filter(x => x.ItemId === parseInt(formMedicineFields[index].MedicineId));
       //let qty = e.target.value !== "" ? parseInt(e.target.value) : 0;
-      let _unitprice=data[index]["UnitPrice"];
+      let _unitprice = data[index]["UnitPrice"];
       let totalamount = (parseFloat(_unitprice || 0)) * parseInt(e.target.value);
-      
+
       let gstpercentage = data[index]["GST"] / 100;
 
       //let totalamount = (parseFloat(stk[0].PurchasePrice) * qty);
@@ -311,7 +320,8 @@ function Medicine(props) {
   }
 
   const clientChange = (e) => {
-    setMedData({ ...meddata, ClientId: e.target.value });
+    fetchAdvanceListByCustId(e.target.value);
+    setMedData({...meddata, ClientId: e.target.value });
   }
 
   const paymentDateChange = (e) => {
@@ -331,6 +341,26 @@ function Medicine(props) {
 
   const invoiceNoChange = (e) => {
     setMedData({ ...meddata, InvoiceNo: e.target.value });
+  }
+
+  const settleAdvancePayment = (e) => {
+    if (parseFloat(meddata.TotalAmount || 0) > parseFloat(meddata.AdvanceAmount || 0)) {
+      let tobepaid = parseFloat(meddata.TotalAmount || 0) - parseFloat(meddata.AdvanceAmount || 0);
+      let dueafterdeduction = tobepaid - parseFloat(meddata.Paid || 0);
+      setMedData({
+        ...meddata, Due: Math.round(dueafterdeduction).toFixed(2), IsSettle: !meddata.IsSettle
+      });
+    }
+    else if (parseFloat(meddata.TotalAmount || 0) <= parseFloat(meddata.AdvanceAmount || 0)) {
+
+      let tobepaid = parseFloat(meddata.AdvanceAmount || 0) - parseFloat(meddata.TotalAmount || 0);
+      let dueafterdeduction = tobepaid - parseFloat(meddata.Paid || 0);
+
+      setMedData({
+        ...meddata, Paid: meddata.TotalAmount, Due: 0, IsSettle: !meddata.IsSettle
+      });
+    }
+
   }
 
 
@@ -388,7 +418,87 @@ function Medicine(props) {
     }
   }, []);
 
+  const fetchAdvanceListByCustId = async (custid) => {
 
+    fetch(process.env.REACT_APP_API + 'AdvancePayment/GetAdvancePaymentList?CustomerId='+
+      custid+'&CompanyId='+localStorage.getItem('companyid') ,
+      {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': localStorage.getItem('token')
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.StatusCode === 200) {
+          setAdvanceData(data.Result);
+          setMedData({
+            ...meddata, AdvanceAmount: data.Result[0].Amount, ClientId:custid
+          })
+        }
+        else if (data.StatusCode === 401) {
+          HandleLogout();
+
+          history("/login")
+        }
+        else if (data.StatusCode === 404) {
+          props.showAlert("Data not found!!", "danger")
+          setIsLoaded(false);
+        }
+        else {
+          props.showAlert("Error occurred!!", "danger")
+          setIsLoaded(false);
+        }
+      });
+  }
+
+
+  // const fetchAdvanceListByCustId = async (custid) => {
+
+  //   fetch(process.env.REACT_APP_API + 'AdvancePayment/GetAdvancePaymentList',
+  //     {
+  //       method: 'POST',
+  //       headers: {
+  //         'Accept': 'application/json',
+  //         'Content-Type': 'application/json',
+  //         'Authorization': localStorage.getItem('token')
+  //       },
+  //       body: JSON.stringify({
+  //         CustomerId: custid,
+  //         CompanyId: localStorage.getItem('companyid'),
+  //         Date:new Date(),
+  //         Id:0,
+  //         Amount:0,
+  //         PaymentMode:"",
+  //         Settlement:false
+
+  //       })
+  //     })
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       if (data.StatusCode === 200) {
+  //         setAdvanceData(data.Result);
+  //         setMedData({
+  //           ...meddata, AdvanceAmount: data.Result[0].Amount, ClientId:custid
+  //         })
+  //       }
+  //       else if (data.StatusCode === 401) {
+  //         HandleLogout();
+
+  //         history("/login")
+  //       }
+  //       else if (data.StatusCode === 404) {
+  //         props.showAlert("Data not found!!", "danger")
+  //         setIsLoaded(false);
+  //       }
+  //       else {
+  //         props.showAlert("Error occurred!!", "danger")
+  //         setIsLoaded(false);
+  //       }
+  //     });
+  // }
 
 
   const fetchStockListById = async (catid) => {
@@ -416,7 +526,7 @@ function Medicine(props) {
 
   const fetchMedicineList = async () => {
     setIsLoaded(true);
-    fetch(process.env.REACT_APP_API + 'Medicine/GetMedicineListByCompanyId?CompanyId='+localStorage.getItem('companyid'),
+    fetch(process.env.REACT_APP_API + 'Medicine/GetMedicineListByCompanyId?CompanyId=' + localStorage.getItem('companyid'),
       {
         method: 'GET',
         headers: {
@@ -527,7 +637,8 @@ function Medicine(props) {
           InvoiceDate: meddata.InvoiceDate,
           InvoiceNo: meddata.InvoiceNo,
           MedicineSubList: meddata.MedicineSubList,
-          CompanyId:localStorage.getItem('companyid')
+          CompanyId: localStorage.getItem('companyid'),
+          IsSettle:meddata.IsSettle
 
         })
       }).then(res => res.json())
@@ -589,7 +700,8 @@ function Medicine(props) {
           InvoiceNo: meddata.InvoiceNo,
           MedicineSubList: meddata.MedicineSubList,
           Date: meddata.Date,
-          CompanyId:localStorage.getItem('companyid')
+          CompanyId: localStorage.getItem('companyid'),
+          IsSettle:meddata.IsSettle
 
         })
       }).then(res => res.json())
@@ -612,41 +724,41 @@ function Medicine(props) {
     setValidated(true);
   }
 
- 
+
 
   const deleteMedicine = (id) => {
     if (window.confirm('Are you sure?')) {
-        fetch(process.env.REACT_APP_API + 'Medicine/' + id, {
-            method: 'DELETE',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('token')
-            }
-        }).then(res => res.json())
-            .then((data) => {
-                if (data.StatusCode === 200) {
-                    setCount(count);
-                    props.showAlert("Successfully deleted", "info")
-                }
-                else if (data.StatusCode === 401) {
-                    HandleLogout();
-                    history("/login")
-                }
-                else if (data.StatusCode === 404) {
-                    props.showAlert("Data not found!!", "danger")
-                }
-                else {
-                    props.showAlert("Error occurred!!", "danger")
-                }
-            },
-                (error) => {
-                    props.showAlert("Error occurred!!", "danger")
-                });
+      fetch(process.env.REACT_APP_API + 'Medicine/' + id, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': localStorage.getItem('token')
+        }
+      }).then(res => res.json())
+        .then((data) => {
+          if (data.StatusCode === 200) {
+            setCount(count);
+            props.showAlert("Successfully deleted", "info")
+          }
+          else if (data.StatusCode === 401) {
+            HandleLogout();
+            history("/login")
+          }
+          else if (data.StatusCode === 404) {
+            props.showAlert("Data not found!!", "danger")
+          }
+          else {
+            props.showAlert("Error occurred!!", "danger")
+          }
+        },
+          (error) => {
+            props.showAlert("Error occurred!!", "danger")
+          });
 
-        addCount(count);
+      addCount(count);
     }
-}
+  }
 
   const filterSupplierChange = (e) => {
 
@@ -659,7 +771,7 @@ function Medicine(props) {
       setMedicineList(medicineListForFilter);
       calculateValues(medicineListForFilter);
     }
-   
+
     addUCount(ucount);
   }
 
@@ -764,24 +876,24 @@ function Medicine(props) {
           </div>
 
           <div className="col-2">
-          <p><strong>Supplier</strong></p>
-                        
-                        <Form.Select style={{fontSize:'13px'}}
-                            onChange={filterSupplierChange}>
-                            <option selected value="">Choose...</option>
-                            {
-                               clientlist.map((item) => {
-                                    return (
-                                        <option
-                                            key={item.ID}
-                                            defaultValue={item.Id == null ? null : item.ID}
-                                            value={item.ID}
-                                        >{item.FirstName +" "+item.LastName}</option>
-                                    );
-                                })
-                            }
-                        </Form.Select>
-            </div>
+            <p><strong>Supplier</strong></p>
+
+            <Form.Select style={{ fontSize: '13px' }}
+              onChange={filterSupplierChange}>
+              <option selected value="">Choose...</option>
+              {
+                clientlist.map((item) => {
+                  return (
+                    <option
+                      key={item.ID}
+                      defaultValue={item.Id == null ? null : item.ID}
+                      value={item.ID}
+                    >{item.FirstName + " " + item.LastName}</option>
+                  );
+                })
+              }
+            </Form.Select>
+          </div>
 
           <div className="col-4" style={{ textAlign: 'right', marginTop: 30 }}>
             <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2', marginRight: 30 }}
@@ -801,7 +913,7 @@ function Medicine(props) {
               <option value="200">200</option>
             </select>
           </div>
-          
+
         </div>
       </div>
 
@@ -853,28 +965,30 @@ function Medicine(props) {
                 _supp[0].FirstName + " " + _supp[0].LastName : "";
               p.ClientName = _suppname;
 
+              fetchAdvanceListByCustId(p.ClientId);
+
               //setMedicineFields(p.MedicineSubList);
 
               return (
                 !isloaded && <tr align='center' style={{ fontSize: '13px' }} key={p.Id}>
                   <td >{moment(p.Date).format('DD-MMM-YYYY')}</td>
                   <td>{p.InvoiceNo}</td>
-                  <td>{ moment(p.InvoiceDate).format('DD-MMM-YYYY')}</td>
-                  
-                  <td ><a href={`/paymentout/?uid=${p.ClientId}`}>{_suppname}
-                  <span className="sr-only">(current)</span></a></td>
+                  <td>{moment(p.InvoiceDate).format('DD-MMM-YYYY')}</td>
+
+                  <td ><a href={`/paymentout/?uid=${p.ClientId}&custtype=${process.env.REACT_APP_CUST_TYPE_MEDICINE}`}>{_suppname}
+                    <span className="sr-only">(current)</span></a></td>
                   <td >{p.TotalAmount.toFixed(2)}</td>
-                  <td >{parseFloat(p.Paid||0).toFixed(2)}</td>
-                  <td >{parseFloat(p.Due||0).toFixed(2)}</td>
-                  <td >{(p.PaymentDate==''  || p.PaymentDate==null) ?'':moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
+                  <td >{parseFloat(p.Paid || 0).toFixed(2)}</td>
+                  <td >{parseFloat(p.Due || 0).toFixed(2)}</td>
+                  <td >{(p.PaymentDate == '' || p.PaymentDate == null) ? '' : moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
                   <td >{p.Comments}</td>
                   <td align='center'>
                     {
                       <ButtonToolbar>
                         <i className="fa-solid fa-pen-to-square" style={{ color: '#0545b3', marginLeft: '15px' }} onClick={() => clickEditMedicine(p)}></i>
                         {localStorage.getItem('isadmin') === 'true' &&
-                          <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} 
-                          onClick={() => deleteMedicine(p.Id)}></i>}
+                          <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }}
+                            onClick={() => deleteMedicine(p.Id)}></i>}
 
 
                       </ButtonToolbar>
@@ -891,17 +1005,17 @@ function Medicine(props) {
         </tbody>
 
         <tfoot style={{ backgroundColor: '#cccccc', fontWeight: 'bold', fontSize: 13 }}>
-                    <td align='center'>Total</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td align='center'>{parseFloat(_totalAmount).toFixed(2)}</td>
-                    <td align='center'>{parseFloat(_totalPaid).toFixed(2)}</td>
-                    <td align='center'>{parseFloat(_totalDue).toFixed(2)}</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tfoot>
+          <td align='center'>Total</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td align='center'>{parseFloat(_totalAmount).toFixed(2)}</td>
+          <td align='center'>{parseFloat(_totalPaid).toFixed(2)}</td>
+          <td align='center'>{parseFloat(_totalDue).toFixed(2)}</td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tfoot>
       </Table >
       <div className="container" id="exampleModal">
         <Modal
@@ -912,7 +1026,7 @@ function Medicine(props) {
           centered
         >
           <Modal.Header>
-            <Modal.Title id="contained-modal-title-vcenter" style={{fontSize:'18px'}}>
+            <Modal.Title id="contained-modal-title-vcenter" style={{ fontSize: '18px' }}>
               {meddata.modaltitle}
             </Modal.Title>
             <button type="button" class="btn-close" aria-label="Close" onClick={addModalClose}> </button>
@@ -1017,7 +1131,7 @@ function Medicine(props) {
                                       Please select medicine name
                                     </Form.Control.Feedback>
                                   </Form.Group>
-                                  
+
                                   <InputField controlId="Quantity" label=""
                                     type="text"
                                     value={form.Quantity}
@@ -1049,7 +1163,7 @@ function Medicine(props) {
                                     required={false}
                                     disabled={false}
                                     onChange={event => gstChange(event, index)}
-                                    //
+                                  //
                                   />
 
                                   <InputField controlId="Amount" label=""
@@ -1094,11 +1208,27 @@ function Medicine(props) {
                       <hr className="line" style={{ marginTop: '10px' }} />
                     </Row>
 
+                    {
 
-                    <Row className="mb-12">
-
-
-                    </Row>
+                      parseFloat(meddata.AdvanceAmount || 0) > 0 ?
+                        <Row className="mb-12">
+                          <div className="col-6">
+                            <p class="form-label" style={{color:'green'}}>Advance payment done Rs: {parseFloat(meddata.AdvanceAmount|| 0).toFixed(2)}</p>
+                          </div>
+                          <div className="col-6">
+                            <Form.Check
+                              type="checkbox"
+                              id="chkIsActive"
+                              label="Settle advance amount"
+                              onChange={settleAdvancePayment}
+                              value={meddata.IsSettle}
+                              checked={meddata.IsSettle}
+                              style={{ fontSize: '13px', fontWeight:'bold'}}
+                            />
+                          </div>
+                          <hr className="line" style={{ marginTop: '10px' }} />
+                        </Row> : ""
+                    }
                     <Row className="mb-12">
 
                       <InputField controlId="Paid" label="Paid"
@@ -1124,8 +1254,8 @@ function Medicine(props) {
 
                       <Form.Group as={Col} controlId="PaymentDate">
                         <Form.Label style={{ fontSize: 13 }}>Payment date</Form.Label>
-                        <DateComponent date={null} onChange={paymentDateChange} 
-                        isRequired={false} value={meddata.PaymentDate} />
+                        <DateComponent date={null} onChange={paymentDateChange}
+                          isRequired={false} value={meddata.PaymentDate} />
                         <Form.Control.Feedback type="invalid">
                           Please select payment date
                         </Form.Control.Feedback>
@@ -1133,12 +1263,23 @@ function Medicine(props) {
                     </Row>
 
                     <Row className="mb-12">
-                      <Form.Group controlId="ChequeRefNo" as={Col} >
+
+                      <InputField controlId="ChequeRefNo" label="Cheque Ref No"
+                        type="text"
+                        value={meddata.ChequeRefNo}
+                        name="ChequeRefNo"
+                        placeholder="Cheque Ref No"
+                        errormessage="Enter Cheque Ref No"
+                        required={false}
+                        disabled={false}
+                        onChange={chequeRefNoChange}
+                      />
+                      {/* <Form.Group controlId="ChequeRefNo" as={Col} >
                         <Form.Label style={{ fontSize: 13 }}>Cheque Ref No</Form.Label>
                         <Form.Control as="textarea" rows={3} style={{ fontSize: 13 }} 
                         name="ChequeRefNo" onChange={chequeRefNoChange} value={meddata.ChequeRefNo}
                           placeholder="Cheque Ref No" />
-                      </Form.Group>
+                      </Form.Group> */}
                     </Row>
                     <Row className="mb-12">
                       <Form.Group controlId="Comments" as={Col} >

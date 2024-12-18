@@ -124,6 +124,8 @@ export const FetchShedLotMapList = async (apiurl) => {
 }
 
 
+
+
 export const FetchChicks = async (companyid,apiurl) => {
   const response = await fetch(apiurl + 'ChicksMaster/GetChicksByCompanyId?CompanyId='+companyid,
     {
@@ -188,6 +190,20 @@ export const downloadExcel = (data, name) => {
     XLSX.writeFile(wb, `${name}.xlsx`);
   }
 };
+
+export const FetchGunnyBagSaleList = async (uid,id,apiurl) => {
+  const response = await fetch(apiurl + 'GunnyBagSale/GetGunnyBagSale?uid='
+    +uid +'&id='+id +'&CompanyId='+localStorage.getItem('companyid'),
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+
+  const data = await response.json();
+  return data;
+}
 
 export const FetchBirdSaleList = async (uid,id,apiurl) => {
   const response =await fetch(apiurl + 'BirdSale/GetBirdSale?uid='
@@ -379,6 +395,22 @@ export const ConvertNumberToWords =(amount)=> {
   return `${result} ${only}`;
 }
 
+export const FetchEggDiscountTypes=()=>{
+
+  const eggdistype =[
+        {
+            "Id": 1,
+            "Name": "Per Egg"
+        },
+        {
+           "Id": 2,
+            "Name": "%"
+      }
+      ]
+
+      return eggdistype;
+}
+
 
 export const AmountInWords=(value)=>
 {
@@ -418,5 +450,21 @@ while ( arr.length ) {
 }
 
 return str;
+}
+
+export const FetchAdvanceListByCustId = async (custid) => {
+  const response =await fetch(process.env.REACT_APP_API 
+    + 'AdvancePayment/GetAdvancePaymentListByCustId?CustomerId=' +
+      custid + '&CompanyId=' + localStorage.getItem('companyid'),
+      {
+          method: 'GET',
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': localStorage.getItem('token')
+          }
+      });
+      const data = await response.json();
+      return data;
 }
 

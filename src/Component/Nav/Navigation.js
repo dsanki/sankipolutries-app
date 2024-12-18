@@ -88,6 +88,11 @@ function Navigation() {
                                             <a className={`nav-link ${location.pathname === "/birdsale" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/customerlist?type=2">Bird sale
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
+
+                                        <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/gunnybag" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/gunnybag">Gunny Bag
+                                                <span className="sr-only">(current)</span></a>
+                                        </li>
                                     </ul>
                                 </li>
 

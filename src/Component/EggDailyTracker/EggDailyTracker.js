@@ -312,6 +312,8 @@ function EggDailyTracker(props) {
         }
     }, [obj]);
 
+    
+
 
     const fetchSheds = async () => {
         FetchShedsList(process.env.REACT_APP_API)

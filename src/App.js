@@ -35,6 +35,7 @@ import Test from './Component/Testing/Test'
  import Stock from './Component/Stock/Stock';
  import CompanySelection from './Component/CompanySelection/CompanySelection';
  import EggStockInventory from './Component/EggInventory/EggStockInventory'
+import GunnyBag from './Component/GunnyBag/GunnyBag';
  
  
 function App() {
@@ -127,6 +128,8 @@ function App() {
             <Route path="/paymentout" element={<PaymentOut showAlert={showAlert} />} />
             <Route path="/paymentout/:uid" element={<PaymentOut showAlert={showAlert} />} />
             <Route path="/paymentout/?:uid" element={<PaymentOut showAlert={showAlert} />} />
+            <Route path="/gunnybag" element={<GunnyBag showAlert={showAlert} />} />
+            
             
           </Routes>
         </div>
