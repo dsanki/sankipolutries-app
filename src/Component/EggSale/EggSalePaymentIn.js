@@ -246,7 +246,8 @@ function EggSalePaymentIn(props) {
                 Date: paymentDetails.PaymentDate || new Date(),
                 PaymentMode: paymentDetails.PaymentMode || 'Cash',
                 CustomerId: paymentDetails.CustomerId,
-                CompanyId: localStorage.getItem('companyid')
+                CompanyId: localStorage.getItem('companyid'),
+                PaymentType:'In'
             })
         });
         const todo = await response.json()

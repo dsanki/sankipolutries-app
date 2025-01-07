@@ -7,8 +7,8 @@ import InputField from '../ReuseableComponent/InputField'
 
 export const categoryList = {
     categories: [
-        { Key: 1, Value: 'MEDICINE' },
-        { Key: 2, Value: 'VACCINE' },
+        { Key: 1, Value: 'MEDICINE/VACCINE' },
+        // { Key: 2, Value: 'VACCINE' },
         { Key: 3, Value: 'EGG' },
         { Key: 4, Value: 'PACKAGING' },
         { Key: 5, Value: 'RAW_MATERIALS' },

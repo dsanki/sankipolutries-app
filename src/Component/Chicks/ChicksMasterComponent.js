@@ -33,7 +33,11 @@ function ChicksMasterComponent(props) {
         LotName: "",
         IsActive: "",
         ExtraChicksPercentage: "",
-        CustomerId: ""
+        CustomerId: "",
+        Comments:"",
+        Discount:"",
+        FinalCost:"",
+        SettleAmount:""
     };
 
     const [chicksdata, setChicksData] = useState(initialvalues);
@@ -58,7 +62,11 @@ function ChicksMasterComponent(props) {
             LotName: "",
             IsActive: true,
             ExtraChicksPercentage: "",
-            CustomerId: ""
+            CustomerId: "",
+            Comments:"",
+            Discount:"",
+            FinalCost:"",
+            SettleAmount:""
         })
     }
 
@@ -82,7 +90,11 @@ function ChicksMasterComponent(props) {
             LotName: chicks.LotName,
             IsActive: chicks.IsActive,
             ExtraChicksPercentage: chicks.ExtraChicksPercentage,
-            CustomerId: chicks.CustomerId
+            CustomerId: chicks.CustomerId,
+            Comments:chicks.Comments,
+            Discount:chicks.Discount,
+            FinalCost:chicks.FinalCost,
+            SettleAmount:chicks.SettleAmount
         })
     }
 
@@ -110,7 +122,7 @@ function ChicksMasterComponent(props) {
             .then(data => {
                 if (data.StatusCode === 200) {
                     var filterList = data.Result;
-                    filterList = data.Result.filter((c) => c.CustomerTypeId == 2004);
+                    filterList = data.Result.filter((c) => c.CustomerTypeId == process.env.REACT_APP_CUST_TYPE_CHICKS);
 
                     setCustomerList(filterList);
                 }
@@ -173,20 +185,46 @@ function ChicksMasterComponent(props) {
 
     const lambChange = (e) => {
         const lamb = e.target.value === "" ? 0 : parseInt(e.target.value);
-        setChicksData({ ...chicksdata, LambChicks: e.target.value, DueChicks: (lamb + (chicksdata.Mortality === "" ? 0 : parseInt(chicksdata.Mortality))) });
+        setChicksData({ ...chicksdata, LambChicks: e.target.value, 
+            DueChicks: (lamb + (chicksdata.Mortality === "" ? 0 : parseInt(chicksdata.Mortality))) });
     }
 
     const rateChange = (e) => {
-        setChicksData({ ...chicksdata, Rate: e.target.value, TotalAmount: e.target.value * chicksdata.Chicks, Due: (e.target.value * chicksdata.Chicks) - chicksdata.Paid });
+let _totalAmt=e.target.value * chicksdata.Chicks;
+        let _finalcost=(parseFloat(_totalAmt||0)-parseFloat(chicksdata.Discount||0));
+
+        setChicksData({ ...chicksdata, Rate: e.target.value, 
+            TotalAmount: _totalAmt, 
+            Due: _finalcost - parseFloat(chicksdata.Paid||0),
+            FinalCost:_finalcost });
     }
 
     const paidChange = (e) => {
-        setChicksData({ ...chicksdata, Paid: e.target.value, Due: chicksdata.TotalAmount - e.target.value });
+        setChicksData({ ...chicksdata, Paid: e.target.value, 
+            Due: chicksdata.FinalCost - e.target.value });
     }
 
     const paymentDateChange = (e) => {
         setChicksData({ ...chicksdata, PaymentDate: e.target.value });
     }
+
+    const commentsChange = (e) => {
+        setChicksData({ ...chicksdata, Comments: e.target.value});
+    }
+
+    const discountChange = (e) => {
+        let _finalcost=(parseFloat(chicksdata.TotalAmount||0)-parseFloat(e.target.value||0));
+        setChicksData({ ...chicksdata, Discount: e.target.value,
+            FinalCost:_finalcost,
+            Due: _finalcost - parseFloat(chicksdata.Paid||0)
+        });
+    }
+
+    // const finalCostChange = (e) => {
+    //     setChicksData({ ...chicksdata, Rate: e.target.value, TotalAmount: e.target.value * chicksdata.Chicks, 
+    //         Due: (e.target.value * chicksdata.Chicks) - chicksdata.Paid });
+    // }
+
 
 
     const [count, setCount] = useState(0);
@@ -215,7 +253,60 @@ function ChicksMasterComponent(props) {
         setCount(num + 1);
     };
     const [issettle, setIsSettle] = useState(false);
-    const isSettleChange = (e) => {}
+      const [advancedataticked, setAdvanceDataTicked] = useState([]);
+
+
+    const isSettleChange = (e) => {
+        // setChicksData({ ...chicksdata, IsActive: !chicksdata.IsActive });
+        if (!issettle) {
+            let advance = advancedataticked.Amount,
+                finalAmt = chicksdata.FinalCost;
+            //Need to add one more payment mode Adjustment
+            if (advance > finalAmt) {
+
+                let _paid = parseFloat(finalAmt || 0);
+
+                let _due = parseFloat(finalAmt || 0) - _paid;
+
+                setChicksData({
+                    ...chicksdata, Paid: _paid, Due: _due,SettleAmount:finalAmt
+                });
+                
+
+                setAdvanceDataTicked({ ...advancedataticked, Amount: advance - finalAmt })
+            }
+            else {
+
+                if (advance <= finalAmt) {
+
+                    let _paid = parseFloat(advance || 0);
+
+                    let _due = (parseFloat(finalAmt || 0)) - _paid;
+
+                    setChicksData({
+                        ...chicksdata, Paid: _paid, Due: _due, SettleAmount:advance
+                    });
+
+                    setAdvanceDataTicked({ ...advancedataticked, Amount: 0 })
+                }
+            }
+        }
+        else {
+
+            let _paid = parseFloat(chicksdata.Paid || 0) ;
+
+            let _due = chicksdata.FinalCost - _paid;
+            setChicksData({
+                ...chicksdata, Paid: _paid, Due: _due, SettleAmount:0
+            });
+
+            let da = parseFloat(advancedata.Amount || 0);
+            setAdvanceDataTicked({ ...advancedataticked, Amount: da })
+        }
+
+        setIsSettle(!issettle);
+
+    }
 
     const fetchAdvanceListByCustId = async (custid) => {
 
@@ -233,6 +324,7 @@ function ChicksMasterComponent(props) {
             .then(data => {
                 if (data.StatusCode === 200) {
                     setAdvanceData(data.Result);
+                    setAdvanceDataTicked(data.Result);
                 }
                 else if (data.StatusCode === 401) {
                     HandleLogout();
@@ -243,11 +335,14 @@ function ChicksMasterComponent(props) {
                     // props.showAlert("Data not found!!", "danger")
                     // setIsLoaded(false);
                     setAdvanceData("");
+                    setAdvanceDataTicked(data.Result);
                 }
                 else {
                     props.showAlert("Error occurred!!", "danger")
                     // setIsLoaded(false);
                     setAdvanceData("");
+                    setAdvanceData("");
+                    setAdvanceDataTicked("");
                 }
             });
     }
@@ -373,7 +468,13 @@ function ChicksMasterComponent(props) {
                     LotName: chicksdata.LotName,
                     IsActive: chicksdata.IsActive,
                     ExtraChicksPercentage: chicksdata.ExtraChicksPercentage,
-                    CompanyId: localStorage.getItem('companyid')
+                    CompanyId: localStorage.getItem('companyid'),
+                    FinalCost:chicksdata.FinalCost,
+                    Comments:chicksdata.Comments,
+                    Discount:chicksdata.Discount,
+                    CustomerId:chicksdata.CustomerId,
+                    SettleAmount:chicksdata.SettleAmount
+
                 })
             })
                 .then(res => res.json())
@@ -430,7 +531,13 @@ function ChicksMasterComponent(props) {
                     LotName: chicksdata.LotName,
                     IsActive: chicksdata.IsActive,
                     ExtraChicksPercentage: chicksdata.ExtraChicksPercentage,
-                    CompanyId: localStorage.getItem('companyid')
+                    CompanyId: localStorage.getItem('companyid'),
+                    FinalCost:chicksdata.FinalCost,
+                    Comments:chicksdata.Comments,
+                    Discount:chicksdata.Discount,
+                    CustomerId:chicksdata.CustomerId,
+                    SettleAmount:chicksdata.SettleAmount
+
 
                 })
             }).then(res => res.json())
@@ -489,6 +596,8 @@ function ChicksMasterComponent(props) {
                         <th align='center'>Due cks</th>
                         <th align='center'>Rate</th>
                         <th align='center'>Total amt</th>
+                        <th align='center'>Discount</th>
+                        <th align='center'>FinalCost</th>
                         <th align='center'>Paid</th>
                         <th align='center'>Due</th>
                         <th align='center'>Payment date</th>
@@ -510,6 +619,8 @@ function ChicksMasterComponent(props) {
                                 <td align='center'>{p.DueChicks}</td>
                                 <td align='center'>{p.Rate.toFixed(2)}</td>
                                 <td align='center'>{p.TotalAmount.toFixed(2)}</td>
+                                <td align='center'>{parseFloat(p.Discount||0).toFixed(2)}</td>
+                                <td align='center'>{parseFloat(p.FinalCost||0).toFixed(2)}</td>
                                 <td align='center'>{p.Paid.toFixed(2)}</td>
                                 <td align='center'>{p.Due.toFixed(2)}</td>
                                 <td align='center'>{Moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
@@ -758,6 +869,32 @@ function ChicksMasterComponent(props) {
                                             disabled={true}
                                         />
 
+
+                                        <InputField controlId="Discount" label="Discount"
+                                            type="number"
+                                            value={chicksdata.Discount}
+                                            name="Discount"
+                                            placeholder="Discount"
+                                            errormessage="Please provide discount"
+                                            required={false}
+                                            disabled={false}
+                                            onChange={discountChange}
+                                        />
+
+<InputField controlId="FinalCost" label="FinalCost"
+                                            type="number"
+                                            value={chicksdata.FinalCost}
+                                            name="FinalCost"
+                                            placeholder="Final cost"
+                                            errormessage="Please provide final cost"
+                                            required={false}
+                                            disabled={false}
+                                        />
+                                          </Row>
+
+<Row className="mb-12">
+
+
                                         <InputField controlId="Paid" label="Paid"
                                             type="number"
                                             value={chicksdata.Paid}
@@ -801,6 +938,16 @@ function ChicksMasterComponent(props) {
 
 
                                     </Row>
+
+                                    <Row className="mb-12">
+                                                                              <Form.Group controlId="Comments" as={Col} >
+                                                                                  <Form.Label style={{ fontSize: '13px' }}>Comments</Form.Label>
+                                                                                  <Form.Control style={{ fontSize: '13px' }} as="textarea" rows={3} name="Comments"
+                                                                                      onChange={commentsChange} value={chicksdata.Comments}
+                                                                                      placeholder="Comments" />
+                                  
+                                                                              </Form.Group>
+                                                                          </Row>
 
                                     <Form.Group as={Col}>
                                         {chicksdata.Id <= 0 ?

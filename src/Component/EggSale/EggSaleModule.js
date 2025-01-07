@@ -101,10 +101,11 @@ function EggSaleModule(props) {
         Cash: "",
         PhonePay: "",
         NetBanking: "",
-        UPI: "",
+        CashDeposite: "",
         Cheque: "",
         Advance: "",
-        Complimentary: ""
+        Complimentary: "",
+        Comments: ""
     };
 
     const [eggsaleinvdata, setEggSaleInvoiceData] = useState(initialeggsaleinvoicevalues);
@@ -139,11 +140,11 @@ function EggSaleModule(props) {
             Cash: eggsaleinvdata.Cash,
             PhonePay: eggsaleinvdata.PhonePay,
             NetBanking: eggsaleinvdata.NetBanking,
-            UPI: eggsaleinvdata.UPI,
+            CashDeposite: eggsaleinvdata.CashDeposite,
             Cheque: eggsaleinvdata.Cheque,
             Advance: eggsaleinvdata.Advance,
-            Complimentary: eggsaleinvdata.Complimentary
-
+            Complimentary: eggsaleinvdata.Complimentary,
+            Comments: eggsaleinvdata.Comments
         })
     }
 
@@ -206,7 +207,7 @@ function EggSaleModule(props) {
             else if (val === "2") {
                 let totalCost = eggsaledata.TotalCost;
                 _totalDiscount = totalCost * (eggsaledata.DiscountPerEgg / 100);
-                
+
 
             }
 
@@ -279,6 +280,12 @@ function EggSaleModule(props) {
     //     //setAdditionalCharge(addch);
     // }
 
+    const invCommentsChange = (e) => {
+        setEggSaleInvoiceData({
+            ...eggsaleinvdata, Comments: e.target.value
+        });
+    }
+
     const additionalChargeChange = (e) => {
         let addch = parseFloat(e.target.value || 0);
 
@@ -287,10 +294,10 @@ function EggSaleModule(props) {
             return accumulator;
         }, { totalFinalCost: 0 })
 
-        let _costInclAddCh = parseFloat(totalFinalCost || 0) + addch;
+        let _costInclAddCh = Math.round(parseFloat(totalFinalCost || 0)) + addch;
 
         let _paid = (parseFloat(eggsaleinvdata.Cash || 0) + parseFloat(eggsaleinvdata.PhonePay || 0) +
-            parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
+            parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.CashDeposite || 0)
             + parseFloat(eggsaleinvdata.Cheque || 0));
 
         let _due = _costInclAddCh - _paid;
@@ -406,7 +413,7 @@ function EggSaleModule(props) {
             let cashamt = parseFloat(e.target.value || 0);
 
             let _paid = (cashamt + parseFloat(eggsaleinvdata.PhonePay || 0) +
-                parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
+                parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.CashDeposite || 0)
                 + parseFloat(eggsaleinvdata.Cheque || 0));
 
             let _due = (eggsaleinvdata.FinalCostInvoice - _paid) < 0 ? 0 : (eggsaleinvdata.FinalCostInvoice - _paid);
@@ -415,14 +422,6 @@ function EggSaleModule(props) {
             setEggSaleInvoiceData({
                 ...eggsaleinvdata, Cash: e.target.value,
                 Paid: _paid,
-                // Paid: (cashamt + parseFloat(eggsaleinvdata.PhonePay || 0) +
-                //     parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
-                //     + parseFloat(eggsaleinvdata.Cheque || 0)),
-                // Due: (eggsaleinvdata.FinalCostInvoice -
-                //     (cashamt + parseFloat(eggsaleinvdata.PhonePay || 0) +
-                //         parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
-                //         + parseFloat(eggsaleinvdata.Cheque || 0))
-                // )
                 Due: _due,
                 Advance: Math.round(_advance)
             });
@@ -435,7 +434,7 @@ function EggSaleModule(props) {
         if (e.target.value === '' || re.test(e.target.value)) {
             let phpayamt = parseFloat(e.target.value || 0);
             let _paid = (phpayamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
+                parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.CashDeposite || 0)
                 + parseFloat(eggsaleinvdata.Cheque || 0));
 
             let _due = (eggsaleinvdata.FinalCostInvoice - _paid) < 0 ? 0
@@ -448,16 +447,8 @@ function EggSaleModule(props) {
             setEggSaleInvoiceData({
                 ...eggsaleinvdata, PhonePay: e.target.value,
                 Paid: _paid,
-                // (phpayamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                //     parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
-                //     + parseFloat(eggsaleinvdata.Cheque || 0)),
                 Due: _due,
-                // (eggsaleinvdata.FinalCostInvoice -
-                //     (phpayamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                //         parseFloat(eggsaleinvdata.NetBanking || 0) + parseFloat(eggsaleinvdata.UPI || 0)
-                //         + parseFloat(eggsaleinvdata.Cheque || 0))
-                //)
-                Advance:  Math.round(_advance)
+                Advance: Math.round(_advance)
             });
         }
     }
@@ -469,7 +460,7 @@ function EggSaleModule(props) {
             let nbamt = parseFloat(e.target.value || 0);
 
             let _paid = (nbamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.UPI || 0)
+                parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.CashDeposite || 0)
                 + parseFloat(eggsaleinvdata.Cheque || 0));
 
 
@@ -482,16 +473,8 @@ function EggSaleModule(props) {
             setEggSaleInvoiceData({
                 ...eggsaleinvdata, NetBanking: e.target.value,
                 Paid: _paid,
-                // (nbamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                //     parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.UPI || 0)
-                //     + parseFloat(eggsaleinvdata.Cheque || 0)),
                 Due: _due,
-                // (eggsaleinvdata.FinalCostInvoice -
-                //     (nbamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                //         parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.UPI || 0)
-                //         + parseFloat(eggsaleinvdata.Cheque || 0))
-                //)
-                Advance:  Math.round(_advance)
+                Advance: Math.round(_advance)
             });
         }
     }
@@ -503,7 +486,7 @@ function EggSaleModule(props) {
         }
     }
 
-    const upiChange = (e) => {
+    const cashDepositeChange = (e) => {
         const re = /^\d*\.?\d{0,2}$/
 
         if (e.target.value === '' || re.test(e.target.value)) {
@@ -521,21 +504,47 @@ function EggSaleModule(props) {
                 ? _paid - eggsaleinvdata.FinalCostInvoice : 0;
 
             setEggSaleInvoiceData({
-                ...eggsaleinvdata, UPI: e.target.value,
+                ...eggsaleinvdata, CashDeposite: e.target.value,
                 Paid: _paid,
-                // (upiamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                //     parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
-                //     + parseFloat(eggsaleinvdata.Cheque || 0)),
                 Due: _due,
-                // (eggsaleinvdata.FinalCostInvoice -
-                //     (upiamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                //         parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
-                //         + parseFloat(eggsaleinvdata.Cheque || 0))
-                //)
-                Advance:  Math.round(_advance)
+                Advance: Math.round(_advance)
             });
         }
     }
+
+    // const upiChange = (e) => {
+    //     const re = /^\d*\.?\d{0,2}$/
+
+    //     if (e.target.value === '' || re.test(e.target.value)) {
+    //         let upiamt = parseFloat(e.target.value || 0);
+
+    //         let _paid = (upiamt + parseFloat(eggsaleinvdata.Cash || 0) +
+    //             parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
+    //             + parseFloat(eggsaleinvdata.Cheque || 0));
+
+
+    //         let _due = (eggsaleinvdata.FinalCostInvoice - _paid) < 0 ? 0
+    //             : (eggsaleinvdata.FinalCostInvoice - _paid);
+
+    //         let _advance = _paid > eggsaleinvdata.FinalCostInvoice
+    //             ? _paid - eggsaleinvdata.FinalCostInvoice : 0;
+
+    //         setEggSaleInvoiceData({
+    //             ...eggsaleinvdata, UPI: e.target.value,
+    //             Paid: _paid,
+    //             // (upiamt + parseFloat(eggsaleinvdata.Cash || 0) +
+    //             //     parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
+    //             //     + parseFloat(eggsaleinvdata.Cheque || 0)),
+    //             Due: _due,
+    //             // (eggsaleinvdata.FinalCostInvoice -
+    //             //     (upiamt + parseFloat(eggsaleinvdata.Cash || 0) +
+    //             //         parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
+    //             //         + parseFloat(eggsaleinvdata.Cheque || 0))
+    //             //)
+    //             Advance: Math.round(_advance)
+    //         });
+    //     }
+    // }
 
     const chequeChange = (e) => {
         const re = /^\d*\.?\d{0,2}$/
@@ -545,7 +554,7 @@ function EggSaleModule(props) {
 
             let _paid = (chqamt + parseFloat(eggsaleinvdata.Cash || 0) +
                 parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
-                + parseFloat(eggsaleinvdata.UPI || 0));
+                + parseFloat(eggsaleinvdata.CashDeposite || 0));
 
             let _due = (eggsaleinvdata.FinalCostInvoice - _paid) < 0 ? 0
                 : (eggsaleinvdata.FinalCostInvoice - _paid);
@@ -557,16 +566,8 @@ function EggSaleModule(props) {
             setEggSaleInvoiceData({
                 ...eggsaleinvdata, Cheque: e.target.value,
                 Paid: _paid,
-                // (chqamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                //     parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
-                //     + parseFloat(eggsaleinvdata.UPI || 0)),
                 Due: _due,
-                // (eggsaleinvdata.FinalCostInvoice -
-                //     (chqamt + parseFloat(eggsaleinvdata.Cash || 0) +
-                //         parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
-                //         + parseFloat(eggsaleinvdata.UPI || 0))
-                // )
-                Advance:  Math.round(_advance)
+                Advance: Math.round(_advance)
             });
         }
     }
@@ -579,7 +580,7 @@ function EggSaleModule(props) {
             let due = Math.round(eggsaleinvdata.FinalCostInvoice -
                 (parseFloat(eggsaleinvdata.Cheque || 0) + parseFloat(eggsaleinvdata.Cash || 0) +
                     parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
-                    + parseFloat(eggsaleinvdata.UPI || 0))
+                    + parseFloat(eggsaleinvdata.CashDeposite || 0))
             )
 
             let _duefinal = parseFloat(due) - parseFloat(e.target.value || 0) < 0 ? 0 :
@@ -607,7 +608,7 @@ function EggSaleModule(props) {
                     + parseFloat(eggsaleinvdata.Cash || 0) +
                     parseFloat(eggsaleinvdata.PhonePay || 0)
                     + parseFloat(eggsaleinvdata.NetBanking || 0)
-                    + parseFloat(eggsaleinvdata.UPI || 0));
+                    + parseFloat(eggsaleinvdata.CashDeposite || 0));
 
                 let _due = parseFloat(finalAmt || 0) - parseFloat(_paid || 0);
 
@@ -623,7 +624,7 @@ function EggSaleModule(props) {
 
                     let _paid = (parseFloat(advance || 0) + parseFloat(eggsaleinvdata.Cash || 0) +
                         parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
-                        + parseFloat(eggsaleinvdata.UPI || 0));
+                        + parseFloat(eggsaleinvdata.CashDeposite || 0));
 
                     let _due = (parseFloat(finalAmt || 0)) - _paid;
 
@@ -639,7 +640,7 @@ function EggSaleModule(props) {
 
             let _paid = parseFloat(eggsaleinvdata.Cash || 0) +
                 parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
-                + parseFloat(eggsaleinvdata.UPI || 0);
+                + parseFloat(eggsaleinvdata.CashDeposite || 0);
 
             let adjustment = eggsaleinvdata.Cheque;
 
@@ -708,7 +709,7 @@ function EggSaleModule(props) {
 
             setEggSaleInvoiceData({
                 ...eggsaleinvdata, TotalQuantity: totalQuantity, TotalCost: totalCost,
-                TotalDiscount: totalDiscount, FinalCostInvoice: totalFinalCost, Due: totalFinalCost
+                TotalDiscount: totalDiscount, FinalCostInvoice: Math.round(totalFinalCost), Due: totalFinalCost
             });
         }
         else {
@@ -990,8 +991,8 @@ function EggSaleModule(props) {
     const getFilterData = (fromDate, toDate) => {
         let _filterList = [];
         if (fromDate !== "" && toDate !== "") {
-            _filterList = eggsalelistfilter.filter((c) => dateyyyymmdd(c.PurchaseDate) >= 
-            dateyyyymmdd(fromDate) && dateyyyymmdd(c.PurchaseDate) <= dateyyyymmdd(toDate));
+            _filterList = eggsalelistfilter.filter((c) => dateyyyymmdd(c.PurchaseDate) >=
+                dateyyyymmdd(fromDate) && dateyyyymmdd(c.PurchaseDate) <= dateyyyymmdd(toDate));
         }
         else if (fromDate === "" && toDate !== "") {
             _filterList = eggsalelistfilter.filter((c) => dateyyyymmdd(c.PurchaseDate) <= dateyyyymmdd(toDate));
@@ -1047,11 +1048,12 @@ function EggSaleModule(props) {
                     Cash: eggsaleinvdata.Cash,
                     PhonePay: eggsaleinvdata.PhonePay,
                     NetBanking: eggsaleinvdata.NetBanking,
-                    UPI: eggsaleinvdata.UPI,
+                    CashDeposite: eggsaleinvdata.CashDeposite,
                     Cheque: eggsaleinvdata.Cheque,
                     Advance: eggsaleinvdata.Advance,
                     Complimentary: eggsaleinvdata.Complimentary,
-                    CompanyId: localStorage.getItem('companyid')
+                    CompanyId: localStorage.getItem('companyid'),
+                    Comments:eggsaleinvdata.Comments
 
                 })
             }).then(res => res.json())
@@ -1115,11 +1117,12 @@ function EggSaleModule(props) {
                     Cash: eggsaleinvdata.Cash,
                     PhonePay: eggsaleinvdata.PhonePay,
                     NetBanking: eggsaleinvdata.NetBanking,
-                    UPI: eggsaleinvdata.UPI,
+                    CashDeposite: eggsaleinvdata.CashDeposite,
                     Cheque: eggsaleinvdata.Cheque,
                     Advance: eggsaleinvdata.Advance,
                     Complimentary: eggsaleinvdata.Complimentary,
-                    CompanyId: localStorage.getItem('companyid')
+                    CompanyId: localStorage.getItem('companyid'),
+                    Comments:eggsaleinvdata.Comments
 
                 })
             }).then(res => res.json())
@@ -1240,14 +1243,13 @@ function EggSaleModule(props) {
 
                             const filterByCategorydId = eggcategory.filter((c) => c.Id === parseInt(p.EggCategory));
                             const catname = filterByCategorydId.length > 0 ? filterByCategorydId[0].EggCategoryName : "";
- 
-                            let _discounttype= discounttypelist.filter((c)=>c.Id===parseInt(p.EggDiscountType));
-                            let _discounttypeName=_discounttype.length > 0 ? " "+_discounttype[0].Name : "";
+
+                            let _discounttype = discounttypelist.filter((c) => c.Id === parseInt(p.EggDiscountType));
+                            let _discounttypeName = _discounttype.length > 0 ? " " + _discounttype[0].Name : "";
 
 
 
-                            if(p.EggDiscountType==1)
-                            {
+                            if (p.EggDiscountType == 1) {
 
                             }
 
@@ -1269,7 +1271,7 @@ function EggSaleModule(props) {
 
                                     {/* <td align='center'> {p.TotalCost !== "" ?  parseFloat(p.TotalCost).toFixed(2) : p.TotalCost}
                                     </td> */}
-                                   
+
 
                                     <td align='center'>{parseFloat(p.DiscountPerEgg || 0).toFixed(2)}{_discounttypeName}</td>
 
@@ -1421,11 +1423,11 @@ function EggSaleModule(props) {
                             disabled={false}
                             onChange={cashChange}
                         />
-                        <InputField controlId="PhonePay" label="Phone Pay"
+                        <InputField controlId="PhonePay" label="Phone Pay / UPI"
                             type="text"
                             value={eggsaleinvdata.PhonePay}
                             name="PhonePay"
-                            placeholder="PhonePay"
+                            placeholder="PhonePay / UPI"
                             errormessage="Please enter amount"
                             required={false}
                             disabled={false}
@@ -1443,7 +1445,7 @@ function EggSaleModule(props) {
                             onChange={netBankingChange}
                         />
 
-                        <InputField controlId="UPI" label="UPI"
+                        {/* <InputField controlId="UPI" label="UPI"
                             type="text"
                             value={eggsaleinvdata.UPI}
                             name="UPI"
@@ -1452,6 +1454,17 @@ function EggSaleModule(props) {
                             required={false}
                             disabled={false}
                             onChange={upiChange}
+                        /> */}
+
+                        <InputField controlId="CashDeposite" label="Cash Deposite"
+                            type="text"
+                            value={eggsaleinvdata.CashDeposite}
+                            name="CashDeposite"
+                            placeholder="Cash Deposite"
+                            errormessage="Please cash deposite amount"
+                            required={false}
+                            disabled={false}
+                            onChange={cashDepositeChange}
                         />
 
                         <InputField controlId="Cheque" label="Adjustment"
@@ -1515,6 +1528,16 @@ function EggSaleModule(props) {
                             onChange={vehicleNoChange}
                         />
 
+                    </Row>
+
+                    <Row className="mb-12">
+                        <Form.Group controlId="Comments" as={Col} >
+                            <Form.Label style={{ fontSize: '13px' }}>Comments</Form.Label>
+                            <Form.Control style={{ fontSize: '13px' }} as="textarea" rows={3} name="Comments"
+                                onChange={invCommentsChange} value={eggsaleinvdata.Comments}
+                                placeholder="Comments" />
+
+                        </Form.Group>
                     </Row>
 
                     <Form.Group as={Col} style={{ textAlign: 'center' }}>
@@ -1731,7 +1754,7 @@ function EggSaleModule(props) {
                                         <Row className="mb-12">
                                             <InputField controlId="TotalCost" label="Total cost *"
                                                 type="number"
-                                                value={eggsaledata.TotalCost >= 0 ? parseFloat(eggsaledata.TotalCost).toFixed(2) 
+                                                value={eggsaledata.TotalCost >= 0 ? parseFloat(eggsaledata.TotalCost).toFixed(2)
                                                     : eggsaledata.TotalCost}
                                                 name="TotalCost"
                                                 placeholder="Total cost"

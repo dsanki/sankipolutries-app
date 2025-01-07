@@ -4,46 +4,54 @@ import React, { useState, Component, Fragment } from 'react'
 import Home from './Home';
 
 import NavComponent from './Component/Nav/NavComponent';
-  import ChicksMasterComponent from './Component/Chicks/ChicksMasterComponent';
+import ChicksMasterComponent from './Component/Chicks/ChicksMasterComponent';
 import LoginComponent from './Component/Login';
- import ClientList from './Component/Client/ClientList'
+import ClientList from './Component/Client/ClientList'
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 // import CommonState from './Context/CommonState';
 import Alert from './Component/Alert/Alert';
- import ShedLotMap from './Component/Chicks/ShedLotMap';
+import ShedLotMap from './Component/Chicks/ShedLotMap';
 import EggDailyTracker from './Component/EggDailyTracker/EggDailyTracker';
 import CartonList from './Component/Carton/CartonList';
- import LotListComponent from './Component/LotMaster/LotListComponent';
- import MortalityList from './Component/Chicks/MortalityList'
- import CustomerList from './Component/Customer/CustomerList'
- import EggSale from './Component/EggSale/EggSale';
- import EggSaleModule from './Component/EggSale/EggSaleModule';
- import EggSaleInvoiceList from './Component/EggSale/EggSaleInvoiceList';
- import EggSalePaymentIn from './Component/EggSale/EggSalePaymentIn';
- import Medicine from './Component/Medicine/Medicine';
- import PaymentOut from './Component/Medicine/PaymentOut';
- import RawMaterials from './Component/RawMaterials/RawMaterials'
- import BirdSale from './Component/BirdSale/BirdSale'
+import LotListComponent from './Component/LotMaster/LotListComponent';
+import MortalityList from './Component/Chicks/MortalityList'
+import CustomerList from './Component/Customer/CustomerList'
+import EggSale from './Component/EggSale/EggSale';
+import EggSaleModule from './Component/EggSale/EggSaleModule';
+import EggSaleInvoiceList from './Component/EggSale/EggSaleInvoiceList';
+import EggSalePaymentIn from './Component/EggSale/EggSalePaymentIn';
+import Medicine from './Component/Medicine/Medicine';
+import PaymentOut from './Component/Medicine/PaymentOut';
+import RawMaterials from './Component/RawMaterials/RawMaterials'
+import BirdSale from './Component/BirdSale/BirdSale'
 import Navigation from './Component/Nav/Navigation'
 import Test from './Component/Testing/Test'
- import ChicksVaccinationTracker from './Component/Vaccination/ChicksVaccinationTracker'
- import ShedMedcineTracker from './Component/Medicine/ShedMedcineTracker';
+import ChicksVaccinationTracker from './Component/Vaccination/ChicksVaccinationTracker'
+import ShedMedcineTracker from './Component/Medicine/ShedMedcineTracker';
 // import ReactDOM from 'react-dom';
 // import Invoice from './Component/Invoice/Invoice';
 // import InvoiceData from './data/InvoiceData'
- import Registration from './Component/Registration/Registration'
- import Stock from './Component/Stock/Stock';
- import CompanySelection from './Component/CompanySelection/CompanySelection';
- import EggStockInventory from './Component/EggInventory/EggStockInventory'
+import Registration from './Component/Registration/Registration'
+import Stock from './Component/Stock/Stock';
+import CompanySelection from './Component/CompanySelection/CompanySelection';
+import EggStockInventory from './Component/EggInventory/EggStockInventory'
 import GunnyBag from './Component/GunnyBag/GunnyBag';
- 
- 
+import RawMaterialsPaymentOut from "./Component/RawMaterials/RawMaterialsPaymentOut";
+
+import CartonPaymentOut from "./Component/Carton/CartonPaymentOut";
+import ManureSale from "./Component/ManureSale/ManureSale";
+
+ import ChicksFeed from "./Component/Feed/ChicksFeed";
+ import FeedPaymentOut from "./Component/Feed/FeedPaymentOut";
+
+
+
 function App() {
 
-      // console.log("Local-"+process.env.REACT_APP_API)
-      //  console.log("development-"+process.env.development.REACT_APP_API)
-      //  console.log("test-"+process.env.test.REACT_APP_API)
-      //  console.log("production-"+process.env.production.REACT_APP_API)
+  // console.log("Local-"+process.env.REACT_APP_API)
+  //  console.log("development-"+process.env.development.REACT_APP_API)
+  //  console.log("test-"+process.env.test.REACT_APP_API)
+  //  console.log("production-"+process.env.production.REACT_APP_API)
 
   const [alert, setAlert] = useState(null);
 
@@ -62,10 +70,10 @@ function App() {
     <>
 
       <div>
-       {
-      
+        {
 
-       }
+
+        }
 
       </div>
 
@@ -95,11 +103,11 @@ function App() {
             <Route path="/registration" element={<Registration showAlert={showAlert} />} />
             <Route path="/test" element={<Test showAlert={showAlert} />} />
             <Route path="/vaccinationtracker" element={<ChicksVaccinationTracker showAlert={showAlert} />} />
-            <Route path="/companyselection" element={<CompanySelection showAlert={showAlert} />} /> 
-            <Route path="/:companyid" element={<Home showAlert={showAlert} />} /> 
+            <Route path="/companyselection" element={<CompanySelection showAlert={showAlert} />} />
+            <Route path="/:companyid" element={<Home showAlert={showAlert} />} />
             <Route path="/?:companyid" element={<Home showAlert={showAlert} />} />
-            <Route path="/?companyid" element={<Home showAlert={showAlert} />} />  
-            <Route path="/stock" element={<Stock showAlert={showAlert} />} /> 
+            <Route path="/?companyid" element={<Home showAlert={showAlert} />} />
+            <Route path="/stock" element={<Stock showAlert={showAlert} />} />
             <Route path="/medicine" element={<Medicine showAlert={showAlert} />} />
             <Route path="/carton" element={<CartonList showAlert={showAlert} />} />
             <Route path="/lotList" element={<LotListComponent showAlert={showAlert} />} />
@@ -124,13 +132,34 @@ function App() {
             <Route path="/shedlotmap" element={<ShedLotMap showAlert={showAlert} />} />
             <Route path="/mortalitylist" element={<MortalityList showAlert={showAlert} />} />
             <Route path="/rawmaterials" element={<RawMaterials showAlert={showAlert} />} />
+            <Route path="/rawmaterialspaymentout" element={<RawMaterialsPaymentOut showAlert={showAlert} />} />
+            <Route path="/rawmaterialspaymentout/?:custtype" element={<RawMaterialsPaymentOut showAlert={showAlert} />} />
+            <Route path="/rawmaterialspaymentout/:custtype" element={<RawMaterialsPaymentOut showAlert={showAlert} />} />
+            <Route path="/rawmaterialspaymentout/:custtype/:uid" element={<RawMaterialsPaymentOut showAlert={showAlert} />} />
+            <Route path="/rawmaterialspaymentout/?:custtype/:uid" element={<RawMaterialsPaymentOut showAlert={showAlert} />} />
             <Route path="/eggstockinventory" element={<EggStockInventory showAlert={showAlert} />} />
             <Route path="/paymentout" element={<PaymentOut showAlert={showAlert} />} />
             <Route path="/paymentout/:uid" element={<PaymentOut showAlert={showAlert} />} />
             <Route path="/paymentout/?:uid" element={<PaymentOut showAlert={showAlert} />} />
             <Route path="/gunnybag" element={<GunnyBag showAlert={showAlert} />} />
-            
-            
+            <Route path="/cartonpaymentout" element={<CartonPaymentOut showAlert={showAlert} />} />
+            <Route path="/cartonpaymentout/?:custtype" element={<CartonPaymentOut showAlert={showAlert} />} />
+            <Route path="/cartonpaymentout/:custtype" element={<CartonPaymentOut showAlert={showAlert} />} />
+            <Route path="/cartonpaymentout/:custtype/:uid" element={<CartonPaymentOut showAlert={showAlert} />} />
+            <Route path="/cartonpaymentout/?:custtype/:uid" element={<CartonPaymentOut showAlert={showAlert} />} />
+
+            <Route path="/manure" element={<ManureSale showAlert={showAlert} />} />
+
+            <Route path="/chicksfeed" element={<ChicksFeed showAlert={showAlert} />} /> 
+            <Route path="/chicksfeedpaymentout" element={<FeedPaymentOut showAlert={showAlert} />} /> 
+
+           <Route path="/chicksfeedpaymentout/?:custtype" element={<FeedPaymentOut showAlert={showAlert} />} />
+            <Route path="/chicksfeedpaymentout/:custtype" element={<FeedPaymentOut showAlert={showAlert} />} />
+            <Route path="/chicksfeedpaymentout/:custtype/:uid" element={<FeedPaymentOut showAlert={showAlert} />} />
+            <Route path="/chicksfeedpaymentout/?:custtype/:uid" element={<FeedPaymentOut showAlert={showAlert} />} />
+
+
+
           </Routes>
         </div>
 

@@ -13,8 +13,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 
-
-function PaymentOut(props) {
+function CartonPaymentOut(props) {
     let history = useNavigate();
     const [count, setCount] = useState(0);
     const obj = useMemo(() => ({ count }), [count]);
@@ -25,15 +24,15 @@ function PaymentOut(props) {
     const [clientlist, setClientList] = useState([]);
     const [filtered, setfiltered] = useState([]);
     const [searchcustomer, setSearchCustomer] = useState("");
-    const [medicinependinglist, setMedicinePurchasePendingList] = useState([]);
-    const [medicinependinglistfilter, setMedicinePurchasePendingListFilter] = useState([]);
+    const [cartonpendinglist, setCartonPurchasePendingList] = useState([]);
+    const [cartonpendinglistfilter, setCartonPurchasePendingListFilter] = useState([]);
     const search = useLocation().search;
     const [customerid, setCustomerId] = useState(new URLSearchParams(search).get('uid'));
     const [customertype, setCustomerType] = useState(new URLSearchParams(search).get('custtype'));
     const searchRef = useRef();
 
     const [advancedata, setAdvanceData] = useState([]);
-    const[isPendingListLoaded,setIsPendingListLoaded]=useState(false);
+    const [isPendingListLoaded, setIsPendingListLoaded] = useState(false);
     const [ucount, setUCount] = useState(0);
     const objU = useMemo(() => ({ ucount }), [ucount]);
     const [delaychange, setDelayChange] = useState('');
@@ -53,11 +52,9 @@ function PaymentOut(props) {
 
     useEffect((e) => {
         if (localStorage.getItem('token')) {
-           // if (delaychange !== '') {
-                fetchAdvanceListByCustId(parseInt(paymentDetails.CustomerId || 0));
-                fetchPendingMedcineInvoiceList(parseInt(paymentDetails.CustomerId || 0));
-                fetchMedicinePaymentOutHistory(parseInt(paymentDetails.CustomerId || 0));
-            //}
+            fetchAdvanceListByCustId(parseInt(paymentDetails.CustomerId || 0));
+            fetchPendingCartonInvoiceList(parseInt(paymentDetails.CustomerId || 0));
+            fetchCartonPaymentOutHistory(parseInt(paymentDetails.CustomerId || 0));
         }
         else {
             HandleLogout();
@@ -66,7 +63,7 @@ function PaymentOut(props) {
     }, [obj]);
 
     useEffect((e) => {
-        fetchMedicinePaymentOutHistory(parseInt(paymentDetails.CustomerId || 0));
+        fetchCartonPaymentOutHistory(parseInt(paymentDetails.CustomerId || 0));
     }, [objU]);
 
     useEffect(() => {
@@ -77,29 +74,16 @@ function PaymentOut(props) {
 
         setfiltered(data);
 
-        // const close = document.getElementsByClassName(
-        //     "MuiAutocomplete-clearIndicator"
-        // )[0];
-
-        // // Add a Click Event Listener to the button
-        // close.addEventListener("click", () => {
-        //     setSearchCustomer("");
-        //     setPaymentHistoryList("");
-        //    // var data= medicinependinglistfilter;
-        //     setMedicinePurchasePendingList(medicinependinglistfilter);
-        // });
-
     }, [searchcustomer]);
 
     const customerChange = (e) => {
         setSearchCustomer(e.target.value);
-        //alert(customerid);
     }
     const supplierOnChange = (e) => {
         setSearchCustomer(e.target.value);
 
         setPaymentDetails({ ...paymentDetails, CustomerId: e.target.value });
-        history('/paymentout/?custtype='+customertype+'&uid=' + e.target.value);
+        history('/cartonpaymentout/?custtype=' + customertype + '&uid=' + e.target.value);
         addCount(count);
     }
 
@@ -224,11 +208,11 @@ function PaymentOut(props) {
         let newAdvVal = advancedata.Amount;
         e.preventDefault();
         setIsLoaded(true);
-        for (const p of medicinependinglist) {
+        for (const p of cartonpendinglist) {
             if (newAdvVal !== 0) {
                 if (parseFloat(p.Due) < parseFloat(newAdvVal)) {
                     const response = await fetch(process.env.REACT_APP_API
-                        + 'Medicine/MedicineInvoicePaymentUpdate', {
+                        + 'Carton/CartonInvoicePaymentUpdate', {
                         method: 'PUT',
                         headers: {
                             'Accept': 'application/json',
@@ -255,7 +239,7 @@ function PaymentOut(props) {
                 }
                 else {
                     const response = await fetch(process.env.REACT_APP_API
-                        + 'Medicine/MedicineInvoicePaymentUpdate', {
+                        + 'Carton/CartonInvoicePaymentUpdate', {
                         method: 'PUT',
                         headers: {
                             'Accept': 'application/json',
@@ -284,13 +268,6 @@ function PaymentOut(props) {
             }
         }
 
-        // if (newAdvVal > 0) {
-        //     updateAdvancePayment(newAdvVal)
-        // }
-
-
-
-
         addCount(count);
 
         setIsLoaded(false);
@@ -309,11 +286,11 @@ function PaymentOut(props) {
         else {
             e.preventDefault();
             setIsLoaded(true);
-            for (const p of medicinependinglist) {
+            for (const p of cartonpendinglist) {
                 if (newVal !== 0) {
                     if (parseFloat(p.Due) < parseFloat(newVal)) {
                         const response = await fetch(process.env.REACT_APP_API
-                            + 'Medicine/MedicineInvoicePaymentUpdate', {
+                            + 'Carton/CartonInvoicePaymentUpdate', {
                             method: 'PUT',
                             headers: {
                                 'Accept': 'application/json',
@@ -337,7 +314,7 @@ function PaymentOut(props) {
                     }
                     else {
                         const response = await fetch(process.env.REACT_APP_API
-                            + 'Medicine/MedicineInvoicePaymentUpdate', {
+                            + 'Carton/CartonInvoicePaymentUpdate', {
                             method: 'PUT',
                             headers: {
                                 'Accept': 'application/json',
@@ -443,9 +420,9 @@ function PaymentOut(props) {
 
     }
 
-    const fetchPendingMedcineInvoiceList = async (uid) => {
+    const fetchPendingCartonInvoiceList = async (uid) => {
         setIsPendingListLoaded(false);
-        fetch(process.env.REACT_APP_API + 'Medicine/GetPendingMedicinePurchaseInvoiceList?CustId='
+        fetch(process.env.REACT_APP_API + 'Carton/GetPendingCartonInvoiceList?CustId='
             + uid + '&CompanyId=' + localStorage.getItem('companyid'),
             {
                 method: 'GET',
@@ -458,8 +435,8 @@ function PaymentOut(props) {
             .then(response => response.json())
             .then(data => {
                 if (data.StatusCode === 200) {
-                    setMedicinePurchasePendingList(data.Result);
-                    setMedicinePurchasePendingListFilter(data.Result);
+                    setCartonPurchasePendingList(data.Result);
+                    setCartonPurchasePendingListFilter(data.Result);
                     setIsPendingListLoaded(true);
                 }
                 else if (data.StatusCode === 401) {
@@ -474,7 +451,7 @@ function PaymentOut(props) {
                 }
             });
 
-            setIsPendingListLoaded(true);
+        setIsPendingListLoaded(true);
     }
 
     const UpdatePaymentHistory = async (val) => {
@@ -520,7 +497,7 @@ function PaymentOut(props) {
     let requestTimer = null;
 
 
-    const fetchMedicinePaymentOutHistory = async (uid) => {
+    const fetchCartonPaymentOutHistory = async (uid) => {
         setIsLoaded(true);
         fetch(process.env.REACT_APP_API + 'EggSale/GetPaymentHistoryByCustId?CustId='
             + uid + '&CompanyId=' + localStorage.getItem('companyid'),
@@ -554,7 +531,6 @@ function PaymentOut(props) {
     }
 
     return (
-
         <div>
             {isloaded && <Loading />}
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '30px', marginBottom: '30px' }}>
@@ -650,7 +626,7 @@ function PaymentOut(props) {
                             <div className="alert alert-success" role="alert">
                                 <strong>  Advance payment done of Rs: {parseFloat(advancedata.Amount || 0).toFixed(2)}</strong>
                                 {
-                                    medicinependinglist && medicinependinglist.length > 0 &&
+                                    cartonpendinglist && cartonpendinglist.length > 0 &&
                                     <Button variant="primary" type="submit" style={{ marginLeft: '20px' }} onClick={(e) => settleAdvancePayment(e)}>
                                         Settle
                                     </Button>
@@ -681,10 +657,10 @@ function PaymentOut(props) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                {!isPendingListLoaded && <Loading />}
+                                    {!isPendingListLoaded && <Loading />}
                                     {
 
-                                        medicinependinglist && medicinependinglist.length > 0 ? medicinependinglist.map((p) => {
+                                        cartonpendinglist && cartonpendinglist.length > 0 ? cartonpendinglist.map((p) => {
                                             return (
 
                                                 !isloaded && <tr align='center' style={{ fontSize: 13 }} key={p.Id}>
@@ -733,7 +709,6 @@ function PaymentOut(props) {
                                                 <th>Date</th>
                                                 <th>Amount (<span>&#8377;</span>)</th>
                                                 <th>Mode </th>
-                                                <th>Type</th>
 
                                             </tr>
                                         </thead>
@@ -752,7 +727,7 @@ function PaymentOut(props) {
                                                             </td>
 
                                                             <td>{p.PaymentMode}</td>
-                                                            <td>{p.PaymentType} </td>
+                                                            {/* <td> </td> */}
 
                                                         </tr>
                                                     )
@@ -817,4 +792,4 @@ function PaymentOut(props) {
     )
 }
 
-export default PaymentOut
+export default CartonPaymentOut

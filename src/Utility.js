@@ -163,6 +163,22 @@ export const FetchUnit = async (apiurl) => {
   return data;
 }
 
+
+
+export const FetchFeed = async (apiurl) => {
+  const response = await fetch(apiurl + 'Feed/GetFeedListByCompanyId?CompanyId='
+    +localStorage.getItem('companyid'),
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+
+  const data = await response.json();
+  return data;
+}
+
 export const FetchLots = async (apiurl) => {
   const response = await fetch(apiurl + 'ChicksMaster/GetLots?CompanyId='
     +localStorage.getItem('companyid'),
@@ -312,6 +328,18 @@ export const FecthStockListById = async (catid, apiurl) => {
 
 export const GetCustomerByTypeId = async (custtypeid, apiurl) => {
   const response =await fetch(apiurl + 'Customer/GetCustomerByTypeId?customerTypeId='+custtypeid,
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+  const data = await response.json();
+  return data;
+}
+
+export const GetGunnybagTypeList = async (apiurl) => {
+  const response =await fetch(apiurl + 'GunnyBagSale/GetGunnybagTypeMaster',
     {
       method: 'GET',
       headers: {

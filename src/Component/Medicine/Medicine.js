@@ -36,10 +36,8 @@ function Medicine(props) {
 
   const [ucount, setUCount] = useState(0);
   const objupdate = useMemo(() => ({ ucount }), [ucount]);
-
   const [newcount, setAddNewCount] = useState(0);
   const objAddNew = useMemo(() => ({ newcount }), [newcount]);
-
   const [advancedata, setAdvanceData] = useState([]);
 
   let addModalClose = () => {
@@ -541,6 +539,8 @@ function Medicine(props) {
 
           setMedicineList(data.Result);
           setMedicineListForFilter(data.Result);
+          setCount(data.Result.length);
+          setTotalPages(Math.ceil(data.Result.length / itemsPerPage));
           setIsLoaded(false);
 
           calculateValues(data.Result);
@@ -576,8 +576,6 @@ function Medicine(props) {
       .then(data => {
         if (data.StatusCode === 200) {
           setUnitList(data.Result);
-          setCount(data.Result.length);
-          setTotalPages(Math.ceil(data.Result.length / itemsPerPage));
         }
         else if (data.StatusCode === 401) {
           HandleLogout();
@@ -780,6 +778,20 @@ function Medicine(props) {
     getFilterData(e.target.value, filterToDate);
   }
 
+//   const handlePageChange = (newPage) => {
+//     setCurrentPage(newPage)
+// }
+// const handleNextClick = () => {
+//     if (currentPage < totalPages) {
+//         setCurrentPage(currentPage + 1)
+//     }
+// }
+// const handlePrevClick = () => {
+//     if (currentPage > 1) {
+//         setCurrentPage(currentPage - 1)
+//     }
+// }
+
 
   const getFilterData = (fromDate, toDate) => {
     let _filterList = [];
@@ -860,7 +872,8 @@ function Medicine(props) {
   return (
     <div>
       {isloaded && <Loading />}
-      <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '30px', marginBottom: '30px' }}>
+      <div className="row justify-content-center" 
+      style={{ textAlign: 'center', marginTop: '30px', marginBottom: '30px' }}>
         <h4> Medicine / Vaccine Purchase Tracker</h4>
       </div>
 
@@ -970,12 +983,12 @@ function Medicine(props) {
               //setMedicineFields(p.MedicineSubList);
 
               return (
-                !isloaded && <tr align='center' style={{ fontSize: '13px' }} key={p.Id}>
+                !isloaded && <tr align='center' style={{ fontSize: '12.5px' }} key={p.Id}>
                   <td >{moment(p.Date).format('DD-MMM-YYYY')}</td>
                   <td>{p.InvoiceNo}</td>
                   <td>{moment(p.InvoiceDate).format('DD-MMM-YYYY')}</td>
 
-                  <td ><a href={`/paymentout/?uid=${p.ClientId}&custtype=${process.env.REACT_APP_CUST_TYPE_MEDICINE}`}>{_suppname}
+                  <td style= {{ overflowWrap:"break-word" }}><a href={`/paymentout/?uid=${p.ClientId}&custtype=${process.env.REACT_APP_CUST_TYPE_MEDICINE}`}>{_suppname}
                     <span className="sr-only">(current)</span></a></td>
                   <td >{p.TotalAmount.toFixed(2)}</td>
                   <td >{parseFloat(p.Paid || 0).toFixed(2)}</td>
@@ -1017,6 +1030,41 @@ function Medicine(props) {
           <td></td>
         </tfoot>
       </Table >
+
+
+      {
+                medicineList && medicineList.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
+                <>
+                    <button
+                        onClick={handlePrevClick}
+                        disabled={preDisabled}
+                    >
+                        Prev
+                    </button>
+                    {
+                        Array.from({ length: totalPages }, (_, i) => {
+                            return (
+                                <button
+                                    onClick={() => handlePageChange(i + 1)}
+                                    key={i}
+                                    disabled={i + 1 === currentPage}
+                                >
+                                    {i + 1}
+                                </button>
+                            )
+                        })
+                    }
+
+                    <button
+                        onClick={handleNextClick}
+                        disabled={nextDisabled}
+                    >
+                        Next
+                    </button>
+                </>
+            }
+
+
       <div className="container" id="exampleModal">
         <Modal
           show={addModalShow}

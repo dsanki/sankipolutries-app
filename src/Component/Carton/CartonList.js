@@ -13,6 +13,7 @@ const CartonList = (props) => {
 
     const [cartons, setCartons] = useState([]);
     const [clients, setClients] = useState([]);
+    const [cartonsForFilter, setCartonsForFilter] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [cartonId, setCartonId] = useState(0);
@@ -21,6 +22,12 @@ const CartonList = (props) => {
     const [validated, setValidated] = useState(false);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [isloaded, setIsLoaded] = useState(true);
+
+
+    const [ucount, setUCount] = useState(0);
+    const objupdate = useMemo(() => ({ ucount }), [ucount]);
+
+
     const initialvalues = {
         modaltitle: "",
         Id: 0,
@@ -34,8 +41,16 @@ const CartonList = (props) => {
         ClientId: "",
         ClientName: "",
         GST: "",
-        Due: ""
+        Due: "",
+         InvoiceNo:"",
+        InvoiceDate:""
     };
+
+    const [cartonconSolList, setCartonConsolList] = useState({
+        TotalAmount: 0,
+        TotalPaid: 0,
+        TotalDue: 0
+    });
 
     const [cartonsdata, setCartonsData] = useState(initialvalues);
 
@@ -55,7 +70,9 @@ const CartonList = (props) => {
             ClientId: "",
             ClientName: "",
             GST: "",
-            Due: ""
+            Due: "",
+            InvoiceNo:"",
+            InvoiceDate:""
         })
     }
 
@@ -74,7 +91,9 @@ const CartonList = (props) => {
             ClientId: cart.ClientId,
             ClientName: cart.ClientName,
             GST: cart.GST,
-            Due: cart.Due
+            Due: cart.Due,
+            InvoiceNo:cart.InvoiceNo,
+            InvoiceDate:cart.InvoiceDate
         })
     }
 
@@ -86,6 +105,7 @@ const CartonList = (props) => {
     useEffect((e) => {
         if (localStorage.getItem('token')) {
             fetchCarton();
+            calculateValues(cartons);
         }
         else {
             history("/login")
@@ -130,8 +150,10 @@ const CartonList = (props) => {
 
                 if (result.StatusCode === 200) {
                     setCartons(result.Result);
+                    setCartonsForFilter(result.Result);
                     if (result.Result.length > 0) {
                         setCount(result.Result.length);
+
                         setTotalPages(Math.ceil(result.Result.length / itemsPerPage));
                     }
 
@@ -151,6 +173,43 @@ const CartonList = (props) => {
                 }
             });
     }
+
+
+    const calculateValues = (data) => {
+        const { totalAmount, totalPaid, totalDue } =
+            data.reduce((accumulator, item) => {
+                accumulator.totalAmount += item.TotalAmount;
+                accumulator.totalPaid += item.Payment;
+                accumulator.totalDue += item.Due;
+
+                return accumulator;
+            }, { totalAmount: 0, totalPaid: 0, totalDue: 0 })
+
+        setCartonConsolList({
+            ...cartonconSolList, TotalAmount: totalAmount,
+            TotalPaid: totalPaid, TotalDue: totalDue
+        });
+    }
+
+
+    const filterSupplierChange = (e) => {
+
+        if (e.target.value > 0) {
+            const _medd = cartonsForFilter.filter((c) => c.ClientId === parseInt(e.target.value));
+            setCartons(_medd);
+            calculateValues(_medd);
+        }
+        else {
+            setCartons(cartonsForFilter);
+            calculateValues(cartonsForFilter);
+        }
+
+        addUCount(ucount);
+    }
+
+    let addUCount = (num) => {
+        setUCount(num + 1);
+    };
 
     let addCount = (num) => {
         setCount(num + 1);
@@ -251,7 +310,9 @@ const CartonList = (props) => {
                     PaymentDate: cartonsdata.PaymentDate,
                     GST: cartonsdata.GST,
                     CompanyId: localStorage.getItem('companyid'),
-                    Due: cartonsdata.Due
+                    Due: cartonsdata.Due,
+                    InvoiceNo:cartonsdata.InvoiceNo,
+                    InvoiceDate:cartonsdata.InvoiceDate
                 })
             })
                 .then(res => res.json())
@@ -309,7 +370,9 @@ const CartonList = (props) => {
                     PaymentDate: cartonsdata.PaymentDate,
                     GST: cartonsdata.GST,
                     CompanyId: localStorage.getItem('companyid'),
-                    Due: cartonsdata.Due
+                    Due: cartonsdata.Due,
+                    InvoiceNo:cartonsdata.InvoiceNo,
+                    InvoiceDate:cartonsdata.InvoiceDate
                 })
             })
                 .then(res => res.json())
@@ -359,6 +422,14 @@ const CartonList = (props) => {
             TotalAmount: (e.target.value * cartonsdata.Quantity),
             Due: (e.target.value * cartonsdata.Quantity) - parseFloat(cartonsdata.Payment || 0)
         });
+    }
+
+    const invoiceDateChange = (e) => {
+        setCartonsData({ ...cartonsdata, InvoiceDate: e.target.value });
+    }
+
+    const invoiceNoChange = (e) => {
+        setCartonsData({ ...cartonsdata, InvoiceNo: e.target.value });
     }
 
 
@@ -421,17 +492,46 @@ const CartonList = (props) => {
 
         <>
             {isloaded && <Loading />}
-            <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px' }}>
-                <h4>Cartons</h4>
+            <div className="row justify-content-center" 
+            style={{ textAlign: 'center', marginTop: '30px', marginBottom: '30px' }}>
+                <h4>Packaging</h4>
             </div>
 
-            <div class="row">
-                <div class="col-md-9">  <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2' }} title='Download Egg Sale List' onClick={() => onDownloadExcel()} ></i></div>
-                <div class="col-md-3"> <div class="row"><div class="col-md-6" style={{ textAlign: 'right' }}> <Button className="mr-2" variant="primary"
-                    style={{ marginRight: "17.5px" }}
-                    onClick={() => clickAddCarton()}>Add</Button></div>
+            <div className="container" style={{ marginTop: '30px', marginBottom: '20px' }}>
+                <div className="row align-items-center" style={{ fontSize: 13 }}>
+                    <div className="col-2">
+                        <p><strong>Supplier</strong></p>
 
-                    <div class="col-md-6">
+                        <Form.Select style={{ fontSize: '13px' }}
+                            onChange={filterSupplierChange}>
+                            <option selected value="">Choose...</option>
+                            {
+                                clients.map((item) => {
+                                    return (
+                                        <option
+                                            key={item.ID}
+                                            defaultValue={item.Id == null ? null : item.ID}
+                                            value={item.ID}
+                                        >{item.FirstName + " " + item.LastName}</option>
+                                    );
+                                })
+                            }
+                        </Form.Select>
+                    </div>
+
+                    <div className="col-8" style={{ textAlign: 'right'}}>
+                        <i className="fa-regular fa-file-excel fa-2xl"
+                            style={{ color: '#bea2a2', marginRight:'20px' }} title='Download Egg Sale List'
+                            onClick={() => onDownloadExcel()} ></i>
+                              <a className="mr-2 btn btn-primary"
+                        style={{ marginRight: '10px' }}
+                        href={`/cartonpaymentout/?custtype=${process.env.REACT_APP_CUST_TYPE_PACKAGING}`}>Payment</a>
+                        <Button className="mr-2" variant="primary"
+                            style={{ marginRight: "17.5px" }}
+                            onClick={() => clickAddCarton()}>Add</Button>
+                    </div>
+
+                    <div className="col-2">
                         <select className="form-select" aria-label="Default select example" style={{ width: "80px" }} onChange={selectPaginationChange}>
                             <option selected value="10">10</option>
                             <option value="20">20</option>
@@ -439,15 +539,23 @@ const CartonList = (props) => {
                             <option value="50">50</option>
                             <option value="100">100</option>
                             <option value="200">200</option>
-                        </select></div></div></div>
+                        </select>
+                    </div>
+
+                </div>
             </div>
+
+
+            
 
             {<Table className="mt-4" striped bordered hover size="sm">
                 <thead>
                     <tr align='center' className="tr-custom">
-                        <th>Quantity</th>
                         <th>Billing Date</th>
                         <th>Client Name</th>
+                        <th>Quantity</th>
+
+
                         <th>Rate (<span>&#8377;</span>)</th>
                         <th>GST</th>
                         <th>Total Amount (<span>&#8377;</span>)</th>
@@ -471,16 +579,41 @@ const CartonList = (props) => {
 
                             return (
                                 !isloaded && <tr key={carton.Id} align='center' style={{ fontSize: '13px' }}>
-                                 
-                                    <td>{carton.Quantity}</td>
                                     <td>{Moment(carton.BillingDate).format('DD-MMM-YYYY')}</td>
                                     <td>{filterByClientName}</td>
-                                    <td>{parseFloat(carton.Rate||0).toFixed(2)}</td>
+                                    <td>{carton.Quantity}</td>
+
+
+                                    <td>{new Intl.NumberFormat('en-IN', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }).format(parseFloat(parseFloat(carton.Rate).toFixed(2)))}
+                                    </td>
+
                                     <td>{parseFloat(carton.GST || 0).toFixed(2)}</td>
-                                    <td>{parseFloat(carton.TotalAmount||0).toFixed(2)}</td>
-                                    <td>{parseFloat(carton.Payment||0).toFixed(2)}</td>
-                                    <td>{parseFloat(carton.UnloadingCharge||0).toFixed(2)}</td>
-                                    <td>{parseFloat(carton.Due||0).toFixed(2)}</td>
+
+                                    <td>{new Intl.NumberFormat('en-IN', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }).format(parseFloat(parseFloat(carton.TotalAmount || 0).toFixed(2)))}
+                                    </td>
+
+
+
+                                    <td>{new Intl.NumberFormat('en-IN', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }).format(parseFloat(parseFloat(carton.Payment || 0).toFixed(2)))}
+                                    </td>
+
+
+
+                                    <td>{parseFloat(carton.UnloadingCharge || 0).toFixed(2)}</td>
+                                    <td>{new Intl.NumberFormat('en-IN', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    }).format(parseFloat(parseFloat(carton.Due || 0).toFixed(2)))}
+                                    </td>
                                     <td>{Moment(carton.PaymentDate).format('DD-MMM-YYYY')}</td>
                                     <td>
                                         {
@@ -502,6 +635,37 @@ const CartonList = (props) => {
                         </tr>
                     }
                 </tbody>
+
+                <tfoot style={{ backgroundColor: '#cccccc', fontWeight: 'bold', fontSize: 13 }}>
+                    <td align='center'>Total</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(parseFloat(cartonconSolList.TotalAmount || 0).toFixed(2)))}
+                    </td>
+
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(parseFloat(cartonconSolList.TotalPaid || 0).toFixed(2)))}
+                    </td>
+                    <td></td>
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(parseFloat(cartonconSolList.TotalDue || 0).toFixed(2)))}
+                    </td>
+
+                    <td></td>
+                    {/* <td></td>
+                    <td></td> */}
+                    <td></td>
+                </tfoot>
             </Table >
 
             }
@@ -549,7 +713,7 @@ const CartonList = (props) => {
                 >
                     <Modal.Header>
                         <Modal.Title id="contained-modal-title-vcenter" style={{ fontSize: '18px' }}>
-                            Add Carton
+                            Add Packaging
                         </Modal.Title>
                         <button type="button" class="btn-close" aria-label="Close" onClick={addModalClose}> </button>
                     </Modal.Header>
@@ -558,6 +722,26 @@ const CartonList = (props) => {
                             <Col sm={12}>
 
                                 <Form className="needs-validation" noValidate validated={validated}>
+                                <Row className="mb-12">
+                                            <Form.Group as={Col} controlId="InvoiceDate">
+                                                <Form.Label style={{ fontSize: 13 }}>Invoice Date</Form.Label>
+                                                <DateComponent date={null} onChange={invoiceDateChange} isRequired={true}
+                                                    value={cartonsdata.InvoiceDate} />
+                                                <Form.Control.Feedback type="invalid">
+                                                    Select invoice date
+                                                </Form.Control.Feedback>
+                                            </Form.Group>
+                                            <InputField controlId="InvoiceNo" label="Invoice no"
+                                                type="text"
+                                                value={cartonsdata.InvoiceNo}
+                                                name="InvoiceNo"
+                                                placeholder="Invoice no"
+                                                errormessage="Enter Invoice no"
+                                                onChange={invoiceNoChange}
+                                                required={true}
+                                                disabled={false}
+                                            />
+                                        </Row>
                                     <Row className="mb-12">
                                         <Form.Group controlId="ClientId" as={Col}>
                                             <Form.Label style={{ fontSize: '13px' }}>Client</Form.Label>

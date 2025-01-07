@@ -58,19 +58,22 @@ function Navigation() {
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
                                         <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/rawmaterials" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/rawmaterials">Raw materials
+                                            <a className={`nav-link ${location.pathname === "/chicksfeed" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/chicksfeed">Feed
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
-
-                                        <li className="nav-item">
-                                            <a className={`nav-link ${location.pathname === "/carton" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/carton">Carton
-                                                <span className="sr-only">(current)</span></a>
-                                        </li>
-
                                         <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/medicine" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/medicine">Medicine/Vaccine
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
+                                        <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/carton" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/carton">Packaging
+                                                <span className="sr-only">(current)</span></a>
+                                        </li>
+
+                                        <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/rawmaterials" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/rawmaterials">Raw materials
+                                                <span className="sr-only">(current)</span></a>
+                                        </li>     
 
                                     </ul>
                                 </li>
@@ -91,6 +94,11 @@ function Navigation() {
 
                                         <li className="nav-item">
                                             <a className={`nav-link ${location.pathname === "/gunnybag" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/gunnybag">Gunny Bag
+                                                <span className="sr-only">(current)</span></a>
+                                        </li>
+
+                                        <li className="nav-item">
+                                            <a className={`nav-link ${location.pathname === "/manure" ? "active" : ""}`} style={{ fontSize: '20px' }} href="/manure">Manure
                                                 <span className="sr-only">(current)</span></a>
                                         </li>
                                     </ul>

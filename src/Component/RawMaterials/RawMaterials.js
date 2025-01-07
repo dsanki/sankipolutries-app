@@ -31,6 +31,12 @@ function RawMaterials(props) {
 
     const [stockList, setStockList] = useState([]);
 
+    const [rawconSolList, setRawConsolList] = useState({
+        TotalCost:0,
+        TotalPaid:0,
+        TotalDue:0
+    });
+
     let addModalClose = () => {
         setAddModalShow(false);
         setValidated(false);
@@ -151,7 +157,6 @@ function RawMaterials(props) {
 
     const rateChange = (e) => {
 
-        //let data = [...materialsdata];
         let gstpercentage = parseFloat(materialsdata.GST || 0) / 100;
         let totalamount = parseFloat(materialsdata.Quantity || 0) * parseFloat(e.target.value || 0);
         let totalgst = totalamount * gstpercentage;
@@ -169,6 +174,7 @@ function RawMaterials(props) {
                 parseFloat(materialsdata.Paid || 0)).toFixed(2)
 
         });
+
         // setMaterialsData({
         //     ...materialsdata,
         //     Rate: e.target.value,
@@ -248,6 +254,21 @@ function RawMaterials(props) {
         setMaterialsData({ ...materialsdata, Comments: e.target.value });
     }
 
+
+    const calculateValues = (data) => {
+        const { totalCost,totalPaid,totalDue } =
+        data.reduce((accumulator, item) => {
+          accumulator.totalCost += item.TotalAmount;
+          accumulator.totalPaid+=item.Paid;
+          accumulator.totalDue += item.Due;
+          return accumulator;
+        }, { totalCost: 0, totalPaid:0,totalDue:0 })
+       
+        setRawConsolList({ ...rawconSolList, TotalCost: totalCost,
+            TotalPaid:totalPaid,TotalDue:totalDue
+         });
+      }
+
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
@@ -256,6 +277,21 @@ function RawMaterials(props) {
             fetchRawMaterials();
             //fetchMaterialsTypes();
             fetchStockByCatId();
+            calculateValues(rawmaterialList);
+
+            // const { totalCost,totalPaid,totalDue } =
+            // rawmaterialList.reduce((accumulator, item) => {
+            //   accumulator.totalCost += item.TotalAmount;
+            //   accumulator.totalPaid+=item.Paid;
+            //   accumulator.totalDue += item.Due;
+             
+            //   return accumulator;
+            // }, { totalCost: 0, totalPaid:0,totalDue:0 })
+           
+            // setRawConsolList({ ...rawconSolList, TotalCost: totalCost,
+            //     TotalPaid:totalPaid,TotalDue:totalDue
+            //  });
+
         }
         else {
 
@@ -282,6 +318,7 @@ function RawMaterials(props) {
                     setRawMaterialListFilter(data.Result);
                     setCount(data.Result.length);
                     setTotalPages(Math.ceil(data.Result.length / process.env.REACT_APP_PAGE_PAGINATION_NO));
+                    calculateValues(data.Result);
                 }
                 else if (data.StatusCode === 401) {
                     history("/login")
@@ -369,7 +406,6 @@ function RawMaterials(props) {
                 }
             });
     }
-
 
     const fetchCutomerTypes = async () => {
         fetch(process.env.REACT_APP_API + 'ProductType/GetProductType',
@@ -465,10 +501,10 @@ function RawMaterials(props) {
                     if (result > 0 || result.StatusCode === 200 || result.StatusCode === "OK") {
 
                         addCount(count);
-                       // setAddModalShow(false);
-                       // setValidated(false);  
-                       
-                       addModalClose();
+                        // setAddModalShow(false);
+                        // setValidated(false);  
+
+                        addModalClose();
 
                         props.showAlert("Successfully updated", "info")
                     }
@@ -537,8 +573,8 @@ function RawMaterials(props) {
                         addCount(count);
                         //setAddModalShow(false);
                         props.showAlert("Successfully added", "info")
-                       // setValidated(false);
-                       addModalClose();
+                        // setValidated(false);
+                        addModalClose();
                     }
                     else {
                         props.showAlert("Error occurred!!", "danger")
@@ -552,7 +588,7 @@ function RawMaterials(props) {
                     });
         }
 
-        
+
     }
 
     const deleteMaterials = (id) => {
@@ -568,7 +604,7 @@ function RawMaterials(props) {
                 .then((result) => {
 
                     if (result.StatusCode === 200) {
-                        
+
                         props.showAlert("Successfully deleted", "info")
                         addCount(count);
                     }
@@ -594,9 +630,11 @@ function RawMaterials(props) {
         if (e.target.value > 0) {
             const _medd = rawmaterialListFilter.filter((c) => c.ClientId === parseInt(e.target.value));
             setRawMaterialList(_medd);
+            calculateValues(_medd);
         }
         else {
             setRawMaterialList(rawmaterialListFilter);
+            calculateValues(rawmaterialListFilter);
         }
     }
 
@@ -651,6 +689,9 @@ function RawMaterials(props) {
                     </select>
                 </div>
                 <div className="col" style={{ textAlign: 'right' }}>
+                    <a className="mr-2 btn btn-primary"
+                        style={{ marginRight: '10px' }}
+                        href={`/rawmaterialspaymentout/?custtype=${process.env.REACT_APP_CUST_TYPE_RAW_MATERIALS}`}>Payment</a>
                     <Button className="mr-2" variant="primary"
                         style={{ marginRight: "17.5px" }}
                         onClick={() => clickAddMaterials()}>Add</Button>
@@ -661,7 +702,7 @@ function RawMaterials(props) {
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
-                    <tr align='center' className="tr-custom">
+                    <tr align='center' className="tr-custom" style={{fontSize:'13px'}}>
                         <th>Date</th>
                         <th>Supplier</th>
                         <th>Materials name</th>
@@ -673,8 +714,8 @@ function RawMaterials(props) {
                         <th>Extra Charge</th>
                         <th>Paid</th>
                         <th>Due</th>
-                        <th>Payment date</th>
-                        <th>Comments</th>
+                        {/* <th>Payment date</th>
+                        <th>Comments</th> */}
                         <th>Options</th>
                     </tr>
                 </thead>
@@ -695,20 +736,20 @@ function RawMaterials(props) {
                             const _matname = _mat.length > 0 ? _mat[0].ItemName : "";
 
                             return (
-                                <tr align='center' key={p.Id} style={{ fontSize: 13 }} >
-                                    <td align='left'>{moment(p.BillingDate).format('DD-MMM-YYYY')}</td>
-                                    <td align='left'>{_suppname}</td>
-                                    <td align='left'>{_matname}</td>
-                                    <td align='left'>{p.Broker}</td>
-                                    <td align='left'>{p.Quantity + " " + _uname}</td>
-                                    <td align='left'>{p.Rate}</td>
-                                    <td align='left'>{p.GST}</td>
-                                    <td align='left'>{p.TotalAmount.toFixed(2)}</td>
-                                    <td align='left'>{parseFloat(p.ExtraCharge || 0).toFixed(2)}</td>
-                                    <td align='left'>{p.Paid.toFixed(2)}</td>
-                                    <td align='left'>{p.Due.toFixed(2)}</td>
-                                    <td align='left'>{p.PaymentDate != null ? moment(p.PaymentDate).format('DD-MMM-YYYY') : ""}</td>
-                                    <td align='left'>{p.Comments}</td>
+                                <tr align='center' key={p.Id} style={{ fontSize: '12.5px' }} >
+                                    <td align='center'>{moment(p.BillingDate).format('DD-MMM-YYYY')}</td>
+                                    <td align='center'  style= {{ overflowWrap:"break-word" }}>{_suppname}</td>
+                                    <td align='center'>{_matname}</td>
+                                    <td align='center'>{p.Broker}</td>
+                                    <td align='center'>{p.Quantity + " " + _uname}</td>
+                                    <td align='center'>{p.Rate}</td>
+                                    <td align='center'>{p.GST}</td>
+                                    <td align='center'>{p.TotalAmount.toFixed(2)}</td>
+                                    <td align='center'>{parseFloat(p.ExtraCharge || 0).toFixed(2)}</td>
+                                    <td align='center'>{p.Paid.toFixed(2)}</td>
+                                    <td align='center'>{p.Due.toFixed(2)}</td>
+                                    {/* <td align='left'>{p.PaymentDate != null ? moment(p.PaymentDate).format('DD-MMM-YYYY') : ""}</td>
+                                    <td align='left'>{p.Comments}</td> */}
                                     <td align='center'>
                                         {
                                             <ButtonToolbar>
@@ -727,6 +768,22 @@ function RawMaterials(props) {
                         </tr>
                     }
                 </tbody>
+                <tfoot style={{ backgroundColor: '#cccccc', fontWeight: 'bold', fontSize: 13 }}>
+                    <td align='center'>Total</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td align='center'>{parseFloat(rawconSolList.TotalCost).toFixed(2)}</td>
+                    <td></td>
+                    <td align='center'>{parseFloat(rawconSolList.TotalPaid).toFixed(2)}</td>
+                    <td align='center'>{parseFloat(rawconSolList.TotalDue).toFixed(2)}</td>
+                    {/* <td></td>
+                    <td></td> */}
+                    <td></td>
+                </tfoot>
             </Table >
 
             {
