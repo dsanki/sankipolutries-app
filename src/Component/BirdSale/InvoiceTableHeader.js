@@ -11,27 +11,28 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         alignItems: 'center',
         height: 24,
-        fontSize:10,
+        fontSize:9,
         textAlign: 'center',
         fontStyle: 'bold',
         flexGrow: 1
     },
     qty: {
-        width: '25%',
+        width: '20%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         textAlign: 'center',
         fontFamily: 'Helvetica-Bold'
     },
+   
     rate: {
-        width: '17%',
+        width: '15%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         textAlign: 'center',
         fontFamily: 'Helvetica-Bold'
     },
     weight: {
-        width: '25%',
+        width: '20%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         textAlign: 'center',
@@ -40,10 +41,8 @@ const styles = StyleSheet.create({
     amount: {
         width: '25%',
         textAlign: 'right',
-        //marginRight:5,
         fontFamily: 'Helvetica-Bold',
         borderRightColor: borderColor,
-        //borderRightWidth: 1
         paddingRight: 8,
     },
     slno:
@@ -53,6 +52,13 @@ const styles = StyleSheet.create({
         borderRightColor: borderColor,
         borderRightWidth: 1,
         fontFamily: 'Helvetica-Bold'
+    },
+    AddnCharge: {
+        width: '17%',
+        borderRightColor: borderColor,
+        borderRightWidth: 1,
+        textAlign: 'center',
+        //paddingRight: 8,
     }
   });
 
@@ -62,6 +68,7 @@ const styles = StyleSheet.create({
         <Text style={styles.qty}>Total Birds</Text>
         <Text style={styles.weight}>Total Weight</Text>
         <Text style={styles.rate}>Rate</Text>
+        <Text style={styles.rate}>Addn. Charge</Text>
         <Text style={styles.amount}>Total Cost</Text>
        
     </View>

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import logo from '../../image/logo.png'
-import InvoiceTitle from './../Invoice/InvoiceTitle'
+import InvoiceTitle from './InvoiceTitle'
 import BillTo from './../Invoice/BillTo'
-import InvoiceNo from './../Invoice/InvoiceNo'
+import InvoiceNo from './InvoiceNo'
 import InvoiceItemsTable from './InvoiceItemsTable'
 import InvoiceThankYouMsg from './../Invoice/InvoiceThankYouMsg'
 import Company from './../Invoice/Company'
@@ -34,26 +34,44 @@ const styles = StyleSheet.create({
     gap:
     {
         marginBottom: 30
-    }
+    },
+    sectionROW: {
+        margin: 10,
+        padding: 10,
+       // flexGrow: 1,
+        flexDirection: 'row'
+      }
 });
 
 // Create Document Component
 const InvoiceBirdSale = (props) => (
     <Document>
         <Page size="A4" style={styles.page}>
-            <InvoiceTitle title='Invoice' eggsaledata={props.birdsaledata} 
+            <InvoiceTitle title='Invoice' birdsaledata={props.birdsaledata} 
+           companydetails={props.companydetails}
             invoiceno={props.birdsaledata.InvoiceNo} date={props.birdsaledata.Date} />
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
                 <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
                 <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
             </View>
-            <View style={styles.rowComp}>
-                <Company companydetails={props.companydetails} />
-                <BillTo customerdetails={props.customerdetails} vehicle={props.birdsaledata.VehicleNo} />
+            <View style={styles.sectionROW}>
+                <Company style={{marginTop:8}} companydetails={props.companydetails} />
+                <BillTo style={{marginTop:8}}  customerdetails={props.customerdetails}   
+                vehicle={props.birdsaledata} />
+                
             </View>
+          
             <View style={styles.gap}></View>
-            <InvoiceItemsTable birdsaledata={props.birdsaledata} />
-            <InvoiceThankYouMsg bankdetails={props.bankdetails}/>
+
+            <InvoiceItemsTable birdsaledata={props.birdsaledata} 
+            />
+            
+            <InvoiceThankYouMsg bankdetails={props.bankdetails} 
+            companydetails={props.companydetails}/>
+
+
+            {/* <InvoiceItemsTable birdsaledata={props.birdsaledata} />
+            <InvoiceThankYouMsg bankdetails={props.bankdetails}/> */}
         </Page>
     </Document>
 );

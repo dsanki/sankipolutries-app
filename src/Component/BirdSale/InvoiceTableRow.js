@@ -10,17 +10,24 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         alignItems: 'center',
         height: 24,
-        fontSize:10,
+        fontSize:9,
         fontStyle: 'bold',
     },
     qty: {
-        width: '25%',
+        width: '20%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         textAlign: 'center'
        // paddingRight: 8,
     },
     rate: {
+        width: '15%',
+        borderRightColor: borderColor,
+        borderRightWidth: 1,
+        textAlign: 'center',
+        //paddingRight: 8,
+    },
+    AddnCharge: {
         width: '17%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
@@ -28,7 +35,7 @@ const styles = StyleSheet.create({
         //paddingRight: 8,
     },
     weight: {
-        width: '25%',
+        width: '20%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         textAlign: 'center',
@@ -61,6 +68,7 @@ const InvoiceTableRow = (props) => {
                         <Text style={styles.qty}>{props.birdsaledata.BirdCount}</Text>
                         <Text style={styles.weight}>{props.birdsaledata.TotalWeight+" "+props.birdsaledata.UnitName}</Text>
                         <Text style={styles.rate}>{props.birdsaledata.Rate}</Text>
+                        <Text style={styles.rate}>{props.birdsaledata.AdditionalCharge}</Text>
                         <Text style={styles.amount}>{Number.parseFloat(props.birdsaledata.TotalAmount).toFixed(2)}</Text>
                     </View>
 

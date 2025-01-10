@@ -272,10 +272,12 @@ function ManureSale(props) {
             setManureSaleData({
                 ...manureSaleData, Cash: e.target.value,
                 Paid: (cashamt + parseFloat(manureSaleData.PhonePay || 0) +
-                    parseFloat(manureSaleData.NetBanking || 0) + parseFloat(manureSaleData.CashDeposite || 0)),
+                    parseFloat(manureSaleData.NetBanking || 0) 
+                    + parseFloat(manureSaleData.CashDeposite || 0)),
                 Due: (manureSaleData.FinalCost -
                     (cashamt + parseFloat(manureSaleData.PhonePay || 0) +
-                        parseFloat(manureSaleData.NetBanking || 0) + parseFloat(manureSaleData.CashDeposite || 0))
+                        parseFloat(manureSaleData.NetBanking || 0) 
+                        + parseFloat(manureSaleData.CashDeposite || 0))
                 )
             });
         }

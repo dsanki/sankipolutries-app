@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, Fragment } from 'react'
 import { Modal, Button, ButtonToolbar, Table, Row, Col, Form } from 'react-bootstrap';
-import { useNavigate, useParams,useLocation } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import moment from 'moment';
 import { ErrorMessageHandle } from '../../Utility';
 import InputField from '../ReuseableComponent/InputField'
@@ -8,8 +8,8 @@ import PaymentControl from '../ReuseableComponent/PaymentControl'
 import DateComponent from '../DateComponent';
 import {
     dateyyyymmdd, HandleLogout, downloadExcel,
-    FetchCompanyDetails, AmountInWords, ReplaceNonNumeric, Commarize, 
-    FecthEggCategory, FecthEggSaleInvoiceList, ConvertNumberToWords, 
+    FetchCompanyDetails, AmountInWords, ReplaceNonNumeric, Commarize,
+    FecthEggCategory, FecthEggSaleInvoiceList, ConvertNumberToWords,
     FecthEggSaleInvoiceById, FectAllEggSaleInvoiceList, CalculateNoOfDays
 } from './../../Utility'
 import Loading from '../Loading/Loading'
@@ -35,32 +35,32 @@ function EggSaleInvoiceList(props) {
     const [filterToDate, setFilterToDate] = useState("");
     const [isloaded, setIsLoaded] = useState(true);
     const [eggsalelistfilter, setEggSaleListFilter] = useState([]);
-   // const [companydetails, setCompanyDetails] = useState([]);
+    // const [companydetails, setCompanyDetails] = useState([]);
     const [companydetails, setCompanyDetails] = useState([JSON.parse(localStorage.getItem('companydetails'))]);
     const [eggcategory, setEggCategory] = useState([]);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const initialvalues = {
-    modaltitle: "",
-    Id: 0,
-    InvoiceNo: "",
-    CustomerId: "",
-    TotalQuantity: "",
-    PurchaseDate: "",
-    TotalCost: "",
-    TotalDiscount: "",
-    FinalCostInvoice: "",
-    Paid: "",
-    Due: "",
-    EggSale: [],
-    VehicleNo:"",
-    AdditionalCharge:"",
-        Cash:"",
-        PhonePay:"",
-        NetBanking:"",
-        UPI:"",
-        Cheque:"",
-        Complimentary:""
+        modaltitle: "",
+        Id: 0,
+        InvoiceNo: "",
+        CustomerId: "",
+        TotalQuantity: "",
+        PurchaseDate: "",
+        TotalCost: "",
+        TotalDiscount: "",
+        FinalCostInvoice: "",
+        Paid: "",
+        Due: "",
+        EggSale: [],
+        VehicleNo: "",
+        AdditionalCharge: "",
+        Cash: "",
+        PhonePay: "",
+        NetBanking: "",
+        CashDeposite: "",
+        Cheque: "",
+        Complimentary: ""
     }
 
     const [eggsaledata, setEggSaletData] = useState(initialvalues);
@@ -73,11 +73,11 @@ function EggSaleInvoiceList(props) {
         history("/eggsalemodule/" + p.CustomerId + "/" + p.Id);
     }
 
-    const _bankdetails={
-        BankName:"",
-        AccountNo:"",
-        IfscCode:"",
-        BankName:""
+    const _bankdetails = {
+        BankName: "",
+        AccountNo: "",
+        IfscCode: "",
+        BankName: ""
 
     }
 
@@ -86,16 +86,17 @@ function EggSaleInvoiceList(props) {
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
-           // setEggSaletData({ ...eggsaledata, CustomerId: uid });
+            // setEggSaletData({ ...eggsaledata, CustomerId: uid });
             //fetchCustomerDetails(uid);
-          //  fetchCompanyDetails();
+            //  fetchCompanyDetails();
             fetchEggCategory();
 
-            setBankDetails({ ...bankdetails, BankName: process.env.REACT_APP_BANK_NAME,
-                AccountNo:process.env.REACT_APP_ACCOUNT_NO,IfscCode: process.env.REACT_APP_IFSC_CODE
+            setBankDetails({
+                ...bankdetails, BankName: process.env.REACT_APP_BANK_NAME,
+                AccountNo: process.env.REACT_APP_ACCOUNT_NO, IfscCode: process.env.REACT_APP_IFSC_CODE
                 ,
-                BranchName:process.env.REACT_APP_BRANCH_NAME
-             });
+                BranchName: process.env.REACT_APP_BRANCH_NAME
+            });
         }
         else {
             HandleLogout();
@@ -106,7 +107,7 @@ function EggSaleInvoiceList(props) {
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
-            fetchEggSaleDetails(filterFromDate,filterToDate);
+            fetchEggSaleDetails(filterFromDate, filterToDate);
         }
         else {
             HandleLogout();
@@ -160,9 +161,9 @@ function EggSaleInvoiceList(props) {
     const [_totalPaid, _setTotalPaid] = useState(0);
     const [_totalDue, _setTotalDue] = useState(0);
 
-    const fetchEggSaleDetails = async (fromdate,todate) => {
+    const fetchEggSaleDetails = async (fromdate, todate) => {
         setIsLoaded(true);
-        FectAllEggSaleInvoiceList(fromdate,todate, process.env.REACT_APP_API)
+        FectAllEggSaleInvoiceList(fromdate, todate, process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
                     setEggSaleList(data.Result);
@@ -234,10 +235,10 @@ function EggSaleInvoiceList(props) {
                 }
             });
     }
-
+    //EggSale/DeleteEggSaleInvoice/?id=' + id
     const deleteEggSale = (id) => {
         if (window.confirm('Are you sure?')) {
-            fetch(process.env.REACT_APP_API + 'EggSale/' + id, {
+            fetch(process.env.REACT_APP_API + 'EggSale/DeleteEggSaleInvoice/?id=' + id, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': localStorage.getItem('token')
@@ -301,13 +302,13 @@ function EggSaleInvoiceList(props) {
     const nextDisabled = currentPage === totalPages;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const itemsToDiaplay = eggsalelist && eggsalelist.length > 0 ? 
-    eggsalelist.slice(startIndex, endIndex) : [];
+    const itemsToDiaplay = eggsalelist && eggsalelist.length > 0 ?
+        eggsalelist.slice(startIndex, endIndex) : [];
     if (itemsToDiaplay.length === 0 && eggsalelist.length > 0) {
         setCurrentPage(currentPage - 1);
     }
 
-    
+
 
     const getFilterData = (fromDate, toDate) => {
         let _filterList = [];
@@ -330,28 +331,26 @@ function EggSaleInvoiceList(props) {
 
     const onDateFilterFromChange = (e) => {
         setFilterFromDate(e.target.value);
-       // getFilterData(e.target.value, filterToDate);
-       if(e.target.value!="" && filterToDate!="")
-       {
-        // let days= CalculateNoOfDays(e.target.value,filterToDate);
-        // if(days>0)
-        // {
-        fetchEggSaleDetails(e.target.value,filterToDate)
-    //     }
-    }
-       
+        // getFilterData(e.target.value, filterToDate);
+        if (e.target.value != "" && filterToDate != "") {
+            // let days= CalculateNoOfDays(e.target.value,filterToDate);
+            // if(days>0)
+            // {
+            fetchEggSaleDetails(e.target.value, filterToDate)
+            //     }
+        }
+
     }
 
     const onDateFilterToChange = (e) => {
-       setFilterToDate(e.target.value);
-      //  getFilterData(filterFromDate, e.target.value);
-      if(e.target.value!="" && filterFromDate!="")
-        {
-        //    let days= CalculateNoOfDays(filterFromDate,e.target.value);
-        //    if(days>0)
-        //    {
-                fetchEggSaleDetails(filterFromDate,e.target.value)
-           //}
+        setFilterToDate(e.target.value);
+        //  getFilterData(filterFromDate, e.target.value);
+        if (e.target.value != "" && filterFromDate != "") {
+            //    let days= CalculateNoOfDays(filterFromDate,e.target.value);
+            //    if(days>0)
+            //    {
+            fetchEggSaleDetails(filterFromDate, e.target.value)
+            //}
         }
     }
 
@@ -373,7 +372,7 @@ function EggSaleInvoiceList(props) {
 
         setEggSaletData({
             Id: eggsale.Id,
-            InvoiceNo:eggsale.InvoiceNo,
+            InvoiceNo: eggsale.InvoiceNo,
             CustomerId: eggsale.CustomerId,
             TotalQuantity: eggsale.TotalQuantity,
             PurchaseDate: eggsale.PurchaseDate,
@@ -382,16 +381,16 @@ function EggSaleInvoiceList(props) {
             FinalCostInvoice: eggsale.FinalCostInvoice,
             Paid: eggsale.Paid,
             Due: eggsale.Due,
-            AmountInWords: ConvertNumberToWords(parseFloat(eggsale.FinalCostInvoice||0) + parseFloat(eggsale.AdditionalCharge||0)),
-            EggSale:eggsale.EggSaleList,
-            VehicleNo:eggsale.VehicleNo,
-            AdditionalCharge:eggsale.AdditionalCharge,
-            Cash:eggsale.Cash,
-            PhonePay:eggsale.PhonePay,
-            NetBanking:eggsale.NetBanking,
-            UPI:eggsale.UPI,
-            Cheque:eggsale.Cheque,
-            Complimentary:eggsale.Complimentary
+            AmountInWords: ConvertNumberToWords(parseFloat(eggsale.FinalCostInvoice || 0) + parseFloat(eggsale.AdditionalCharge || 0)),
+            EggSale: eggsale.EggSaleList,
+            VehicleNo: eggsale.VehicleNo,
+            AdditionalCharge: eggsale.AdditionalCharge,
+            Cash: eggsale.Cash,
+            PhonePay: eggsale.PhonePay,
+            NetBanking: eggsale.NetBanking,
+            CashDeposite: eggsale.CashDeposite,
+            Cheque: eggsale.Cheque,
+            Complimentary: eggsale.Complimentary
         });
 
         setInvoiceModalShow(true);
@@ -414,9 +413,9 @@ function EggSaleInvoiceList(props) {
             <div className="row justify-content-center" style={{ textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
                 <h4>Egg sale list</h4>
             </div>
-            
+
             <div className="container" style={{ marginTop: '20px', marginBottom: '10px' }}>
-                <div className="row align-items-center" style={{fontSize:13}}>
+                <div className="row align-items-center" style={{ fontSize: 13 }}>
                     <div className="col-2">
                         <p><strong>From</strong></p>
                         <DateComponent date={null} onChange={onDateFilterFromChange} isRequired={false} value={filterFromDate} />
@@ -430,19 +429,19 @@ function EggSaleInvoiceList(props) {
                    
                     </div> */}
 
-                    <div className="col-6" style={{textAlign:'right', marginTop: 30}}>
-                    <i className="fa-regular fa-file-excel fa-2xl" 
-                    style={{ color: '#bea2a2',marginRight:30}} 
-                    title='Download Egg Sale List' onClick={() => onDownloadExcel()} ></i>
-                    <Button className="mr-2" variant="primary"
-                    style={{ marginRight: "17.5px" }}
-                    onClick={() => clickAddEggSale()}>Add</Button>
+                    <div className="col-6" style={{ textAlign: 'right', marginTop: 30 }}>
+                        <i className="fa-regular fa-file-excel fa-2xl"
+                            style={{ color: '#bea2a2', marginRight: 30 }}
+                            title='Download Egg Sale List' onClick={() => onDownloadExcel()} ></i>
+                        <Button className="mr-2" variant="primary"
+                            style={{ marginRight: "17.5px" }}
+                            onClick={() => clickAddEggSale()}>Add</Button>
 
-                       
+
                     </div>
-                    <div className="col-2" style={{textAlign:'right', marginTop: 30}}>
-                    <select className="form-select" aria-label="Default select example" 
-                    style={{ width: "80px" }} onChange={selectPaginationChange}>
+                    <div className="col-2" style={{ textAlign: 'right', marginTop: 30 }}>
+                        <select className="form-select" aria-label="Default select example"
+                            style={{ width: "80px" }} onChange={selectPaginationChange}>
                             <option selected value="10">10</option>
                             <option value="20">20</option>
                             <option value="30">30</option>
@@ -453,13 +452,13 @@ function EggSaleInvoiceList(props) {
                     </div>
                 </div>
             </div>
-           
+
 
             <div class="row">
                 <div class="col-md-9">  </div>
                 <div class="col-md-3"> <div class="row">
-                    
-                    </div></div>
+
+                </div></div>
             </div>
 
             <Table className="mt-4" striped bordered hover size="sm">
@@ -482,14 +481,14 @@ function EggSaleInvoiceList(props) {
                     {
 
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
-                            
+
                             return (
-                                !isloaded && <tr align='center' style={{fontSize:13}} key={p.Id}>
+                                !isloaded && <tr align='center' style={{ fontSize: 13 }} key={p.Id}>
 
                                     <td align='center'>{moment(p.PurchaseDate).format('DD-MMM-YYYY')}</td>
 
                                     <td align='center'><a href={`/eggsale/?uid=${p.CustomerId}`}>{p.CustomerName}
-                                            <span className="sr-only">(current)</span></a></td>
+                                        <span className="sr-only">(current)</span></a></td>
                                     {/* <td align='center'>{p.CustomerName}</td> */}
                                     <td align='center'>{new Intl.NumberFormat('en-IN', {
                                     }).format(p.TotalQuantity.toFixed(2))}
@@ -526,12 +525,12 @@ function EggSaleInvoiceList(props) {
                                         {
                                             <ButtonToolbar>
 
-                                                <i className="fa-solid fa-pen-to-square" title='Edit' style={{ color: '#0545b3', marginLeft: '15px' }} 
-                                                onClick={() => clickEditEggSale(p)}></i>
+                                                <i className="fa-solid fa-pen-to-square" title='Edit' style={{ color: '#0545b3', marginLeft: '15px' }}
+                                                    onClick={() => clickEditEggSale(p)}></i>
 
                                                 {localStorage.getItem('isadmin') === 'true' &&
-                                                    <i className="fa-solid fa-trash" title='Delete' style={{ color: '#f81616', marginLeft: '15px' }} 
-                                                    onClick={() => deleteEggSale(p.Id)}></i>}
+                                                    <i className="fa-solid fa-trash" title='Delete' style={{ color: '#f81616', marginLeft: '15px' }}
+                                                        onClick={() => deleteEggSale(p.Id)}></i>}
 
 
 
@@ -618,16 +617,16 @@ function EggSaleInvoiceList(props) {
                         <Fragment>
                             <PDFViewer width="900" height="900" className="app" >
 
-                                <InvoiceEggSale companydetails={companydetails} 
-                                eggsaledata={eggsaledata} 
-                                customerdetails={customerdetails} 
-                                eggcategory={eggcategory} 
-                                bankdetails={bankdetails}/>
+                                <InvoiceEggSale companydetails={companydetails}
+                                    eggsaledata={eggsaledata}
+                                    customerdetails={customerdetails}
+                                    eggcategory={eggcategory}
+                                    bankdetails={bankdetails} />
                             </PDFViewer>
                         </Fragment>
                     </Modal.Body>
                 </Modal>
-</div>
+            </div>
 
 
 

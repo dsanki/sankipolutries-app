@@ -21,7 +21,7 @@ export const categoryList = {
 function Stock(props) {
 
     let history = useNavigate();
-
+    const [producttypes, setProductType] = useState([]);
     const [stockList, setStockList] = useState([]);
     const [stockListForFilter, setStockForFilter] = useState([]);
     const [validated, setValidated] = useState(false);
@@ -32,6 +32,7 @@ function Stock(props) {
     const [addModalShow, setAddModalShow] = useState(false);
     const [isloaded, setIsLoaded] = useState(true);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [filterItemName, setFilterItemName] = useState("");
 
     let addModalClose = () => {
         setAddModalShow(false);
@@ -98,6 +99,7 @@ function Stock(props) {
 
         if (localStorage.getItem('token')) {
             fetchStockListById("");
+            fetchProductTypes();
         }
         else {
 
@@ -193,7 +195,7 @@ function Stock(props) {
         }
         else {
 
-            fetch(process.env.REACT_APP_API+ 'Stock/AddStock', {
+            fetch(process.env.REACT_APP_API + 'Stock/AddStock', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -278,15 +280,82 @@ function Stock(props) {
         let _filterList = stockListForFilter;
         let category = e.target.value;
         setFilterCategory(category);
-        // getFilterData(filterFromDate, filterToDate, e.target.value)
 
         if (category !== "") {
             _filterList = stockListForFilter.filter((c) => c.Category === category);
 
         }
 
+        if (filterItemName !== "") {
+            _filterList = _filterList.filter(((c) => c.ItemName
+                .toLowerCase().includes(filterItemName.toLowerCase())));
+        }
+
         setStockList(_filterList);
     }
+
+    // const [filterItemName, setFilterItemName] = useState("");
+    const itemNameSearch = (e) => {
+        setFilterItemName(e.target.value);
+        getDataByItemName(e.target.value, filtercategory);
+    }
+
+    const getDataByItemName = (itemname, category) => {
+        let _filterList = [];
+        if (itemname !== "") {
+            _filterList = stockListForFilter.filter(((c) => c.ItemName
+                .toLowerCase().includes(itemname.toLowerCase()))
+            );
+        }
+        else {
+            _filterList = stockListForFilter;
+        }
+
+        if (category !== "") {
+            _filterList = _filterList.filter((c) => c.Category === category);
+
+        }
+
+        setStockList(_filterList);
+    }
+
+
+    const fetchProductTypes = async () => {
+        fetch(process.env.REACT_APP_API + 'ProductType/GetProductType',
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setProductType(data.Result);
+                }
+                else if (data.StatusCode === 401) {
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found!!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                }
+            });
+    }
+
+    const producTypeChange = (e) => {
+        setStockData({ ...stockdata, Category: e.target.value });
+    }
+
+
+    // const categoryChange = (e) => {
+    //     setStockData({ ...stockdata, Category: e.target.value });
+    // }
+
 
     return (
         <div>
@@ -298,10 +367,45 @@ function Stock(props) {
 
             <div className="container" style={{ marginTop: '30px' }}>
                 <div className="row align-items-center">
-
                     <div className="col-4">
-                        <p><strong>Category</strong></p>
+                        <InputField label="Item name"
+                            type="text"
+                            value={filterItemName}
+                            name="ItemName"
+                            placeholder="Search by item name"
+                            onChange={itemNameSearch}
+                            required={false}
+                            disabled={false}
+
+                        />
+                    </div>
+                    <div className="col-4">
+
+                        <label class="form-label" style={{ fontSize: 13 }}>Category Type</label>
+
                         <Form.Select aria-label="Default select example"
+                            onChange={onCategoryFilterChange} style={{ fontSize: 13 }}>
+                            <option selected value="">Choose...</option>
+                            {
+                                producttypes.map((item) => {
+                                    return (
+                                        <option
+                                            key={item.ProductId}
+                                            defaultValue={item.ProductId == null ? null : item.ProductId}
+                                            selected={item.ProductId === parseInt(filtercategory)}
+                                            value={item.ProductId}
+                                        >{item.ProductName}</option>
+
+                                    );
+                                })
+                            }
+                        </Form.Select>
+
+
+
+
+                        {/* <p style={{ fontSize: '13px' }}><strong>Category</strong></p>
+                        <Form.Select aria-label="Default select example" style={{ fontSize: '13px' }}
                             onChange={onCategoryFilterChange}>
                             <option selected value="">Choose...</option>
                             {
@@ -316,7 +420,7 @@ function Stock(props) {
                                     );
                                 })
                             }
-                        </Form.Select>
+                        </Form.Select> */}
                     </div>
                 </div>
             </div>
@@ -352,12 +456,15 @@ function Stock(props) {
                 <tbody>
                     {
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
+                            let category = producttypes.filter((c) => c.ProductId === parseInt(p.Category));
+                            let categoryName = category != null && category.length>0 ? category[0].ProductName:p.Category;
+
                             return (
                                 !isloaded && <tr align='center' style={{ fontSize: 13 }} key={p.ItemId}>
                                     <td align='left' style={{ maxWidth: '50%', width: '50%' }}>{p.ItemName}</td>
                                     <td >{parseFloat(p.GST).toFixed(2)}</td>
                                     <td >{parseFloat(p.PurchasePrice).toFixed(2)}</td>
-                                    <td >{p.Category}</td>
+                                    <td >{categoryName}</td>
                                     <td align='center'>
                                         {
                                             <ButtonToolbar>
@@ -465,21 +572,33 @@ function Stock(props) {
                                             />
 
                                             <Form.Group controlId="Category" as={Col} >
-                                                <Form.Label style={{fontSize:13}}>Category name</Form.Label>
-                                                <Form.Select style={{fontSize:13}}
-                                                    onChange={categoryChange} required>
+                                                <Form.Label style={{ fontSize: 13 }}>Category name</Form.Label>
+                                                <Form.Select style={{ fontSize: 13 }}
+                                                    onChange={producTypeChange} required>
                                                     <option selected disabled value="">Choose...</option>
                                                     {
-                                                        categoryList.categories.map((item) => {
+
+                                                        producttypes.map((item) => {
                                                             return (
                                                                 <option
-                                                                    key={item.Key}
-                                                                    defaultValue={item.Value == null ? null : item.Value}
-                                                                    selected={item.Value === stockdata.Category}
-                                                                    value={item.Value}
-                                                                >{item.Value}</option>
+                                                                    key={item.ProductId}
+                                                                    defaultValue={item.ProductId == null ? null : item.ProductId}
+                                                                    selected={item.ProductId === stockdata.Category}
+                                                                    value={item.ProductId}
+                                                                >{item.ProductName}</option>
+
                                                             );
                                                         })
+                                                        // categoryList.categories.map((item) => {
+                                                        //     return (
+                                                        //         <option
+                                                        //             key={item.Key}
+                                                        //             defaultValue={item.Value == null ? null : item.Value}
+                                                        //             selected={item.Value === stockdata.Category}
+                                                        //             value={item.Value}
+                                                        //         >{item.Value}</option>
+                                                        //     );
+                                                        // })
                                                     }
                                                 </Form.Select>
                                                 <Form.Control.Feedback type="invalid">

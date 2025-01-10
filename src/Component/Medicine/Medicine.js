@@ -61,7 +61,8 @@ function Medicine(props) {
     UnitPrice: '',
     GST: '',
     Amount: '',
-    ParentId: '0'
+    ParentId: '0',
+    UnitId:""
   }
 
   //const [formMedicineFields, setMedicineFields] = useState(initialMedicineSubvalues);
@@ -75,7 +76,8 @@ function Medicine(props) {
       UnitPrice: '',
       GST: '',
       Amount: '',
-      ParentId: '0'
+      ParentId: '0',
+      UnitId:""
     }
   ])
 
@@ -117,7 +119,7 @@ function Medicine(props) {
     Due: "",
     ClientId: "",
     PaymentDate: "",
-    ChequeRefNo: "",
+    //ChequeRefNo: "",
     Comments: "",
     InvoiceNo: "",
     InvoiceDate: "",
@@ -140,7 +142,7 @@ function Medicine(props) {
       Due: "",
       ClientId: "",
       PaymentDate: "",
-      ChequeRefNo: "",
+      //ChequeRefNo: "",
       Comments: "",
       InvoiceNo: "",
       InvoiceDate: "",
@@ -162,7 +164,7 @@ function Medicine(props) {
       Due: md.Due,
       ClientId: md.ClientId,
       PaymentDate: md.PaymentDate,
-      ChequeRefNo: md.ChequeRefNo,
+      //ChequeRefNo: md.ChequeRefNo,
       Comments: md.Comments,
       InvoiceNo: md.InvoiceNo,
       InvoiceDate: md.InvoiceDate,
@@ -193,15 +195,6 @@ function Medicine(props) {
 
   const medicineNameChange = (e, index) => {
     let stk = stocklist.filter(x => x.ItemId === parseInt(e.target.value));
-    //let qty = meddata.Quantity !== "" ? parseInt(meddata.Quantity) : 0;
-
-    // let total = stk[0].GST > 0 ? ((parseFloat(stk[0].PurchasePrice) * qty) * gstpercentage) : ((parseFloat(stk[0].PurchasePrice) * qty));
-
-    // setMedData({
-    //   ...meddata,
-    //   Amount: totalinclGST,
-    //   Due: totalinclGST - meddata.Paid
-    // });
 
     let data = [...formMedicineFields];
     data[index]["MedicineName"] = stk[0].ItemName;
@@ -305,9 +298,21 @@ function Medicine(props) {
     }
   }
 
-  const unitChange = (e) => {
-    setMedData({ ...meddata, UnitId: e.target.value });
+  // const unitChange = (e) => {
+  //   setMedData({ ...meddata, UnitId: e.target.value });
+  // }
+
+  const unitChange = (e, index) => {
+    let data = [...formMedicineFields];
+    data[index]["UnitId"] = e.target.value;
+    setMedicineFields(data);
   }
+
+
+
+
+
+
 
   // const totalAmountChange = (e) => {
   //   setMedData({ ...meddata, TotalAmount: e.target.value, Due: e.target.value - meddata.Paid });
@@ -319,15 +324,15 @@ function Medicine(props) {
 
   const clientChange = (e) => {
     fetchAdvanceListByCustId(e.target.value);
-    setMedData({...meddata, ClientId: e.target.value });
+    setMedData({ ...meddata, ClientId: e.target.value });
   }
 
   const paymentDateChange = (e) => {
     setMedData({ ...meddata, PaymentDate: e.target.value });
   }
-  const chequeRefNoChange = (e) => {
-    setMedData({ ...meddata, ChequeRefNo: e.target.value });
-  }
+  // const chequeRefNoChange = (e) => {
+  //   setMedData({ ...meddata, ChequeRefNo: e.target.value });
+  // }
 
   const commentsChange = (e) => {
     setMedData({ ...meddata, Comments: e.target.value });
@@ -418,8 +423,8 @@ function Medicine(props) {
 
   const fetchAdvanceListByCustId = async (custid) => {
 
-    fetch(process.env.REACT_APP_API + 'AdvancePayment/GetAdvancePaymentList?CustomerId='+
-      custid+'&CompanyId='+localStorage.getItem('companyid') ,
+    fetch(process.env.REACT_APP_API + 'AdvancePayment/GetAdvancePaymentList?CustomerId=' +
+      custid + '&CompanyId=' + localStorage.getItem('companyid'),
       {
         method: 'GET',
         headers: {
@@ -433,7 +438,7 @@ function Medicine(props) {
         if (data.StatusCode === 200) {
           setAdvanceData(data.Result);
           setMedData({
-            ...meddata, AdvanceAmount: data.Result[0].Amount, ClientId:custid
+            ...meddata, AdvanceAmount: data.Result[0].Amount, ClientId: custid
           })
         }
         else if (data.StatusCode === 401) {
@@ -630,13 +635,13 @@ function Medicine(props) {
           Due: meddata.Due,
           ClientId: meddata.ClientId,
           PaymentDate: meddata.PaymentDate,
-          ChequeRefNo: meddata.ChequeRefNo,
+          //ChequeRefNo: meddata.ChequeRefNo,
           Comments: meddata.Comments,
           InvoiceDate: meddata.InvoiceDate,
           InvoiceNo: meddata.InvoiceNo,
           MedicineSubList: meddata.MedicineSubList,
           CompanyId: localStorage.getItem('companyid'),
-          IsSettle:meddata.IsSettle
+          IsSettle: meddata.IsSettle
 
         })
       }).then(res => res.json())
@@ -692,14 +697,14 @@ function Medicine(props) {
           Due: meddata.Due,
           ClientId: meddata.ClientId,
           PaymentDate: meddata.PaymentDate,
-          ChequeRefNo: meddata.ChequeRefNo,
+          //ChequeRefNo: meddata.ChequeRefNo,
           Comments: meddata.Comments,
           InvoiceDate: meddata.InvoiceDate,
           InvoiceNo: meddata.InvoiceNo,
           MedicineSubList: meddata.MedicineSubList,
           Date: meddata.Date,
           CompanyId: localStorage.getItem('companyid'),
-          IsSettle:meddata.IsSettle
+          IsSettle: meddata.IsSettle
 
         })
       }).then(res => res.json())
@@ -778,19 +783,19 @@ function Medicine(props) {
     getFilterData(e.target.value, filterToDate);
   }
 
-//   const handlePageChange = (newPage) => {
-//     setCurrentPage(newPage)
-// }
-// const handleNextClick = () => {
-//     if (currentPage < totalPages) {
-//         setCurrentPage(currentPage + 1)
-//     }
-// }
-// const handlePrevClick = () => {
-//     if (currentPage > 1) {
-//         setCurrentPage(currentPage - 1)
-//     }
-// }
+  //   const handlePageChange = (newPage) => {
+  //     setCurrentPage(newPage)
+  // }
+  // const handleNextClick = () => {
+  //     if (currentPage < totalPages) {
+  //         setCurrentPage(currentPage + 1)
+  //     }
+  // }
+  // const handlePrevClick = () => {
+  //     if (currentPage > 1) {
+  //         setCurrentPage(currentPage - 1)
+  //     }
+  // }
 
 
   const getFilterData = (fromDate, toDate) => {
@@ -872,8 +877,8 @@ function Medicine(props) {
   return (
     <div>
       {isloaded && <Loading />}
-      <div className="row justify-content-center" 
-      style={{ textAlign: 'center', marginTop: '30px', marginBottom: '30px' }}>
+      <div className="row justify-content-center"
+        style={{ textAlign: 'center', marginTop: '30px', marginBottom: '30px' }}>
         <h4> Medicine / Vaccine Purchase Tracker</h4>
       </div>
 
@@ -988,7 +993,7 @@ function Medicine(props) {
                   <td>{p.InvoiceNo}</td>
                   <td>{moment(p.InvoiceDate).format('DD-MMM-YYYY')}</td>
 
-                  <td style= {{ overflowWrap:"break-word" }}><a href={`/paymentout/?uid=${p.ClientId}&custtype=${process.env.REACT_APP_CUST_TYPE_MEDICINE}`}>{_suppname}
+                  <td style={{ overflowWrap: "break-word" }}><a href={`/paymentout/?uid=${p.ClientId}&custtype=${process.env.REACT_APP_CUST_TYPE_MEDICINE}`}>{_suppname}
                     <span className="sr-only">(current)</span></a></td>
                   <td >{p.TotalAmount.toFixed(2)}</td>
                   <td >{parseFloat(p.Paid || 0).toFixed(2)}</td>
@@ -1033,43 +1038,43 @@ function Medicine(props) {
 
 
       {
-                medicineList && medicineList.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
-                <>
-                    <button
-                        onClick={handlePrevClick}
-                        disabled={preDisabled}
-                    >
-                        Prev
-                    </button>
-                    {
-                        Array.from({ length: totalPages }, (_, i) => {
-                            return (
-                                <button
-                                    onClick={() => handlePageChange(i + 1)}
-                                    key={i}
-                                    disabled={i + 1 === currentPage}
-                                >
-                                    {i + 1}
-                                </button>
-                            )
-                        })
-                    }
+        medicineList && medicineList.length > process.env.REACT_APP_PAGE_PAGINATION_NO &&
+        <>
+          <button
+            onClick={handlePrevClick}
+            disabled={preDisabled}
+          >
+            Prev
+          </button>
+          {
+            Array.from({ length: totalPages }, (_, i) => {
+              return (
+                <button
+                  onClick={() => handlePageChange(i + 1)}
+                  key={i}
+                  disabled={i + 1 === currentPage}
+                >
+                  {i + 1}
+                </button>
+              )
+            })
+          }
 
-                    <button
-                        onClick={handleNextClick}
-                        disabled={nextDisabled}
-                    >
-                        Next
-                    </button>
-                </>
-            }
+          <button
+            onClick={handleNextClick}
+            disabled={nextDisabled}
+          >
+            Next
+          </button>
+        </>
+      }
 
 
       <div className="container" id="exampleModal">
         <Modal
           show={addModalShow}
           {...props}
-          size="lg"
+          size="xl"
           aria-labelledby="contained-modal-title-vcenter"
           centered
         >
@@ -1122,7 +1127,6 @@ function Medicine(props) {
                           {
 
                             clientlist.map((item) => {
-
                               let fullname = (item.MiddleName != "" && item.MiddleName != null) ?
                                 item.FirstName + " " + item.MiddleName + " " + item.LastName :
                                 item.FirstName + " " + item.LastName;
@@ -1130,8 +1134,6 @@ function Medicine(props) {
                                 <option value={item.ID} key={item.ID}
                                   selected={item.ID === meddata.ClientId}>{fullname}</option>)
                             })
-
-
                           }
                         </Form.Select>
                         <Form.Control.Feedback type="invalid">
@@ -1145,6 +1147,7 @@ function Medicine(props) {
                           <Row className="mb-12" style={{ fontSize: '12px', marginTop: '10px' }}>
                             <div class="col-3"><p class="form-label">Medicine Name</p></div>
                             <div class="col"><p class="form-label">Quantity</p></div>
+                            <div class="col-2"><p class="form-label">Unit</p></div>
                             <div class="col"><p class="form-label">Unit Price</p></div>
                             <div class="col"><p class="form-label">GST</p></div>
                             <div class="col-2"><p class="form-label">Amount</p></div>
@@ -1190,6 +1193,29 @@ function Medicine(props) {
                                     disabled={false}
                                     onChange={event => quantityChange(event, index)}
                                   />
+
+                                  <Form.Group controlId="UnitId" as={Col} className="col-2">
+                                    <Form.Select aria-label="Default select example" style={{ fontSize: '13px' }}
+                                      onChange={event => unitChange(event, index)} required>
+                                      <option selected disabled value="">Choose...</option>
+                                      {
+
+                                        unitlist.map((item) => {
+                                          return (
+                                            <option value={item.ID} key={item.ID}
+                                              selected={item.ID === form.UnitId}>{item.UnitName}</option>)
+                                        })
+                                      }
+
+
+
+                                    </Form.Select>
+                                    <Form.Control.Feedback type="invalid">
+                                      Please select Unit
+                                    </Form.Control.Feedback>
+
+
+                                  </Form.Group>
 
                                   <InputField controlId="UnitPrice" label=""
                                     type="text"
@@ -1261,7 +1287,7 @@ function Medicine(props) {
                       parseFloat(meddata.AdvanceAmount || 0) > 0 ?
                         <Row className="mb-12">
                           <div className="col-6">
-                            <p class="form-label" style={{color:'green'}}>Advance payment done Rs: {parseFloat(meddata.AdvanceAmount|| 0).toFixed(2)}</p>
+                            <p class="form-label" style={{ color: 'green' }}>Advance payment done Rs: {parseFloat(meddata.AdvanceAmount || 0).toFixed(2)}</p>
                           </div>
                           <div className="col-6">
                             <Form.Check
@@ -1271,7 +1297,7 @@ function Medicine(props) {
                               onChange={settleAdvancePayment}
                               value={meddata.IsSettle}
                               checked={meddata.IsSettle}
-                              style={{ fontSize: '13px', fontWeight:'bold'}}
+                              style={{ fontSize: '13px', fontWeight: 'bold' }}
                             />
                           </div>
                           <hr className="line" style={{ marginTop: '10px' }} />
@@ -1312,7 +1338,7 @@ function Medicine(props) {
 
                     <Row className="mb-12">
 
-                      <InputField controlId="ChequeRefNo" label="Cheque Ref No"
+                      {/* <InputField controlId="ChequeRefNo" label="Cheque Ref No"
                         type="text"
                         value={meddata.ChequeRefNo}
                         name="ChequeRefNo"
@@ -1321,7 +1347,7 @@ function Medicine(props) {
                         required={false}
                         disabled={false}
                         onChange={chequeRefNoChange}
-                      />
+                      /> */}
                       {/* <Form.Group controlId="ChequeRefNo" as={Col} >
                         <Form.Label style={{ fontSize: 13 }}>Cheque Ref No</Form.Label>
                         <Form.Control as="textarea" rows={3} style={{ fontSize: 13 }} 
@@ -1332,7 +1358,8 @@ function Medicine(props) {
                     <Row className="mb-12">
                       <Form.Group controlId="Comments" as={Col} >
                         <Form.Label style={{ fontSize: 13 }}>Comments</Form.Label>
-                        <Form.Control as="textarea" rows={3} style={{ fontSize: 13 }} name="Comments" onChange={commentsChange} value={meddata.Comments}
+                        <Form.Control as="textarea" rows={3} style={{ fontSize: 13 }} 
+                        name="Comments" onChange={commentsChange} value={meddata.Comments}
                           placeholder="Comments" />
                       </Form.Group>
                     </Row>

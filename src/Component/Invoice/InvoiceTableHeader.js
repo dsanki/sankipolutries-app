@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
         borderRightWidth: 1,
         textAlign: 'center',
        fontFamily: 'Helvetica-Bold',
-        fontSize:10,
+        fontSize:9,
         //fontStyle: 'bold'
     },
     qty: {
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
         borderRightWidth: 1,
         textAlign: 'center',
         fontFamily: 'Helvetica-Bold',
-        fontSize:10
+        fontSize:9
     },
     rate: {
         width: '8%',
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
         borderRightWidth: 1,
         textAlign: 'center',
         fontFamily: 'Helvetica-Bold',
-        fontSize:10
+        fontSize:9
     },
     discnt: {
         width: '10%',
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
         borderRightWidth: 1,
         textAlign: 'center',
         fontFamily: 'Helvetica-Bold',
-        fontSize:10
+        fontSize:9
     },
 
     totaldiscnt: {
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
         borderRightWidth: 1,
         textAlign: 'center',
         fontFamily: 'Helvetica-Bold',
-        fontSize:10
+        fontSize:9
     },
     amount: {
         width: '15%',
@@ -66,14 +66,14 @@ const styles = StyleSheet.create({
         borderRightColor: borderColor,
         borderRightWidth: 1,
         fontFamily: 'Helvetica-Bold',
-        fontSize:10
+        fontSize:9
     },
     FinalAmount: {
         width: '20%',
         textAlign: 'right',
         marginRight:5,
         fontFamily: 'Helvetica-Bold',
-        fontSize:10
+        fontSize:9
     },
     totaldiscntH: {
         width: '15%',
@@ -82,24 +82,24 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontFamily: 'Helvetica-Bold',
         paddingRight: 8,
-        fontSize:10,
+        fontSize:9,
        
     },
     qtyH: {
-        width: '13%',
+        width: '17%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         textAlign: 'center',
         fontFamily: 'Helvetica-Bold',
-        fontSize:10
+        fontSize:9
     },
     catH: {
-        width: '16%',
+        width: '12%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         textAlign: 'center',
        fontFamily: 'Helvetica-Bold',
-        fontSize:10,
+        fontSize:9,
         //fontStyle: 'bold'
     },
     discntH: {
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
         borderRightWidth: 1,
         textAlign: 'center',
         fontFamily: 'Helvetica-Bold',
-        fontSize:10,
+        fontSize:9,
         paddingRight: 8,
     },
     rateH: {
@@ -118,16 +118,16 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         paddingRight: 8,
        fontFamily: 'Helvetica-Bold',
-        fontSize:10
+        fontSize:9
     },
     amountH: {
-        width: '20%',
+        width: '19%',
         textAlign: 'center',
         paddingRight: 8,
         borderRightColor: borderColor,
         borderRightWidth: 1,
         fontFamily: 'Helvetica-Bold',
-        fontSize:10
+        fontSize:9
     },
     finalamountH: {
         width: '20%',
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
        // marginRight:8,
         fontFamily: 'Helvetica-Bold',
         //borderRightColor: borderColor,
-        fontSize:10,
+        fontSize:9,
         paddingRight: 8,
     },
   
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
         borderRightWidth: 1,
         textAlign: 'center',
         fontFamily: 'Helvetica-Bold',
-        fontSize:10
+        fontSize:9
     }
 
 

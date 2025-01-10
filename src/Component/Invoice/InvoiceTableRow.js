@@ -9,17 +9,17 @@ const styles = StyleSheet.create({
         borderBottomColor: '#dee2e6',
         borderBottomWidth: 1,
         alignItems: 'center',
-        height: 24,
+        height:35,
         // fontStyle: 'bold',
-        fontSize:10
+        fontSize:9
     },
     cat: {
-        width: '16%',
+        width: '12%',
         textAlign: 'center',
         borderRightColor: borderColor,
         borderRightWidth: 1,
        // paddingLeft: 8,
-        fontSize:10
+        fontSize:9
     },
 
     // catH: {
@@ -32,12 +32,12 @@ const styles = StyleSheet.create({
     //     //fontStyle: 'bold'
     // },
     qty: {
-        width: '13%',
+        width: '18%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         textAlign: 'center',
         //paddingRight: 8,
-        fontSize:10
+        fontSize:9
     },
     // qtyH: {
     //     width: '13%',
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
         borderRightWidth: 1,
         textAlign: 'center',
         paddingRight: 8,
-        fontSize:10
+        fontSize:9
     },
     // rateH: {
     //     width: '8%',
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
         borderRightWidth: 1,
         textAlign: 'center',
         paddingRight: 8,
-        fontSize:10
+        fontSize:9
     },
     // discntH: {
     //     width: '10%',
@@ -98,15 +98,15 @@ const styles = StyleSheet.create({
         borderRightWidth: 1,
         textAlign: 'center',
         paddingRight: 8,
-        fontSize:10
+        fontSize:9
     },
     amount: {
-        width: '20%',
+        width: '19%',
         textAlign: 'center',
         paddingRight: 8,
         borderRightColor: borderColor,
         borderRightWidth: 1,
-        fontSize:10
+        fontSize:9
     },
     // amountH: {
     //     width: '20%',
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
         textAlign: 'right',
         paddingRight: 8,
        // borderRightColor: borderColor,
-        fontSize:10
+        fontSize:9
     },
 
     SLNo: {
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
         borderRightWidth: 1,
         textAlign: 'center',
         paddingRight: 8,
-        fontSize:10
+        fontSize:9
     }
     // finalamountH: {
     //     width: '20%',
@@ -190,11 +190,14 @@ const InvoiceTableRow = (props) => {
                 
                  props.eggsaledata.map((p, i) => {
                     let catname=props.eggcategory.filter(x=>x.Id===p.EggCategory);
+                    let _loseEgg=p.EggLose>0?"\n" +p.EggLose +" piece(s)":"";
+                    let _eggpack=p.EggPack>0?p.EggPack +" Box":p.Quantity;
+                    let _height=_loseEgg===""?25:50;
                     return(
                     <View style={styles.row} key={p.Id}>
                         <Text style={styles.SLNo}>{i+1}</Text>
                         <Text style={styles.cat}>{catname[0].EggCategoryName}</Text>
-                        <Text style={styles.qty}>{p.Quantity}</Text>
+                        <Text style={styles.qty}>{_eggpack}{_loseEgg}</Text>
                         <Text style={styles.rate}>{p.EggRate}</Text>
                         <Text style={styles.amount}>{Number.parseFloat(p.TotalCost).toFixed(2)}</Text>
                         <Text style={styles.discnt}>{p.DiscountPerEgg!=null?Number.parseFloat(p.DiscountPerEgg).toFixed(2):"0.00"}</Text>

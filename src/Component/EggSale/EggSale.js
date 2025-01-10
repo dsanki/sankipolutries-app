@@ -59,7 +59,7 @@ function EggSale(props) {
         Cash: "",
         PhonePay: "",
         NetBanking: "",
-        UPI: "",
+        CashDeposite: "",
         Cheque: "",
         Complimentary: ""
     }
@@ -380,7 +380,7 @@ function EggSale(props) {
             Cash: eggsale.Cash,
             PhonePay: eggsale.PhonePay,
             NetBanking: eggsale.NetBanking,
-            UPI: eggsale.UPI,
+            CashDeposite: eggsale.CashDeposite,
             Cheque: eggsale.Cheque,
             Complimentary: eggsale.Complimentary
         });
@@ -472,7 +472,10 @@ function EggSale(props) {
                             style={{ marginRight: "17.5px" }}
                             onClick={() => clickAddEggSale()}>Add</Button>
 
-                        <a className="mr-2 btn btn-primary" href={`/eggsalepaymentin/?uid=${uid}`}>Payment</a>
+                        <a className="mr-2 btn btn-primary" href={`/eggsalepaymentin/?uid=${uid}`} 
+                        style={{ marginRight: "17.5px" }}>Payment</a>
+
+                        <a className="mr-2 btn btn-primary" href={`/eggsaleinvoicelist/`}>Return to Sales</a>
 
                     </div>
                     <div className="col-2" style={{ textAlign: 'right', marginTop: 30 }}>

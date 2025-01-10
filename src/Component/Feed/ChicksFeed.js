@@ -56,8 +56,6 @@ function ChicksFeed(props) {
     CustomerId: "",
     CompanyId: "",
     Comments: "",
-    Discount: "",
-    FinalCost: "",
     SettleAmount: "",
     VehicleNo: ""
   };
@@ -88,8 +86,6 @@ function ChicksFeed(props) {
       CustomerId: "",
       CompanyId: "",
       Comments: "",
-      Discount: "",
-      FinalCost: "",
       SettleAmount: "",
       VehicleNo: ""
     })
@@ -116,8 +112,6 @@ function ChicksFeed(props) {
       CustomerId: feed.CustomerId,
       CompanyId: feed.CompanyId,
       Comments: feed.Comments,
-      Discount: feed.Discount,
-      FinalCost: feed.FinalCost,
       SettleAmount: feed.SettleAmount,
       VehicleNo: feed.VehicleNo
     })
@@ -523,8 +517,6 @@ function ChicksFeed(props) {
           CustomerId: feeddata.CustomerId,
           CompanyId: localStorage.getItem('companyid'),
           Comments: feeddata.Comments,
-          Discount: feeddata.Discount,
-          FinalCost: feeddata.FinalCost,
           SettleAmount: feeddata.SettleAmount,
           VehicleNo: feeddata.VehicleNo
 
@@ -585,8 +577,6 @@ function ChicksFeed(props) {
           CustomerId: feeddata.CustomerId,
           CompanyId: localStorage.getItem('companyid'),
           Comments: feeddata.Comments,
-          Discount: feeddata.Discount,
-          FinalCost: feeddata.FinalCost,
           SettleAmount: feeddata.SettleAmount,
           VehicleNo: feeddata.VehicleNo
 
@@ -825,7 +815,8 @@ function ChicksFeed(props) {
                   <Row className="mb-12">
                     <Form.Group as={Col} controlId="date">
                       <Form.Label style={{ fontSize: '13px' }}>Date</Form.Label>
-                      <DateComponent date={null} onChange={dateChange} isRequired={true} value={feeddata.Date} />
+                      <DateComponent date={null} onChange={dateChange} 
+                      isRequired={true} value={feeddata.Date} />
                       <Form.Control.Feedback type="invalid">
                         Please select date
                       </Form.Control.Feedback>
@@ -930,7 +921,7 @@ function ChicksFeed(props) {
                       name="Paid"
                       placeholder="Paid"
                       errormessage="Please provide paid amount"
-                      required={true}
+                      required={false}
                       disabled={false}
                       onChange={paidChange}
                     />
@@ -941,7 +932,7 @@ function ChicksFeed(props) {
                       name="Due"
                       placeholder="Due"
                       errormessage="Please provide due amount"
-                      required={true}
+                      required={false}
                       disabled={true}
                     />
                   </Row>
@@ -952,7 +943,7 @@ function ChicksFeed(props) {
                     <Form.Group controlId="PaymentDate" as={Col}>
                       <Form.Label style={{ fontSize: '13px' }} >Payment date</Form.Label>
                      
-                        <DateComponent date={null} isRequired={true}
+                        <DateComponent date={null} isRequired={false}
                           onChange={paymentDateChange} value={feeddata.PaymentDate} />
                        <Form.Control.Feedback type="invalid">
                         Please select payment date

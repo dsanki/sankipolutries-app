@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         alignItems: 'center',
         height: 24,
-        fontSize: 10,
+        fontSize: 9,
         fontStyle: 'bold',
     },
 
@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
         fontStyle: 'bold',
     },
     description: {
-        width: '80%',
+        width: '75%',
         textAlign: 'right',
         borderRightColor: borderColor,
         borderRightWidth: 1,
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Helvetica-Bold'
     },
     total: {
-        width: '20%',
+        width: '25%',
         textAlign: 'right',
         paddingRight: 8
     },
@@ -134,11 +134,17 @@ const InvoiceTableFooter = (props) => {
 
 {
     <View style={styles.row}>
-    <Text style={styles.description}>Additional Charges</Text>
+    <Text style={styles.description}>Discount</Text>
     <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />
-    {Number.parseFloat(props.birdsaledata.AdditionalCharge||0).toFixed(2)}</Text>
+    {Number.parseFloat(props.birdsaledata.Discount||0).toFixed(2)}</Text>
 </View>
 }
+<View style={styles.row}>
+    <Text style={styles.description}>Final Cost</Text>
+    <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />
+    {Number.parseFloat(props.birdsaledata.FinalCost||0).toFixed(2)}</Text>
+</View>
+
 
 {/* <View style={styles.row}>
                 <Text style={styles.description}>Payble Amount</Text>

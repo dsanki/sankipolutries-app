@@ -22,7 +22,9 @@ function EggSalePaymentIn(props) {
     const [customerdetails, setCustomerDetails] = useState([]);
     const [validated, setValidated] = useState(false);
     const [advancedata, setAdvanceData] = useState([]);
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
     let addCount = (num) => {
         setCount(num + 1);
     };
@@ -175,6 +177,8 @@ function EggSalePaymentIn(props) {
             .then(data => {
                 if (data.StatusCode === 200) {
                     setPaymentHistoryList(data.Result);
+                    setCount(data.Result.length);
+                    setTotalPages(Math.ceil(data.Result.length / itemsPerPage));
                     setIsLoaded(false);
                 }
                 else if (data.StatusCode === 401) {
@@ -247,7 +251,7 @@ function EggSalePaymentIn(props) {
                 PaymentMode: paymentDetails.PaymentMode || 'Cash',
                 CustomerId: paymentDetails.CustomerId,
                 CompanyId: localStorage.getItem('companyid'),
-                PaymentType:'In'
+                PaymentType: 'In'
             })
         });
         const todo = await response.json()
@@ -274,7 +278,7 @@ function EggSalePaymentIn(props) {
             for (const p of duelist) {
                 if (newVal !== 0) {
                     if (parseFloat(p.Due) < parseFloat(newVal)) {
-                        const response = await fetch(process.env.REACT_APP_API 
+                        const response = await fetch(process.env.REACT_APP_API
                             + 'EggSale/EggSaleInvoicePaymentUpdate', {
                             method: 'PUT',
                             headers: {
@@ -430,7 +434,7 @@ function EggSalePaymentIn(props) {
                             Amount: p.Due,
                             PaymentDate: new Date(),
                             Due: 0,
-                            PaymentMode:'Cash'
+                            PaymentMode: 'Cash'
                         })
                     });
 
@@ -458,7 +462,7 @@ function EggSalePaymentIn(props) {
                             Amount: newAdvVal,
                             PaymentDate: new Date(),
                             Due: parseFloat(p.Due) - parseFloat(newAdvVal),
-                             PaymentMode:'Cash'
+                            PaymentMode: 'Cash'
                         })
                     });
                     const todo = await response.json()
@@ -510,6 +514,36 @@ function EggSalePaymentIn(props) {
 
         //setIsLoaded(false);
 
+    }
+
+
+    const handlePageChange = (newPage) => {
+        setCurrentPage(newPage)
+    }
+    const handleNextClick = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1)
+        }
+    }
+    const handlePrevClick = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1)
+        }
+    }
+    const preDisabled = currentPage === 1;
+    const nextDisabled = currentPage === totalPages
+    //const itemsPerPage = variables.PAGE_PAGINATION_NO;
+    const startIndex = (currentPage - 1) * parseInt(itemsPerPage);
+    const endIndex = startIndex + parseInt(itemsPerPage);
+    const itemsToDiaplay = paymenthistorylist.slice(startIndex, endIndex);
+
+    if (itemsToDiaplay.length === 0 && paymenthistorylist.length > 0) {
+        setCurrentPage(currentPage - 1);
+    }
+
+    const selectPaginationChange = (e) => {
+        setItemsPerPage(e.target.value);
+        addCount(count);
     }
 
     return (
@@ -575,10 +609,9 @@ function EggSalePaymentIn(props) {
                                         onChange={paymentModeChange} required style={{ width: "150px", fontSize: 13 }}>
                                         <option selected disabled value="">Choose...</option>
                                         <option value="Cash">Cash</option>
-                                        <option value="PhonePay">PhonePay</option>
-                                        <option value="NetBanking">NetBanking</option>
-                                        <option value="UPI">UPI</option>
-                                        <option value="Cheque">Cheque</option>
+                                        <option value="PhonePay">PhonePay / UPI </option>
+                                        <option value="NetBanking">Net Banking</option>
+                                        <option value="CashDeposite">Cash Deposite</option>
                                     </Form.Select>
                                     <Form.Control.Feedback type="invalid">
                                         Please select payment mode
@@ -625,8 +658,8 @@ function EggSalePaymentIn(props) {
                                 <strong>  Advance payment done of Rs: {parseFloat(advancedata.Amount || 0).toFixed(2)}</strong>
                                 {
                                     duelist && duelist.length > 0 &&
-                                    <Button variant="primary" type="submit" style={{ marginLeft: '20px' }} 
-                                    onClick={(e) => settleAdvancePayment(e)}>
+                                    <Button variant="primary" type="submit" style={{ marginLeft: '20px' }}
+                                        onClick={(e) => settleAdvancePayment(e)}>
                                         Settle
                                     </Button>
                                 }
@@ -684,7 +717,7 @@ function EggSalePaymentIn(props) {
 
                     <div className="row justify-content-center">
                         {
-                            paymenthistorylist && paymenthistorylist.length > 0 &&
+                            itemsToDiaplay && itemsToDiaplay.length > 0 &&
                             <>
                                 <div className="row justify-content-center"
                                     style={{ textAlign: 'center', marginTop: '10px', marginBottom: '10px' }}>
@@ -703,7 +736,7 @@ function EggSalePaymentIn(props) {
                                         </thead>
                                         <tbody>
                                             {
-                                                paymenthistorylist && paymenthistorylist.length > 0 ? paymenthistorylist.map((p) => {
+                                                itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
                                                     return (
                                                         !isloaded && <tr align='center' style={{ fontSize: 13 }} key={p.Id}>
 
@@ -728,6 +761,42 @@ function EggSalePaymentIn(props) {
                                             }
                                         </tbody>
                                     </Table>
+
+                                    {
+                                        paymenthistorylist && paymenthistorylist.length > itemsPerPage &&
+                                        <>
+                                            <button
+                                                onClick={handlePrevClick}
+                                                disabled={preDisabled}
+                                            >
+                                                Prev
+                                            </button>
+
+                                            {
+
+                                                Array.from({ length: totalPages }, (_, i) => {
+                                                    return (
+                                                        <button
+                                                            onClick={() => handlePageChange(i + 1)}
+                                                            key={i}
+                                                            disabled={i + 1 === currentPage}
+                                                        >
+                                                            {i + 1}
+                                                        </button>
+                                                    )
+                                                })
+                                            }
+
+
+                                            <button
+                                                onClick={handleNextClick}
+                                                disabled={nextDisabled}
+                                            >
+                                                Next
+                                            </button>
+
+                                        </>
+                                    }
                                 </div>
                             </>
                         }

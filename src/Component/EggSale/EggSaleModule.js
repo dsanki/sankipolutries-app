@@ -196,9 +196,9 @@ function EggSaleModule(props) {
             let _totalDiscount = eggsaledata.TotalDiscount;
 
             if (val === "1") {
-                _totalDiscount = (eggsaledata.Quantity * eggsaledata.DiscountPerEgg);
+                _totalDiscount = (eggsaledata.Quantity * parseFloat(e.target.value||0));
 
-                // setEggSaletData({
+                // setEggSaletData({S
                 //     ...eggsaledata, DiscountPerEgg: e.target.value,
                 //     TotalDiscount: (eggsaledata.Quantity * eggsaledata.DiscountPerEgg),
                 //     FinalCost: (eggsaledata.TotalCost - (eggsaledata.Quantity * eggsaledata.DiscountPerEgg))
@@ -206,7 +206,7 @@ function EggSaleModule(props) {
             }
             else if (val === "2") {
                 let totalCost = eggsaledata.TotalCost;
-                _totalDiscount = totalCost * (eggsaledata.DiscountPerEgg / 100);
+                _totalDiscount = totalCost * (parseFloat(e.target.value||0) / 100);
 
 
             }

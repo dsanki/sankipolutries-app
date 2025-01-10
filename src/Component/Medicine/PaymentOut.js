@@ -33,11 +33,17 @@ function PaymentOut(props) {
     const searchRef = useRef();
 
     const [advancedata, setAdvanceData] = useState([]);
-    const[isPendingListLoaded,setIsPendingListLoaded]=useState(false);
+    const [isPendingListLoaded, setIsPendingListLoaded] = useState(false);
     const [ucount, setUCount] = useState(0);
     const objU = useMemo(() => ({ ucount }), [ucount]);
     const [delaychange, setDelayChange] = useState('');
     const [value, setValue] = useState('');
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+
     useEffect(() => {
         //let customertype=new URLSearchParams(search).get('custtype');
         fetchClient(customertype);
@@ -53,10 +59,10 @@ function PaymentOut(props) {
 
     useEffect((e) => {
         if (localStorage.getItem('token')) {
-           // if (delaychange !== '') {
-                fetchAdvanceListByCustId(parseInt(paymentDetails.CustomerId || 0));
-                fetchPendingMedcineInvoiceList(parseInt(paymentDetails.CustomerId || 0));
-                fetchMedicinePaymentOutHistory(parseInt(paymentDetails.CustomerId || 0));
+            // if (delaychange !== '') {
+            fetchAdvanceListByCustId(parseInt(paymentDetails.CustomerId || 0));
+            fetchPendingMedcineInvoiceList(parseInt(paymentDetails.CustomerId || 0));
+            fetchMedicinePaymentOutHistory(parseInt(paymentDetails.CustomerId || 0));
             //}
         }
         else {
@@ -99,7 +105,7 @@ function PaymentOut(props) {
         setSearchCustomer(e.target.value);
 
         setPaymentDetails({ ...paymentDetails, CustomerId: e.target.value });
-        history('/paymentout/?custtype='+customertype+'&uid=' + e.target.value);
+        history('/paymentout/?custtype=' + customertype + '&uid=' + e.target.value);
         addCount(count);
     }
 
@@ -474,7 +480,7 @@ function PaymentOut(props) {
                 }
             });
 
-            setIsPendingListLoaded(true);
+        setIsPendingListLoaded(true);
     }
 
     const UpdatePaymentHistory = async (val) => {
@@ -492,7 +498,7 @@ function PaymentOut(props) {
                 PaymentMode: paymentDetails.PaymentMode || 'Cash',
                 CustomerId: paymentDetails.CustomerId,
                 CompanyId: localStorage.getItem('companyid'),
-                PaymentType:'Out'
+                PaymentType: 'Out'
             })
         });
 
@@ -536,6 +542,10 @@ function PaymentOut(props) {
             .then(data => {
                 if (data.StatusCode === 200) {
                     setPaymentHistoryList(data.Result);
+
+                    setCount(data.Result.length);
+                    setTotalPages(Math.ceil(data.Result.length / itemsPerPage));
+                    
                     setIsLoaded(false);
                 }
                 else if (data.StatusCode === 401) {
@@ -551,6 +561,36 @@ function PaymentOut(props) {
             });
 
         setIsLoaded(false);
+    }
+
+
+    const handlePageChange = (newPage) => {
+        setCurrentPage(newPage)
+    }
+    const handleNextClick = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1)
+        }
+    }
+    const handlePrevClick = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1)
+        }
+    }
+    const preDisabled = currentPage === 1;
+    const nextDisabled = currentPage === totalPages
+    //const itemsPerPage = variables.PAGE_PAGINATION_NO;
+    const startIndex = (currentPage - 1) * parseInt(itemsPerPage);
+    const endIndex = startIndex + parseInt(itemsPerPage);
+    const itemsToDiaplay = paymenthistorylist.slice(startIndex, endIndex);
+
+    if (itemsToDiaplay.length === 0 && paymenthistorylist.length > 0) {
+        setCurrentPage(currentPage - 1);
+    }
+
+    const selectPaginationChange = (e) => {
+        setItemsPerPage(e.target.value);
+        addCount(count);
     }
 
     return (
@@ -622,10 +662,9 @@ function PaymentOut(props) {
                                         onChange={paymentModeChange} required style={{ width: "150px", fontSize: 13 }}>
                                         <option selected disabled value="">Choose...</option>
                                         <option value="Cash">Cash</option>
-                                        <option value="PhonePay">PhonePay</option>
-                                        <option value="NetBanking">NetBanking</option>
-                                        <option value="UPI">UPI</option>
-                                        <option value="Cheque">Cheque</option>
+                                        <option value="PhonePay">PhonePay / UPI </option>
+                                        <option value="NetBanking">Net Banking</option>
+                                        <option value="CashDeposite">Cash Deposite</option>
                                     </Form.Select>
                                     <Form.Control.Feedback type="invalid">
                                         Please select payment mode
@@ -681,7 +720,7 @@ function PaymentOut(props) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                {!isPendingListLoaded && <Loading />}
+                                    {!isPendingListLoaded && <Loading />}
                                     {
 
                                         medicinependinglist && medicinependinglist.length > 0 ? medicinependinglist.map((p) => {
@@ -719,7 +758,7 @@ function PaymentOut(props) {
 
                     <div className="row justify-content-center">
                         {
-                            paymenthistorylist && paymenthistorylist.length > 0 &&
+                            itemsToDiaplay && itemsToDiaplay.length > 0 &&
                             <>
                                 <div className="row justify-content-center"
                                     style={{ textAlign: 'center', marginTop: '10px', marginBottom: '10px' }}>
@@ -739,7 +778,7 @@ function PaymentOut(props) {
                                         </thead>
                                         <tbody>
                                             {
-                                                paymenthistorylist && paymenthistorylist.length > 0 ? paymenthistorylist.map((p) => {
+                                                itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
                                                     return (
                                                         !isloaded && <tr align='center' style={{ fontSize: 13 }} key={p.Id}>
 
@@ -764,6 +803,42 @@ function PaymentOut(props) {
                                             }
                                         </tbody>
                                     </Table>
+
+                                    {
+                                        paymenthistorylist && paymenthistorylist.length > itemsPerPage &&
+                                        <>
+                                            <button
+                                                onClick={handlePrevClick}
+                                                disabled={preDisabled}
+                                            >
+                                                Prev
+                                            </button>
+
+                                            {
+
+                                                Array.from({ length: totalPages }, (_, i) => {
+                                                    return (
+                                                        <button
+                                                            onClick={() => handlePageChange(i + 1)}
+                                                            key={i}
+                                                            disabled={i + 1 === currentPage}
+                                                        >
+                                                            {i + 1}
+                                                        </button>
+                                                    )
+                                                })
+                                            }
+
+
+                                            <button
+                                                onClick={handleNextClick}
+                                                disabled={nextDisabled}
+                                            >
+                                                Next
+                                            </button>
+
+                                        </>
+                                    }
                                 </div>
                             </>
                         }
