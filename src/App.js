@@ -43,6 +43,8 @@ import ManureSale from "./Component/ManureSale/ManureSale";
 
  import ChicksFeed from "./Component/Feed/ChicksFeed";
  import FeedPaymentOut from "./Component/Feed/FeedPaymentOut";
+import PaymentHistory from './Component/PaymentHistory/PaymentHistory';
+import Unit from './Component/Unit/Unit';
 
 
 
@@ -159,6 +161,9 @@ function App() {
             <Route path="/chicksfeedpaymentout/?:custtype/:uid" element={<FeedPaymentOut showAlert={showAlert} />} />
 
 
+            <Route path="/paymenthistory" element={<PaymentHistory showAlert={showAlert} />} /> 
+            <Route path="/unit" element={<Unit showAlert={showAlert} />} /> 
+            
 
           </Routes>
         </div>

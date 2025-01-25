@@ -34,10 +34,12 @@ function ChicksMasterComponent(props) {
         IsActive: "",
         ExtraChicksPercentage: "",
         CustomerId: "",
-        Comments:"",
-        Discount:"",
-        FinalCost:"",
-        SettleAmount:""
+        Comments: "",
+        Discount: "",
+        FinalCost: "",
+        SettleAmount: "",
+        InvoiceNo: "",
+        InvoiceDate: ""
     };
 
     const [chicksdata, setChicksData] = useState(initialvalues);
@@ -63,10 +65,12 @@ function ChicksMasterComponent(props) {
             IsActive: true,
             ExtraChicksPercentage: "",
             CustomerId: "",
-            Comments:"",
-            Discount:"",
-            FinalCost:"",
-            SettleAmount:""
+            Comments: "",
+            Discount: "",
+            FinalCost: "",
+            SettleAmount: "",
+            InvoiceNo: "",
+            InvoiceDate: ""
         })
     }
 
@@ -91,10 +95,12 @@ function ChicksMasterComponent(props) {
             IsActive: chicks.IsActive,
             ExtraChicksPercentage: chicks.ExtraChicksPercentage,
             CustomerId: chicks.CustomerId,
-            Comments:chicks.Comments,
-            Discount:chicks.Discount,
-            FinalCost:chicks.FinalCost,
-            SettleAmount:chicks.SettleAmount
+            Comments: chicks.Comments,
+            Discount: chicks.Discount,
+            FinalCost: chicks.FinalCost,
+            SettleAmount: chicks.SettleAmount,
+            InvoiceNo: chicks.InvoiceNo,
+            InvoiceDate: chicks.InvoiceDate
         })
     }
 
@@ -102,6 +108,14 @@ function ChicksMasterComponent(props) {
         setChicksData({ ...chicksdata, CustomerId: e.target.value });
         addCount(count);
 
+    }
+
+    const invoiceDateChange = (e) => {
+        setChicksData({ ...chicksdata, InvoiceDate: e.target.value });
+    }
+
+    const invoiceNoChange = (e) => {
+        setChicksData({ ...chicksdata, InvoiceNo: e.target.value });
     }
 
     const lotnameChange = (e) => {
@@ -185,23 +199,29 @@ function ChicksMasterComponent(props) {
 
     const lambChange = (e) => {
         const lamb = e.target.value === "" ? 0 : parseInt(e.target.value);
-        setChicksData({ ...chicksdata, LambChicks: e.target.value, 
-            DueChicks: (lamb + (chicksdata.Mortality === "" ? 0 : parseInt(chicksdata.Mortality))) });
+        setChicksData({
+            ...chicksdata, LambChicks: e.target.value,
+            DueChicks: (lamb + (chicksdata.Mortality === "" ? 0 : parseInt(chicksdata.Mortality)))
+        });
     }
 
     const rateChange = (e) => {
-let _totalAmt=e.target.value * chicksdata.Chicks;
-        let _finalcost=(parseFloat(_totalAmt||0)-parseFloat(chicksdata.Discount||0));
+        let _totalAmt = e.target.value * chicksdata.Chicks;
+        let _finalcost = (parseFloat(_totalAmt || 0) - parseFloat(chicksdata.Discount || 0));
 
-        setChicksData({ ...chicksdata, Rate: e.target.value, 
-            TotalAmount: _totalAmt, 
-            Due: _finalcost - parseFloat(chicksdata.Paid||0),
-            FinalCost:_finalcost });
+        setChicksData({
+            ...chicksdata, Rate: e.target.value,
+            TotalAmount: _totalAmt,
+            Due: _finalcost - parseFloat(chicksdata.Paid || 0),
+            FinalCost: _finalcost
+        });
     }
 
     const paidChange = (e) => {
-        setChicksData({ ...chicksdata, Paid: e.target.value, 
-            Due: chicksdata.FinalCost - e.target.value });
+        setChicksData({
+            ...chicksdata, Paid: e.target.value,
+            Due: chicksdata.FinalCost - e.target.value
+        });
     }
 
     const paymentDateChange = (e) => {
@@ -209,14 +229,15 @@ let _totalAmt=e.target.value * chicksdata.Chicks;
     }
 
     const commentsChange = (e) => {
-        setChicksData({ ...chicksdata, Comments: e.target.value});
+        setChicksData({ ...chicksdata, Comments: e.target.value });
     }
 
     const discountChange = (e) => {
-        let _finalcost=(parseFloat(chicksdata.TotalAmount||0)-parseFloat(e.target.value||0));
-        setChicksData({ ...chicksdata, Discount: e.target.value,
-            FinalCost:_finalcost,
-            Due: _finalcost - parseFloat(chicksdata.Paid||0)
+        let _finalcost = (parseFloat(chicksdata.TotalAmount || 0) - parseFloat(e.target.value || 0));
+        setChicksData({
+            ...chicksdata, Discount: e.target.value,
+            FinalCost: _finalcost,
+            Due: _finalcost - parseFloat(chicksdata.Paid || 0)
         });
     }
 
@@ -253,7 +274,7 @@ let _totalAmt=e.target.value * chicksdata.Chicks;
         setCount(num + 1);
     };
     const [issettle, setIsSettle] = useState(false);
-      const [advancedataticked, setAdvanceDataTicked] = useState([]);
+    const [advancedataticked, setAdvanceDataTicked] = useState([]);
 
 
     const isSettleChange = (e) => {
@@ -269,9 +290,9 @@ let _totalAmt=e.target.value * chicksdata.Chicks;
                 let _due = parseFloat(finalAmt || 0) - _paid;
 
                 setChicksData({
-                    ...chicksdata, Paid: _paid, Due: _due,SettleAmount:finalAmt
+                    ...chicksdata, Paid: _paid, Due: _due, SettleAmount: finalAmt
                 });
-                
+
 
                 setAdvanceDataTicked({ ...advancedataticked, Amount: advance - finalAmt })
             }
@@ -284,7 +305,7 @@ let _totalAmt=e.target.value * chicksdata.Chicks;
                     let _due = (parseFloat(finalAmt || 0)) - _paid;
 
                     setChicksData({
-                        ...chicksdata, Paid: _paid, Due: _due, SettleAmount:advance
+                        ...chicksdata, Paid: _paid, Due: _due, SettleAmount: advance
                     });
 
                     setAdvanceDataTicked({ ...advancedataticked, Amount: 0 })
@@ -293,11 +314,11 @@ let _totalAmt=e.target.value * chicksdata.Chicks;
         }
         else {
 
-            let _paid = parseFloat(chicksdata.Paid || 0) ;
+            let _paid = parseFloat(chicksdata.Paid || 0);
 
             let _due = chicksdata.FinalCost - _paid;
             setChicksData({
-                ...chicksdata, Paid: _paid, Due: _due, SettleAmount:0
+                ...chicksdata, Paid: _paid, Due: _due, SettleAmount: 0
             });
 
             let da = parseFloat(advancedata.Amount || 0);
@@ -469,11 +490,13 @@ let _totalAmt=e.target.value * chicksdata.Chicks;
                     IsActive: chicksdata.IsActive,
                     ExtraChicksPercentage: chicksdata.ExtraChicksPercentage,
                     CompanyId: localStorage.getItem('companyid'),
-                    FinalCost:chicksdata.FinalCost,
-                    Comments:chicksdata.Comments,
-                    Discount:chicksdata.Discount,
-                    CustomerId:chicksdata.CustomerId,
-                    SettleAmount:chicksdata.SettleAmount
+                    FinalCost: chicksdata.FinalCost,
+                    Comments: chicksdata.Comments,
+                    Discount: chicksdata.Discount,
+                    CustomerId: chicksdata.CustomerId,
+                    SettleAmount: chicksdata.SettleAmount,
+                    InvoiceNo: chicksdata.InvoiceNo,
+                    InvoiceDate: chicksdata.InvoiceDate
 
                 })
             })
@@ -532,11 +555,13 @@ let _totalAmt=e.target.value * chicksdata.Chicks;
                     IsActive: chicksdata.IsActive,
                     ExtraChicksPercentage: chicksdata.ExtraChicksPercentage,
                     CompanyId: localStorage.getItem('companyid'),
-                    FinalCost:chicksdata.FinalCost,
-                    Comments:chicksdata.Comments,
-                    Discount:chicksdata.Discount,
-                    CustomerId:chicksdata.CustomerId,
-                    SettleAmount:chicksdata.SettleAmount
+                    FinalCost: chicksdata.FinalCost,
+                    Comments: chicksdata.Comments,
+                    Discount: chicksdata.Discount,
+                    CustomerId: chicksdata.CustomerId,
+                    SettleAmount: chicksdata.SettleAmount,
+                    InvoiceNo: chicksdata.InvoiceNo,
+                    InvoiceDate: chicksdata.InvoiceDate
 
 
                 })
@@ -584,23 +609,23 @@ let _totalAmt=e.target.value * chicksdata.Chicks;
 
             <Table className="mt-4" striped bordered hover size="sm">
                 <thead>
-                    <tr className="tr-custom">
-                        <th align='left'>Lot name</th>
-                        <th  >Date</th>
+                    <tr className="tr-custom" align='center'>
+                        <th align='center'>Lot name</th>
+                        <th align='center' >Date</th>
                         <th align='center' >Chicks</th>
                         <th align='center' >Extra %</th>
-                        <th align='center' >Extra cks</th>
+                        {/* <th align='center' >Extra cks</th> */}
                         <th align='center' >Total Cks</th>
-                        <th align='center' >Mortality</th>
+                        {/* <th align='center' >Mortality</th>
                         <th align='center'>Lamb</th>
-                        <th align='center'>Due cks</th>
+                        <th align='center'>Due cks</th> */}
                         <th align='center'>Rate</th>
                         <th align='center'>Total amt</th>
                         <th align='center'>Discount</th>
                         <th align='center'>FinalCost</th>
                         <th align='center'>Paid</th>
                         <th align='center'>Due</th>
-                        <th align='center'>Payment date</th>
+                        <th align='center'>Invoice no</th>
                         <th align='center'>Options</th>
                     </tr>
                 </thead>
@@ -608,22 +633,23 @@ let _totalAmt=e.target.value * chicksdata.Chicks;
                     {
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => (
                             <tr key={p.Id} align='center' style={{ fontSize: '13px' }} >
-                                <td align='left'>{p.LotName}</td>
+                                <td align='center'>{p.LotName}</td>
                                 <td align='center'>{Moment(p.Date).format('DD-MMM-YYYY')}</td>
                                 <td align='center'>{p.Chicks}</td>
                                 <td align='center'>{p.ExtraChicksPercentage}</td>
-                                <td align='center'>{p.ExtraChicks}</td>
+                                {/* <td align='center'>{p.ExtraChicks}</td> */}
                                 <td align='center'>{p.TotalChicks}</td>
-                                <td align='center'>{p.Mortality}</td>
+                                {/* <td align='center'>{p.Mortality}</td>
                                 <td align='center'>{p.LambChicks}</td>
-                                <td align='center'>{p.DueChicks}</td>
+                                <td align='center'>{p.DueChicks}</td> */}
                                 <td align='center'>{p.Rate.toFixed(2)}</td>
                                 <td align='center'>{p.TotalAmount.toFixed(2)}</td>
-                                <td align='center'>{parseFloat(p.Discount||0).toFixed(2)}</td>
-                                <td align='center'>{parseFloat(p.FinalCost||0).toFixed(2)}</td>
+                                <td align='center'>{parseFloat(p.Discount || 0).toFixed(2)}</td>
+                                <td align='center'>{parseFloat(p.FinalCost || 0).toFixed(2)}</td>
                                 <td align='center'>{p.Paid.toFixed(2)}</td>
                                 <td align='center'>{p.Due.toFixed(2)}</td>
-                                <td align='center'>{Moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
+                                <td align='center'>{p.InvoiceNo}</td>
+                                {/* <td align='center'>{Moment(p.PaymentDate).format('DD-MMM-YYYY')}</td> */}
                                 <td align='center'>
                                     {
                                         <ButtonToolbar>
@@ -697,6 +723,26 @@ let _totalAmt=e.target.value * chicksdata.Chicks;
                         <button type="button" class="btn-close" aria-label="Close" onClick={addModalClose}> </button>
                     </Modal.Header>
                     <Modal.Body>
+                        <Row className="mb-12">
+                            <Form.Group as={Col} controlId="InvoiceDate">
+                                <Form.Label style={{ fontSize: 13 }}>Invoice Date</Form.Label>
+                                <DateComponent date={null} onChange={invoiceDateChange} isRequired={true}
+                                    value={chicksdata.InvoiceDate} />
+                                <Form.Control.Feedback type="invalid">
+                                    Select invoice date
+                                </Form.Control.Feedback>
+                            </Form.Group>
+                            <InputField controlId="InvoiceNo" label="Invoice no"
+                                type="text"
+                                value={chicksdata.InvoiceNo}
+                                name="InvoiceNo"
+                                placeholder="Invoice no"
+                                errormessage="Enter Invoice no"
+                                onChange={invoiceNoChange}
+                                required={true}
+                                disabled={false}
+                            />
+                        </Row>
                         <Row>
                             <Col sm={12}>
                                 <Form noValidate validated={validated} className="needs-validation">
@@ -724,22 +770,22 @@ let _totalAmt=e.target.value * chicksdata.Chicks;
                                             </Form.Select>
                                         </Form.Group>
                                         {
-                                            advancedata != null && advancedata.Amount > 0 && 
+                                            advancedata != null && advancedata.Amount > 0 &&
                                             <div className="col-6">
                                                 <div className="alert alert-success" role="alert">
                                                     <strong>  Advance of Rs: {parseFloat(advancedata.Amount || 0).toFixed(2)}</strong>
-                                                   
+
                                                     {
-                               chicksdata.TotalAmount>0 && <Form.Check
-                                    type="checkbox"
-                                    id="chkIsActiveSettle"
-                                    label="Settle"
-                                    onChange={isSettleChange}
-                                    value={issettle}
-                                    checked={issettle}
-                                    style={{ fontSize: '13px' }}
-                                />
-                            }
+                                                        chicksdata.TotalAmount > 0 && <Form.Check
+                                                            type="checkbox"
+                                                            id="chkIsActiveSettle"
+                                                            label="Settle"
+                                                            onChange={isSettleChange}
+                                                            value={issettle}
+                                                            checked={issettle}
+                                                            style={{ fontSize: '13px' }}
+                                                        />
+                                                    }
                                                 </div>
                                             </div>
                                         }
@@ -881,7 +927,7 @@ let _totalAmt=e.target.value * chicksdata.Chicks;
                                             onChange={discountChange}
                                         />
 
-<InputField controlId="FinalCost" label="FinalCost"
+                                        <InputField controlId="FinalCost" label="FinalCost"
                                             type="number"
                                             value={chicksdata.FinalCost}
                                             name="FinalCost"
@@ -890,9 +936,9 @@ let _totalAmt=e.target.value * chicksdata.Chicks;
                                             required={false}
                                             disabled={false}
                                         />
-                                          </Row>
+                                    </Row>
 
-<Row className="mb-12">
+                                    <Row className="mb-12">
 
 
                                         <InputField controlId="Paid" label="Paid"
@@ -940,14 +986,14 @@ let _totalAmt=e.target.value * chicksdata.Chicks;
                                     </Row>
 
                                     <Row className="mb-12">
-                                                                              <Form.Group controlId="Comments" as={Col} >
-                                                                                  <Form.Label style={{ fontSize: '13px' }}>Comments</Form.Label>
-                                                                                  <Form.Control style={{ fontSize: '13px' }} as="textarea" rows={3} name="Comments"
-                                                                                      onChange={commentsChange} value={chicksdata.Comments}
-                                                                                      placeholder="Comments" />
-                                  
-                                                                              </Form.Group>
-                                                                          </Row>
+                                        <Form.Group controlId="Comments" as={Col} >
+                                            <Form.Label style={{ fontSize: '13px' }}>Comments</Form.Label>
+                                            <Form.Control style={{ fontSize: '13px' }} as="textarea" rows={3} name="Comments"
+                                                onChange={commentsChange} value={chicksdata.Comments}
+                                                placeholder="Comments" />
+
+                                        </Form.Group>
+                                    </Row>
 
                                     <Form.Group as={Col}>
                                         {chicksdata.Id <= 0 ?

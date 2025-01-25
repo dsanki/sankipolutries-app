@@ -7,7 +7,7 @@ import DateComponent from '../DateComponent';
 import {
     FetchSheds, FecthStockListById, CalculateAgeInWeeks, CalculateAgeInDays,
     FetchShedLotMapList, dateyyyymmdd, downloadExcel, HandleLogout,
-    NumberInputKeyDown, FetchShedsList, FetchLotById
+    NumberInputKeyDown, FetchShedsList, FetchLotById,CalculateAgeInWeeksUpdated, CalculateNoOfDaysUpdated
 } from '../../Utility';
 //import { FetchUnit, FetchShedsList, FetchLots, FetchLotById  } from '../../Utility'
 import Loading from '../Loading/Loading'
@@ -66,7 +66,7 @@ function ShedMedcineTracker(props) {
 
     const fetchMedicineTracker = async () => {
         setIsLoaded(true);
-        fetch(process.env.REACT_APP_API + 'Medicine/GetMedicineTracker?CompanyId='+
+        fetch(process.env.REACT_APP_API + 'Medicine/GetMedicineTracker?CompanyId=' +
             localStorage.getItem('companyid'),
             {
                 method: 'GET',
@@ -100,7 +100,7 @@ function ShedMedcineTracker(props) {
 
     const fetchMedicineList = async () => {
         fetch(process.env.REACT_APP_API + 'Medicine/GetMedicineListByCompanyId?CompanyId='
-            +localStorage.getItem('companyid'),
+            + localStorage.getItem('companyid'),
             {
                 method: 'GET',
                 headers: {
@@ -262,9 +262,25 @@ function ShedMedcineTracker(props) {
         });
     }
 
-
+  const [_lotdetails, setLotDetails] = useState();
     const onDateChange = (e) => {
-        setMedicineTrackerData({ ...medicinetrackerdata, Date: e.target.value });
+        let days = "";
+        let weeks = "";
+
+        if (_lotdetails != null && (_lotdetails.Date != null || _lotdetails.Date != "")) {
+                    if(e.target.value != "")
+                    {
+                        weeks = CalculateAgeInWeeksUpdated(_lotdetails.Date, e.target.value);
+                        days = CalculateNoOfDaysUpdated(_lotdetails.Date, e.target.value);
+                    }
+                    else{
+                        weeks = CalculateAgeInWeeksUpdated(_lotdetails.Date, new Date());
+                        days = CalculateNoOfDaysUpdated(_lotdetails.Date, new Date());
+                    }
+                }
+
+                setMedicineTrackerData({ ...medicinetrackerdata, Date: e.target.value, 
+                    AgeDays: days, AgeWeeks: weeks });
     }
 
     const onCommentsChange = (e) => {
@@ -289,12 +305,23 @@ function ShedMedcineTracker(props) {
             lotname = filterval[0].lotname;
             FetchLotById(lotid, process.env.REACT_APP_API)
                 .then(data => {
+
+                    setLotDetails(data.Result);
                     totalbirds = data.Result.TotalChicks -
                         (data.Result.Mortality + data.Result.TotalMortality
                             + data.Result.TotalBirdSale);
 
-                    weeks = CalculateAgeInWeeks(data.Result.Date);
-                    days = CalculateAgeInDays(data.Result.Date);
+                    if (medicinetrackerdata.Date != null && medicinetrackerdata.Date != "") {
+                        weeks = CalculateAgeInWeeksUpdated(data.Result.Date, medicinetrackerdata.Date,);
+                        days = CalculateNoOfDaysUpdated(data.Result.Date, medicinetrackerdata.Date);
+                    }
+                    else {
+                        weeks = CalculateAgeInWeeksUpdated(data.Result.Date, new Date());
+                        days = CalculateNoOfDaysUpdated(data.Result.Date, new Date());
+                    }
+
+                    //weeks = CalculateAgeInWeeks(data.Result.Date);
+                    //days = CalculateAgeInDays(data.Result.Date);
                     setMedicineTrackerData({
                         ...medicinetrackerdata, ShedId: shedid, LotNo: lotid,
                         LotName: lotname, TotalBirds: totalbirds,
@@ -363,8 +390,8 @@ function ShedMedcineTracker(props) {
                     Dose: medicinetrackerdata.Dose,
                     Date: medicinetrackerdata.Date,
                     Comments: medicinetrackerdata.Comments,
-                    TotalBirds:medicinetrackerdata.TotalBirds,
-                    CompanyId:localStorage.getItem('companyid')
+                    TotalBirds: medicinetrackerdata.TotalBirds,
+                    CompanyId: localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -416,8 +443,8 @@ function ShedMedcineTracker(props) {
                     Dose: medicinetrackerdata.Dose,
                     Date: medicinetrackerdata.Date,
                     Comments: medicinetrackerdata.Comments,
-                    TotalBirds:medicinetrackerdata.TotalBirds,
-                    CompanyId:localStorage.getItem('companyid')
+                    TotalBirds: medicinetrackerdata.TotalBirds,
+                    CompanyId: localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -570,18 +597,18 @@ function ShedMedcineTracker(props) {
             <div className="container" style={{ marginTop: '30px' }}>
                 <div className="row align-items-center">
                     <div className="col-2">
-                        <p style={{fontSize:'13px'}}><strong>From</strong></p>
+                        <p style={{ fontSize: '13px' }}><strong>From</strong></p>
                         <DateComponent date={null} onChange={onDateFilterFromChange}
                             isRequired={false} value={filterFromDate} />
                     </div>
                     <div className="col-2">
-                        <p style={{fontSize:'13px'}}><strong>To</strong></p>
+                        <p style={{ fontSize: '13px' }}><strong>To</strong></p>
                         <DateComponent date={null} onChange={onDateFilterToChange}
                             isRequired={false} value={filterToDate} />
                     </div>
                     <div className="col-2">
-                        <p style={{fontSize:'13px'}}><strong>Shed</strong></p>
-                        <Form.Select aria-label="Default select example"
+                        <p style={{ fontSize: '13px' }}><strong>Shed</strong></p>
+                        <Form.Select aria-label="Default select example" style={{ fontSize: '13px' }}
                             onChange={onShedFilterChange}>
                             <option selected value="">Choose...</option>
                             {
@@ -598,22 +625,22 @@ function ShedMedcineTracker(props) {
                             }
                         </Form.Select>
                     </div>
-                    <div className="col-6" style={{textAlign:'right',marginTop:'38px'}}>
-                    <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2',marginRight: 30  }}
-                        onClick={() => onDownloadExcel()} ></i>
-                          <Button className="mr-2 btn-primary btn-primary-custom" variant="primary"
-                        style={{ marginRight: "17.5px" }}
-                        onClick={() => clickAddMedicineTracker()}>Add</Button>
+                    <div className="col-6" style={{ textAlign: 'right', marginTop: '38px' }}>
+                        <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2', marginRight: 30 }}
+                            onClick={() => onDownloadExcel()} ></i>
+                        <Button className="mr-2 btn-primary btn-primary-custom" variant="primary"
+                            style={{ marginRight: "17.5px" }}
+                            onClick={() => clickAddMedicineTracker()}>Add</Button>
                     </div>
                 </div>
             </div>
 
             <div className="row">
                 <div className="col" style={{ textAlign: 'left', marginTop: '20px' }}>
-                  
+
                 </div>
                 <div className="col" style={{ textAlign: 'right', marginTop: '20px' }}>
-                  
+
                 </div>
 
             </div>
@@ -643,15 +670,23 @@ function ShedMedcineTracker(props) {
                             const medicinename = filterByMedicineId.length > 0 ? filterByMedicineId[0].ItemName : "";
 
 
-                            p.AgeDays = CalculateAgeInDays(p.ChicksDate);
-                            p.AgeWeeks = CalculateAgeInWeeks(p.ChicksDate);
+
+                            if (p.Date != null && p.Date != "") {
+                                p.AgeWeeks = CalculateAgeInWeeksUpdated(p.ChicksDate, p.Date);
+                                p.AgeDays = CalculateNoOfDaysUpdated(p.ChicksDate, p.Date);
+                            }
+
+                           // p.AgeDays = CalculateAgeInDays(p.ChicksDate);
+                            //p.AgeWeeks = CalculateAgeInWeeks(p.ChicksDate);
+
+
 
                             medicineListDowanloadArr.push({
                                 Date: moment(p.Date).format('DD-MMM-YYYY'),
-                                ShedName: shedname, 
-                                LotName: p.LotName, 
-                                Medicine: medicinename, 
-                                Dose: p.Dose, 
+                                ShedName: shedname,
+                                LotName: p.LotName,
+                                Medicine: medicinename,
+                                Dose: p.Dose,
                                 Comments: p.Comments
                             });
 
@@ -736,7 +771,7 @@ function ShedMedcineTracker(props) {
                                 <Form noValidate validated={validated} className="needs-validation">
                                     <Row className="mb-12">
                                         <Form.Group controlId="Date" as={Col} >
-                                            <Form.Label>Date*</Form.Label>
+                                            <Form.Label style={{ fontSize: '13px' }}>Date*</Form.Label>
                                             <Form.Control type="text" name="Id"
                                                 hidden disabled value={medicinetrackerdata.Id} />
                                             <DateComponent date={null} onChange={onDateChange}
@@ -747,9 +782,9 @@ function ShedMedcineTracker(props) {
                                         </Form.Group>
 
                                         <Form.Group controlId="ShedId" as={Col} >
-                                            <Form.Label>Shed*</Form.Label>
+                                            <Form.Label style={{ fontSize: '13px' }}>Shed*</Form.Label>
                                             <Form.Select aria-label="Default select example"
-                                                onChange={onShedChange} required>
+                                                onChange={onShedChange} style={{ fontSize: '13px' }} required>
                                                 <option selected disabled value="">Choose...</option>
                                                 {
                                                     shedlist.map((item) => {
@@ -807,8 +842,8 @@ function ShedMedcineTracker(props) {
                                     </Row>
                                     <Row className="mb-12">
                                         <Form.Group controlId="MedicineID" as={Col} >
-                                            <Form.Label>Medicine*</Form.Label>
-                                            <Form.Select
+                                            <Form.Label style={{ fontSize: '13px' }}>Medicine*</Form.Label>
+                                            <Form.Select style={{ fontSize: '13px' }}
                                                 onChange={onMedicineChange} required>
                                                 <option selected disabled value="">Choose...</option>
                                                 {
@@ -856,8 +891,10 @@ function ShedMedcineTracker(props) {
 
                                     <Row className="mb-12">
                                         <Form.Group controlId="Comments" as={Col} >
-                                            <Form.Label>Comments</Form.Label>
-                                            <Form.Control as="textarea" rows={3} name="Comments" onChange={onCommentsChange} value={medicinetrackerdata.Comments}
+                                            <Form.Label style={{ fontSize: '13px' }}>Comments</Form.Label>
+                                            <Form.Control as="textarea" rows={3} 
+                                            name="Comments" onChange={onCommentsChange} 
+                                            value={medicinetrackerdata.Comments} style={{ fontSize: '13px' }}
                                                 placeholder="Comments" />
                                         </Form.Group>
                                     </Row>

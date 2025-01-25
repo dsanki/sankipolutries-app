@@ -681,7 +681,7 @@ function CustomerList(props) {
 
                                             <Form.Group controlId="CustomerTypeId" as={Col} >
                                                 <Form.Label style={{ fontSize: 13 }}>Customer type</Form.Label>
-                                                <Form.Select aria-label="Default select example"
+                                                <Form.Select aria-label="Default select example" style={{ fontSize: 13 }}
                                                     onChange={custTypeChange} required>
                                                     <option selected disabled value="">Choose...</option>
                                                     {

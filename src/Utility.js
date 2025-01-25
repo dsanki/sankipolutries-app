@@ -25,18 +25,47 @@ export const CalculateAgeInDays = (date) => {
   return days;
 };
 
-export const CalculateNoOfDays = (fromdate,todate) => {
+export const CalculateNoOfDaysUpdated = (fromdate,todate) => {
   var a = moment(new Date(todate), 'DD-MM-YYYY');
   var b = moment(new Date(fromdate), 'DD-MM-YYYY');
   let days = a.diff(b, 'days');
   return days;
 };
 
+export const CalculateAgeInWeeksUpdated = (fromdate, todate) => {
+
+  var a = moment(new Date(todate), 'DD-MM-YYYY');
+  var b = moment(new Date(fromdate), 'DD-MM-YYYY');
+  var diff = moment.duration(a.diff(b));
+
+  var _week=Math.floor(diff.asWeeks());
+  var n=diff.asWeeks();
+  var result = (n - Math. floor(n)) !== 0;
+
+if(result)
+{
+  _week=_week+1;
+}
+  return _week;
+};
+
+
+
 export const CalculateAgeInWeeks = (date) => {
+
   var a = moment(new Date(), 'DD-MM-YYYY');
   var b = moment(new Date(date), 'DD-MM-YYYY');
-  let weeks = a.diff(b, 'week');
-  return weeks;
+  var diff = moment.duration(a.diff(b));
+
+  var _week=Math.floor(diff.asWeeks());
+  var n=diff.asWeeks();
+  var result = (n - Math. floor(n)) !== 0;
+
+if(result)
+{
+  _week=_week+1;
+}
+  return _week;
 };
 
 export const dateyyyymmddhhmmss = (dateString) => {
@@ -327,13 +356,20 @@ export const FecthStockListById = async (catid, apiurl) => {
 }
 
 export const GetCustomerByTypeId = async (custtypeid, apiurl) => {
-  const response =await fetch(apiurl + 'Customer/GetCustomerByTypeId?customerTypeId='+custtypeid,
-    {
-      method: 'GET',
-      headers: {
-        'Authorization': localStorage.getItem('token')
-      }
-    });
+  let url=apiurl + 'Customer/GetCustomerByTypeId?customerTypeId=';
+  if(custtypeid!==null)
+  {
+    url=apiurl + 'Customer/GetCustomerByTypeId?customerTypeId='+custtypeid;
+  }
+    
+    const response =await fetch(url,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
+      });
+  
   const data = await response.json();
   return data;
 }

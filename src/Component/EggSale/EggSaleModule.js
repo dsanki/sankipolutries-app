@@ -1729,7 +1729,7 @@ function EggSaleModule(props) {
                                             <Form.Group controlId="Id" as={Col} >
                                                 <Form.Label style={{ fontSize: '13px' }}>Discount Type*</Form.Label>
                                                 <Form.Select aria-label="Default select example" style={{ fontSize: '13px' }}
-                                                    onChange={eggDiscountTypeChange} required>
+                                                    onChange={eggDiscountTypeChange}>
                                                     <option selected disabled value="">Choose...</option>
                                                     {
                                                         discounttypelist.map((item) => {

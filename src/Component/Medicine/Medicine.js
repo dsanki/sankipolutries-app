@@ -323,6 +323,7 @@ function Medicine(props) {
   }
 
   const clientChange = (e) => {
+  
     fetchAdvanceListByCustId(e.target.value);
     setMedData({ ...meddata, ClientId: e.target.value });
   }
@@ -423,38 +424,51 @@ function Medicine(props) {
 
   const fetchAdvanceListByCustId = async (custid) => {
 
-    fetch(process.env.REACT_APP_API + 'AdvancePayment/GetAdvancePaymentList?CustomerId=' +
-      custid + '&CompanyId=' + localStorage.getItem('companyid'),
+    if(advancedata && advancedata.length > 0 )
       {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('token')
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.StatusCode === 200) {
-          setAdvanceData(data.Result);
-          setMedData({
-            ...meddata, AdvanceAmount: data.Result[0].Amount, ClientId: custid
-          })
-        }
-        else if (data.StatusCode === 401) {
-          HandleLogout();
+        let _data=advancedata.filter((x)=>x.CustomerId===custid);
+        setMedData({
+          ...meddata, AdvanceAmount: _data[0].Amount, ClientId: custid
+        })
+      }
+      else{
 
-          history("/login")
-        }
-        else if (data.StatusCode === 404) {
-          props.showAlert("Data not found!!", "danger")
-          setIsLoaded(false);
-        }
-        else {
-          props.showAlert("Error occurred!!", "danger")
-          setIsLoaded(false);
-        }
-      });
+        fetch(process.env.REACT_APP_API + 'AdvancePayment/GetAdvancePaymentList?CustomerId=' +
+          custid + '&CompanyId=' + localStorage.getItem('companyid'),
+          {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': localStorage.getItem('token')
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.StatusCode === 200) {
+              setAdvanceData(data.Result);
+              setMedData({
+                ...meddata, AdvanceAmount: data.Result[0].Amount, ClientId: custid
+              })
+            }
+            else if (data.StatusCode === 401) {
+              HandleLogout();
+    
+              history("/login")
+            }
+            else if (data.StatusCode === 404) {
+              props.showAlert("Data not found!!", "danger")
+              setIsLoaded(false);
+            }
+            else {
+              props.showAlert("Error occurred!!", "danger")
+              setIsLoaded(false);
+            }
+          });
+        
+      }
+
+   
   }
 
 

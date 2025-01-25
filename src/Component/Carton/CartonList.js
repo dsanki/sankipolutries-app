@@ -554,8 +554,6 @@ const CartonList = (props) => {
                         <th>Billing Date</th>
                         <th>Client Name</th>
                         <th>Quantity</th>
-
-
                         <th>Rate (<span>&#8377;</span>)</th>
                         <th>GST</th>
                         <th>Total Amount (<span>&#8377;</span>)</th>

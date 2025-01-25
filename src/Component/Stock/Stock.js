@@ -5,17 +5,17 @@ import { FecthStockListById, HandleLogout, dateyyyymmdd, downloadExcel } from '.
 import Loading from '../Loading/Loading'
 import InputField from '../ReuseableComponent/InputField'
 
-export const categoryList = {
-    categories: [
-        { Key: 1, Value: 'MEDICINE/VACCINE' },
-        // { Key: 2, Value: 'VACCINE' },
-        { Key: 3, Value: 'EGG' },
-        { Key: 4, Value: 'PACKAGING' },
-        { Key: 5, Value: 'RAW_MATERIALS' },
-        { Key: 6, Value: 'FEED' },
-        { Key: 7, Value: 'PACKAGING' }
-    ]
-}
+// export const categoryList = {
+//     categories: [
+//         { Key: 1, Value: 'MEDICINE/VACCINE' },
+//         // { Key: 2, Value: 'VACCINE' },
+//         { Key: 3, Value: 'EGG' },
+//         { Key: 4, Value: 'PACKAGING' },
+//         { Key: 5, Value: 'RAW_MATERIALS' },
+//         { Key: 6, Value: 'FEED' },
+//         { Key: 7, Value: 'PACKAGING' }
+//     ]
+// }
 
 
 function Stock(props) {
@@ -282,7 +282,7 @@ function Stock(props) {
         setFilterCategory(category);
 
         if (category !== "") {
-            _filterList = stockListForFilter.filter((c) => c.Category === category);
+            _filterList = _filterList.filter((c) => c.Category == category);
 
         }
 
@@ -312,7 +312,7 @@ function Stock(props) {
         }
 
         if (category !== "") {
-            _filterList = _filterList.filter((c) => c.Category === category);
+            _filterList = _filterList.filter((c) => c.Category == category);
 
         }
 

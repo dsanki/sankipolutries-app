@@ -52,7 +52,8 @@ function EggSalePaymentIn(props) {
         PhonePay: "",
         NetBanking: "",
         UPI: "",
-        Cheque: ""
+        Cheque: "",
+        CashDeposite:""
     }
 
     const [paymentDetails, setPaymentDetails] = useState(_paymentDetails);
@@ -132,8 +133,8 @@ function EggSalePaymentIn(props) {
         else if (val == "NetBanking") {
             setPaymentDetails({ ...paymentDetails, NetBanking: amt, PaymentMode: val });
         }
-        else if (val == "UPI") {
-            setPaymentDetails({ ...paymentDetails, UPI: amt, PaymentMode: val });
+        else if (val == "CashDeposite") {
+            setPaymentDetails({ ...paymentDetails, CashDeposite: amt, PaymentMode: val });
         }
         else if (val == "Cheque") {
             setPaymentDetails({ ...paymentDetails, Cheque: amt, PaymentMode: val });
@@ -143,21 +144,6 @@ function EggSalePaymentIn(props) {
     const paymentModeChange = (e) => {
         let paymentMode = e.target.value;
         assignPaymentDetails(paymentMode, paymentDetails.Amount);
-        // if (e.target.value == "Cash") {
-        //     setPaymentDetails({ ...paymentDetails, Cash: paymentDetails.Amount });
-        // }
-        // else if (e.target.value == "PhonePay") {
-        //     setPaymentDetails({ ...paymentDetails, PhonePay: paymentDetails.Amount });
-        // }
-        // else if (e.target.value == "NetBanking") {
-        //     setPaymentDetails({ ...paymentDetails, NetBanking: paymentDetails.Amount });
-        // }
-        // else if (e.target.value == "UPI") {
-        //     setPaymentDetails({ ...paymentDetails, UPI: paymentDetails.Amount });
-        // }
-        // else if (e.target.value == "Cheque") {
-        //     setPaymentDetails({ ...paymentDetails, Cheque: paymentDetails.Amount });
-        // }
     }
 
 

@@ -4,7 +4,11 @@ import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
 import InputField from '../ReuseableComponent/InputField'
 import DateComponent from '../DateComponent';
-import { FetchSheds, CalculateAgeInWeeks, CalculateAgeInDays, FetchShedLotMapList, dateyyyymmdd, downloadExcel, HandleLogout, NumberInputKeyDown, FetchShedsList, FetchLotById } from '../../Utility';
+import {
+    FetchSheds, CalculateAgeInWeeks, CalculateAgeInDays, FetchShedLotMapList,
+    dateyyyymmdd, downloadExcel, HandleLogout, NumberInputKeyDown,
+    FetchShedsList, FetchLotById, CalculateAgeInWeeksUpdated, CalculateNoOfDaysUpdated
+} from '../../Utility';
 //import { FetchUnit, FetchShedsList, FetchLots, FetchLotById  } from '../../Utility'
 import Loading from '../Loading/Loading'
 
@@ -67,7 +71,7 @@ function ChicksVaccinationTracker(props) {
 
     const fetchVaccinationTracker = async () => {
         setIsLoaded(true);
-        fetch(process.env.REACT_APP_API + 'VaccinationTracker/GetVaccinationTrackerByCompanyId?CompanyId='+
+        fetch(process.env.REACT_APP_API + 'VaccinationTracker/GetVaccinationTrackerByCompanyId?CompanyId=' +
             localStorage.getItem('companyid'),
             {
                 method: 'GET',
@@ -339,8 +343,26 @@ function ChicksVaccinationTracker(props) {
         setVaccTrackerData({ ...vacctrackerdata, RouteID: e.target.value });
     }
 
+    const [_lotdetails, setLotDetails] = useState();
+
     const onDateChange = (e) => {
-        setVaccTrackerData({ ...vacctrackerdata, Date: e.target.value });
+
+        let days = "";
+        let weeks = "";
+
+        if (_lotdetails != null && (_lotdetails.Date != null || _lotdetails.Date != "")) {
+            if (e.target.value != "") {
+                weeks = CalculateAgeInWeeksUpdated(_lotdetails.Date, e.target.value);
+                days = CalculateNoOfDaysUpdated(_lotdetails.Date, e.target.value);
+            }
+            else {
+                weeks = CalculateAgeInWeeksUpdated(_lotdetails.Date, new Date());
+                days = CalculateNoOfDaysUpdated(_lotdetails.Date, new Date());
+            }
+        }
+
+        setVaccTrackerData({ ...vacctrackerdata, Date: e.target.value, AgeDays: days, AgeWeeks: weeks });
+
     }
 
     const onCommentsChange = (e) => {
@@ -361,9 +383,23 @@ function ChicksVaccinationTracker(props) {
             lotname = filterval[0].lotname;
             FetchLotById(lotid, process.env.REACT_APP_API)
                 .then(data => {
+                    setLotDetails(data.Result);
                     totalbirds = data.Result.TotalChicks - (data.Result.Mortality + data.Result.TotalMortality + data.Result.TotalBirdSale);
-                    weeks = CalculateAgeInWeeks(data.Result.Date);
-                    days = CalculateAgeInDays(data.Result.Date);
+                    // weeks = CalculateAgeInWeeks(data.Result.Date);
+                    // days = CalculateAgeInDays(data.Result.Date);
+
+                    if (vacctrackerdata.Date != null && vacctrackerdata.Date != "") {
+                        weeks = CalculateAgeInWeeksUpdated(data.Result.Date, vacctrackerdata.Date,);
+                        days = CalculateNoOfDaysUpdated(data.Result.Date, vacctrackerdata.Date);
+                    }
+                    else {
+                        weeks = CalculateAgeInWeeksUpdated(data.Result.Date, new Date());
+                        days = CalculateNoOfDaysUpdated(data.Result.Date, new Date());
+                    }
+
+
+
+
                     setVaccTrackerData({
                         ...vacctrackerdata, ShedId: shedid, LotNo: lotid,
                         LotName: lotname, TotalBirds: totalbirds,
@@ -467,7 +503,7 @@ function ChicksVaccinationTracker(props) {
                     RouteID: vacctrackerdata.RouteID,
                     Date: vacctrackerdata.Date,
                     Comments: vacctrackerdata.Comments,
-                    CompanyId:localStorage.getItem('companyid')
+                    CompanyId: localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -522,7 +558,7 @@ function ChicksVaccinationTracker(props) {
                     RouteID: vacctrackerdata.RouteID,
                     Date: vacctrackerdata.Date,
                     Comments: vacctrackerdata.Comments,
-                    CompanyId:localStorage.getItem('companyid')
+                    CompanyId: localStorage.getItem('companyid')
 
                 })
             }).then(res => res.json())
@@ -629,16 +665,16 @@ function ChicksVaccinationTracker(props) {
             <div className="container" style={{ marginTop: '30px' }}>
                 <div className="row align-items-center">
                     <div className="col-2">
-                        <p style={{fontSize:13}}><strong>From</strong></p>
+                        <p style={{ fontSize: 13 }}><strong>From</strong></p>
                         <DateComponent date={null} onChange={onDateFilterFromChange} isRequired={false} value={filterFromDate} />
                     </div>
                     <div className="col-2">
-                        <p style={{fontSize:13}}><strong>To</strong></p>
+                        <p style={{ fontSize: 13 }}><strong>To</strong></p>
                         <DateComponent date={null} onChange={onDateFilterToChange} isRequired={false} value={filterToDate} />
                     </div>
                     <div className="col-2">
-                        <p style={{fontSize:13}}><strong>Shed</strong></p>
-                        <Form.Select aria-label="Default select example" style={{fontSize:13}}
+                        <p style={{ fontSize: 13 }}><strong>Shed</strong></p>
+                        <Form.Select aria-label="Default select example" style={{ fontSize: 13 }}
                             onChange={onShedFilterChange}>
                             <option selected value="">Choose...</option>
                             {
@@ -655,12 +691,12 @@ function ChicksVaccinationTracker(props) {
                             }
                         </Form.Select>
                     </div>
-                    <div className="col-6" style={{textAlign:'right',marginTop:'38px'}}>
-                    <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2', marginRight: 30  }} 
-                    onClick={() => onDownloadExcel()} ></i>
-                     <Button className="mr-2 btn-primary btn-primary-custom" variant="primary"
-                        style={{ marginRight: "17.5px" }}
-                        onClick={() => clickAddVaccTracker()}>Add</Button>
+                    <div className="col-6" style={{ textAlign: 'right', marginTop: '38px' }}>
+                        <i className="fa-regular fa-file-excel fa-2xl" style={{ color: '#bea2a2', marginRight: 30 }}
+                            onClick={() => onDownloadExcel()} ></i>
+                        <Button className="mr-2 btn-primary btn-primary-custom" variant="primary"
+                            style={{ marginRight: "17.5px" }}
+                            onClick={() => clickAddVaccTracker()}>Add</Button>
                     </div>
                 </div>
             </div>
@@ -700,7 +736,7 @@ function ChicksVaccinationTracker(props) {
                             const filterByVccId = vaccinationlist.filter((c) => c.id === p.VaccinationID);
                             const vccname = filterByVccId.length > 0 ? filterByVccId[0].VaccinationName : "";
 
-                           // const filterByVccTypeId = vaccinationtypelist.filter((c) => c.id === p.TypeID);
+                            // const filterByVccTypeId = vaccinationtypelist.filter((c) => c.id === p.TypeID);
                             //const vcctypename = filterByVccTypeId.length > 0 ? filterByVccTypeId[0].TypeName : "";
 
                             const filterByVccAgeId = vaccinationagelist.filter((c) => c.id === p.AgeID);
@@ -711,6 +747,11 @@ function ChicksVaccinationTracker(props) {
                             p.AgeDays = CalculateAgeInDays(p.LotDate);
                             p.AgeWeeks = CalculateAgeInWeeks(p.LotDate);
 
+                            if (p.Date != null && p.Date != "") {
+                                p.AgeWeeks = CalculateAgeInWeeksUpdated(p.LotDate, p.Date);
+                                p.AgeDays = CalculateNoOfDaysUpdated(p.LotDate, p.Date);
+                            }
+
                             VccListDowanloadArr.push({
                                 Date: moment(p.Date).format('DD-MMM-YYYY'),
                                 ShedName: shedname, LotName: p.LotName, Vaccination: vccname, Age: vccage, Dose: p.Dose,
@@ -718,7 +759,7 @@ function ChicksVaccinationTracker(props) {
                             });
 
                             return (
-                                !isloaded && <tr align='center' style={{fontSize:13}} key={p.Id}>
+                                !isloaded && <tr align='center' style={{ fontSize: 13 }} key={p.Id}>
                                     <td >{moment(p.Date).format('DD-MMM-YYYY')}</td>
                                     <td >{shedname}</td>
                                     <td >{p.LotName}</td>
@@ -800,19 +841,19 @@ function ChicksVaccinationTracker(props) {
                                 <Form noValidate validated={validated} className="needs-validation">
                                     <Row className="mb-12">
                                         <Form.Group controlId="Date" as={Col} >
-                                            <Form.Label style={{fontSize:'13px'}}>Date*</Form.Label>
+                                            <Form.Label style={{ fontSize: '13px' }}>Date*</Form.Label>
                                             <Form.Control type="text" name="Id" hidden disabled value={vacctrackerdata.Id} />
-                                            <DateComponent date={null} onChange={onDateChange} isRequired={true} 
-                                            value={vacctrackerdata.Date} />
+                                            <DateComponent date={null} onChange={onDateChange} isRequired={true}
+                                                value={vacctrackerdata.Date} />
                                             <Form.Control.Feedback type="invalid">
                                                 Please select date
                                             </Form.Control.Feedback>
                                         </Form.Group>
 
                                         <Form.Group controlId="ShedId" as={Col} >
-                                            <Form.Label style={{fontSize:'13px'}}>Shed*</Form.Label>
+                                            <Form.Label style={{ fontSize: '13px' }}>Shed*</Form.Label>
                                             <Form.Select aria-label="Default select example"
-                                                onChange={onShedChange} required style={{fontSize:'13px'}}>
+                                                onChange={onShedChange} required style={{ fontSize: '13px' }}>
                                                 <option selected disabled value="">Choose...</option>
                                                 {
                                                     shedlist.map((item) => {
@@ -869,9 +910,9 @@ function ChicksVaccinationTracker(props) {
                                     </Row>
                                     <Row className="mb-12">
                                         <Form.Group controlId="VaccinationID" as={Col} >
-                                            <Form.Label style={{fontSize:'13px'}}>Vaccination*</Form.Label>
+                                            <Form.Label style={{ fontSize: '13px' }}>Vaccination*</Form.Label>
                                             <Form.Select aria-label="Default select example"
-                                                onChange={onVaccinationChange} required style={{fontSize:'13px'}}>
+                                                onChange={onVaccinationChange} required style={{ fontSize: '13px' }}>
                                                 <option selected disabled value="">Choose...</option>
                                                 {
                                                     vaccinationlist.map((item) => {
@@ -892,9 +933,9 @@ function ChicksVaccinationTracker(props) {
                                         </Form.Group>
 
                                         <Form.Group controlId="AgeID" as={Col} >
-                                            <Form.Label style={{fontSize:'13px'}}>Age*</Form.Label>
+                                            <Form.Label style={{ fontSize: '13px' }}>Age*</Form.Label>
                                             <Form.Select aria-label="Default select example"
-                                                onChange={onAgeChange} required style={{fontSize:'13px'}}>
+                                                onChange={onAgeChange} required style={{ fontSize: '13px' }}>
                                                 <option selected disabled value="">Choose...</option>
                                                 {
                                                     vaccinationagelist.map((item) => {
@@ -953,9 +994,9 @@ function ChicksVaccinationTracker(props) {
 
                                     <Row className="mb-12">
                                         <Form.Group controlId="RouteID" as={Col} >
-                                            <Form.Label style={{fontSize:'13px'}}>Route*</Form.Label>
+                                            <Form.Label style={{ fontSize: '13px' }}>Route*</Form.Label>
                                             <Form.Select aria-label="Default select example"
-                                                onChange={onRouteChange} required style={{fontSize:'13px'}}>
+                                                onChange={onRouteChange} required style={{ fontSize: '13px' }}>
                                                 <option selected disabled value="">Choose...</option>
                                                 {
                                                     vaccinationroutelist.map((item) => {
@@ -978,9 +1019,9 @@ function ChicksVaccinationTracker(props) {
 
                                     <Row className="mb-12">
                                         <Form.Group controlId="Comments" as={Col} >
-                                            <Form.Label style={{fontSize:'13px'}}>Comments</Form.Label>
+                                            <Form.Label style={{ fontSize: '13px' }}>Comments</Form.Label>
                                             <Form.Control as="textarea" rows={3} name="Comments" onChange={onCommentsChange} value={vacctrackerdata.Comments}
-                                                placeholder="Comments" style={{fontSize:'13px'}} />
+                                                placeholder="Comments" style={{ fontSize: '13px' }} />
                                         </Form.Group>
                                     </Row>
 

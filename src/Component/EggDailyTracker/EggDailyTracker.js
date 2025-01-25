@@ -10,7 +10,7 @@ import EggCategoryWiseCount from '../ReuseableComponent/EggCategoryWiseCount'
 import DateComponent from '../DateComponent';
 import {
     CalculateAgeInDays, CalculateAgeInWeeks, dateyyyymmdd, FetchLotById,
-    HandleLogout, FetchShedsList, FetchShedLotMapList, downloadExcel
+    HandleLogout, FetchShedsList, FetchShedLotMapList, downloadExcel, CalculateAgeInWeeksUpdated, CalculateNoOfDaysUpdated
 } from './../../Utility'
 import Loading from '../Loading/Loading'
 
@@ -117,9 +117,13 @@ function EggDailyTracker(props) {
         })
     }
 
-    const onDateChange = (e) => {
-        setEggData({ ...eggdata, Date: e.target.value });
-    }
+    let addModalClose = () => {
+        setAddModalShow(false);
+        setValidated(false);
+        //setEggData(initialvalues);
+    };
+
+
 
     const onEggBigChange = (e) => {
         const re = /^[0-9\b]+$/;
@@ -263,6 +267,26 @@ function EggDailyTracker(props) {
     }
 
     const [_lotdetails, setLotDetails] = useState();
+    const onDateChange = (e) => {
+
+        let days = "";
+        let weeks = "";
+        if (_lotdetails != null && (_lotdetails.Date != null || _lotdetails.Date != "")) {
+            if (e.target.value != "") {
+                weeks = CalculateAgeInWeeksUpdated(_lotdetails.Date, e.target.value);
+                days = CalculateNoOfDaysUpdated(_lotdetails.Date, e.target.value);
+            }
+            else {
+                weeks = CalculateAgeInWeeksUpdated(_lotdetails.Date, new Date());
+                days = CalculateNoOfDaysUpdated(_lotdetails.Date, new Date());
+            }
+        }
+
+        setEggData({ ...eggdata, Date: e.target.value, AgeDays: days, AgeWeeks: weeks });
+
+    }
+
+
     const onShedChange = (e) => {
         const shedid = e.target.value;
         let lotid = "";
@@ -278,9 +302,17 @@ function EggDailyTracker(props) {
             FetchLotById(lotid, process.env.REACT_APP_API)
                 .then(data => {
                     setLotDetails(data.Result);
-                    totalbirds = data.Result.TotalChicks - (data.Result.Mortality + data.Result.TotalMortality + data.Result.TotalBirdSale);
-                    weeks = CalculateAgeInWeeks(data.Result.Date);
-                    days = CalculateAgeInDays(data.Result.Date);
+                    totalbirds = data.Result.TotalChicks -
+                        (data.Result.Mortality + data.Result.TotalMortality + data.Result.TotalBirdSale);
+                    if (eggdata.Date != null && eggdata.Date != "") {
+                        weeks = CalculateAgeInWeeksUpdated(data.Result.Date, eggdata.Date,);
+                        days = CalculateNoOfDaysUpdated(data.Result.Date, eggdata.Date);
+                    }
+                    else {
+                        weeks = CalculateAgeInWeeksUpdated(data.Result.Date, new Date());
+                        days = CalculateNoOfDaysUpdated(data.Result.Date, new Date());
+                    }
+
                     setEggData({ ...eggdata, ShedId: shedid, LotId: lotid, LotName: lotname, TotalBirds: totalbirds, AgeDays: days, AgeWeeks: weeks });
                 });
         }
@@ -312,7 +344,7 @@ function EggDailyTracker(props) {
         }
     }, [obj]);
 
-    
+
 
 
     const fetchSheds = async () => {
@@ -415,10 +447,7 @@ function EggDailyTracker(props) {
         setCurrentPage(currentPage - 1);
     }
 
-    let addModalClose = () => {
-        setAddModalShow(false);
-        setValidated(false);
-    };
+
 
     const deleteTracker = (id) => {
         if (window.confirm('Are you sure?')) {
@@ -513,9 +542,10 @@ function EggDailyTracker(props) {
                     (error) => {
                         props.showAlert("Error occurred!!", "danger")
                     });
+            setValidated(false);
         }
 
-        setValidated(true);
+
     }
 
     const handleEditEggTracker = (e) => {
@@ -582,7 +612,7 @@ function EggDailyTracker(props) {
                     });
         }
 
-        setValidated(true);
+        setValidated(false);
     }
 
     const onDateFilterFromChange = (e) => {
@@ -746,8 +776,15 @@ function EggDailyTracker(props) {
                                 const filterByShedId = shedlotmaplist.filter((c) => c.shedid === egg.ShedId);
                                 const shedname = filterByShedId.length > 0 ? filterByShedId[0].shedname : "";
 
-                                egg.AgeDays = CalculateAgeInDays(egg.LotDate);
-                                egg.AgeWeeks = CalculateAgeInWeeks(egg.LotDate);
+
+                                if (egg.Date != null && egg.Date != "") {
+                                    egg.AgeWeeks = CalculateAgeInWeeksUpdated(egg.LotDate, egg.Date);
+                                    egg.AgeDays = CalculateNoOfDaysUpdated(egg.LotDate, egg.Date);
+                                }
+
+                                // egg.AgeDays = CalculateAgeInDays(egg.LotDate);
+                                // egg.AgeWeeks = CalculateAgeInWeeks(egg.LotDate);
+
                                 return (
                                     !isloaded && <tr key={egg.id} align='center' style={{ fontSize: 13 }} >
                                         <td align='center'>{moment(egg.Date).format('DD-MMM-YYYY')}</td>
@@ -792,7 +829,7 @@ function EggDailyTracker(props) {
                                     </tr>
                                 )
                             }) : <tr>
-                                <td style={{ textAlign: "center", fontSize:'13px' }} colSpan={14}>
+                                <td style={{ textAlign: "center", fontSize: '13px' }} colSpan={14}>
                                     No Records
                                 </td>
                             </tr>
