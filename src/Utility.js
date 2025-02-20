@@ -251,8 +251,17 @@ export const FetchGunnyBagSaleList = async (uid,id,apiurl) => {
 }
 
 export const FetchBirdSaleList = async (uid,id,apiurl) => {
-  const response =await fetch(apiurl + 'BirdSale/GetBirdSale?uid='
-    +uid +'&CompanyId='+localStorage.getItem('companyid'),
+  let url= apiurl + 'BirdSale/GetBirdSale?CompanyId='+localStorage.getItem('companyid');
+
+if(uid!=null)
+{
+ url= apiurl + 'BirdSale/GetBirdSale?uid='
+  +uid +'&CompanyId='+localStorage.getItem('companyid')
+}
+
+
+
+  const response =await fetch(url,
     {
       method: 'GET',
       headers: {
@@ -356,13 +365,13 @@ export const FecthStockListById = async (catid, apiurl) => {
 }
 
 export const GetCustomerByTypeId = async (custtypeid, apiurl) => {
-  let url=apiurl + 'Customer/GetCustomerByTypeId?customerTypeId=';
-  if(custtypeid!==null)
-  {
-    url=apiurl + 'Customer/GetCustomerByTypeId?customerTypeId='+custtypeid;
-  }
+  // let url=apiurl + 'Customer/GetCustomerByTypeId';
+  // if(custtypeid!=null)
+  // {
+  //   url=apiurl + 'Customer/GetCustomerByTypeId?customerTypeId='+custtypeid;
+  // }
     
-    const response =await fetch(url,
+    const response =await fetch(apiurl + 'Customer/GetCustomerByTypeId?customerTypeId='+custtypeid,
       {
         method: 'GET',
         headers: {

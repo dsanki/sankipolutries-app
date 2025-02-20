@@ -46,6 +46,10 @@ import ManureSale from "./Component/ManureSale/ManureSale";
 import PaymentHistory from './Component/PaymentHistory/PaymentHistory';
 import Unit from './Component/Unit/Unit';
 
+import BirdSalePaymentIn  from './Component/BirdSale/BirdSalePaymentIn'
+
+
+
 
 
 function App() {
@@ -163,6 +167,10 @@ function App() {
 
             <Route path="/paymenthistory" element={<PaymentHistory showAlert={showAlert} />} /> 
             <Route path="/unit" element={<Unit showAlert={showAlert} />} /> 
+            <Route path="/birdsalepaymentin" element={<BirdSalePaymentIn showAlert={showAlert} />} />
+            <Route path="/birdsalepaymentin/?:custtype" element={<BirdSalePaymentIn showAlert={showAlert} />} />
+            <Route path="/birdsalepaymentin/?:custtype/:uid" element={<BirdSalePaymentIn showAlert={showAlert} />} />
+            
             
 
           </Routes>

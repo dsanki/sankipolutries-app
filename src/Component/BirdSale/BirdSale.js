@@ -42,6 +42,7 @@ function BirdSale(props) {
     const [custname, setCustomerName] = useState([]);
     const [birdSaleListFilter, setBirdSaleListFilter] = useState([]);
     const [filterFromDate, setFilterFromDate] = useState("");
+
     const [filterToDate, setFilterToDate] = useState("");
     const [filterShed, setFilterShed] = useState();
     const [isloaded, setIsLoaded] = useState(true);
@@ -49,6 +50,9 @@ function BirdSale(props) {
     const [invoiceModalShow, setInvoiceModalShow] = useState(false);
     const [_unitname, setUnitName] = useState();
     const [clientlist, setClientList] = useState([]);
+
+    const [cidfilter, setCIdFilter] = useState();
+
 
     let addModalClose = () => {
         setAddModalShow(false);
@@ -241,7 +245,7 @@ function BirdSale(props) {
             let totalamt = (parseFloat(totalwt || 0) * parseFloat(birdsaledata.Rate || 0))
                 + (parseFloat(birdsaledata.AdditionalCharge || 0));
 
-            let _finalcost = (parseFloat(totalamt || 0) - parseFloat(birdsaledata.Discount || 0));
+            let _finalcost = Math.round((parseFloat(totalamt || 0) - parseFloat(birdsaledata.Discount || 0)));
 
             let due = _finalcost - (parseFloat(birdsaledata.Cash || 0)
                 + parseFloat(birdsaledata.PhonePay || 0)
@@ -270,7 +274,7 @@ function BirdSale(props) {
 
             let Adchrg = parseFloat(birdsaledata.AdditionalCharge || 0);
             let totalamt = (birdsaledata.TotalWeight * parseFloat(rate || 0)) + Adchrg;
-            let _finalcost = (parseFloat(totalamt || 0) - parseFloat(birdsaledata.Discount || 0));
+            let _finalcost = Math.round((parseFloat(totalamt || 0) - parseFloat(birdsaledata.Discount || 0)));
             let due = _finalcost - parseFloat(birdsaledata.Paid || 0);
 
             setBirdSaleData({
@@ -289,7 +293,8 @@ function BirdSale(props) {
         FetchCompanyDetails(process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
-                    let _companydetils = data.Result.filter((x) => x.Id == localStorage.getItem('companyid'));
+                    let _companydetils = data.Result.filter((x) => x.Id == 
+                    localStorage.getItem('companyid'));
                     setCompanyDetails(_companydetils);
                 }
                 else if (data.StatusCode === 401) {
@@ -316,7 +321,10 @@ function BirdSale(props) {
     const paidChange = (e) => {
         const re = /^\d*\.?\d{0,2}$/
         if (e.target.value === '' || re.test(e.target.value)) {
-            setBirdSaleData({ ...birdsaledata, Paid: e.target.value, Due: (birdsaledata.TotalAmount - e.target.value).toFixed(2) });
+            setBirdSaleData({
+                ...birdsaledata, Paid: e.target.value,
+                Due: (birdsaledata.TotalAmount - e.target.value).toFixed(2)
+            });
         }
     }
     const paymentDateChange = (e) => {
@@ -331,25 +339,26 @@ function BirdSale(props) {
 
         // let Adchrg=parseFloat(birdsaledata.AdditionalCharge||0);
         let totalamt = (birdsaledata.TotalWeight * parseFloat(birdsaledata.Rate || 0)) + addch;
-        let _finalcost = (parseFloat(totalamt || 0) - parseFloat(birdsaledata.Discount || 0));
+        let _finalcost = Math.round((parseFloat(totalamt || 0) - parseFloat(birdsaledata.Discount || 0)));
         let due = _finalcost - parseFloat(birdsaledata.Paid || 0);
 
 
         setBirdSaleData({
             ...birdsaledata, AdditionalCharge: e.target.value,
-            Due:due,
-            TotalAmount: totalamt,
-            FinalCost:_finalcost
+            Due: due.toFixed(2),
+            TotalAmount: totalamt.toFixed(2),
+            FinalCost: _finalcost.toFixed(2)
 
         });
     }
 
     const discountChange = (e) => {
-        let _finalcost = (parseFloat(birdsaledata.TotalAmount || 0) - parseFloat(e.target.value || 0));
+        let _finalcost = Math.round((parseFloat(birdsaledata.TotalAmount || 0) - parseFloat(e.target.value || 0)));
         setBirdSaleData({
-            ...birdsaledata, Discount: e.target.value,
-            FinalCost: _finalcost,
-            Due: _finalcost - parseFloat(birdsaledata.Paid || 0)
+            ...birdsaledata,
+            Discount: e.target.value,
+            FinalCost: _finalcost.toFixed(2),
+            Due: (_finalcost - parseFloat(birdsaledata.Paid || 0)).toFixed(2)
         });
     }
 
@@ -367,7 +376,7 @@ function BirdSale(props) {
                     (cashamt + parseFloat(birdsaledata.PhonePay || 0) +
                         parseFloat(birdsaledata.NetBanking || 0) + parseFloat(birdsaledata.CashDeposite || 0)
                         + parseFloat(birdsaledata.Cheque || 0))
-                )
+                ).toFixed(2)
             });
         }
     }
@@ -388,7 +397,7 @@ function BirdSale(props) {
                         parseFloat(birdsaledata.NetBanking || 0)
                         + parseFloat(birdsaledata.CashDeposite || 0)
                         + parseFloat(birdsaledata.Cheque || 0))
-                )
+                ).toFixed(2)
             });
         }
     }
@@ -408,7 +417,7 @@ function BirdSale(props) {
                     (nbamt + parseFloat(birdsaledata.Cash || 0) +
                         parseFloat(birdsaledata.PhonePay || 0) + parseFloat(birdsaledata.CashDeposite || 0)
                         + parseFloat(birdsaledata.Cheque || 0))
-                )
+                ).toFixed(2)
             });
         }
     }
@@ -428,7 +437,7 @@ function BirdSale(props) {
                     (upiamt + parseFloat(birdsaledata.Cash || 0) +
                         parseFloat(birdsaledata.PhonePay || 0) + parseFloat(birdsaledata.NetBanking || 0)
                         + parseFloat(birdsaledata.Cheque || 0))
-                )
+                ).toFixed(2)
             });
         }
     }
@@ -448,7 +457,7 @@ function BirdSale(props) {
                     (chqamt + parseFloat(birdsaledata.Cash || 0) +
                         parseFloat(birdsaledata.PhonePay || 0) + parseFloat(birdsaledata.NetBanking || 0)
                         + parseFloat(birdsaledata.CashDeposite || 0))
-                )
+                ).toFixed(2)
             });
         }
     }
@@ -480,17 +489,24 @@ function BirdSale(props) {
     }
 
     useEffect((e) => {
+        if (uid != null) {
+            fetchCustomerDetails(uid);
+        }
+
+    }, [uid]);
+
+
+    useEffect((e) => {
 
         if (localStorage.getItem('token')) {
             fetchUnit();
             fetchSheds();
             fetchLots();
             fetchShedLotsMapList();
-            fetchCustomerDetails(uid);
-            setBirdSaleData({ ...birdsaledata, CustomerId: uid });
+
             fetchCompanyDetails();
             fetchClient();
-
+            setBirdSaleData({ ...birdsaledata, CustomerId: uid });
             setBankDetails({
                 ...bankdetails, BankName: process.env.REACT_APP_BANK_NAME,
                 AccountNo: process.env.REACT_APP_ACCOUNT_NO, IfscCode: process.env.REACT_APP_IFSC_CODE
@@ -712,6 +728,8 @@ function BirdSale(props) {
             FinalCost: birdsaledata.FinalCost
         });
 
+        fetchCustomerDetails(birdsaledata.CustomerId);
+
         setInvoiceModalShow(true);
     }
 
@@ -810,11 +828,20 @@ function BirdSale(props) {
 
     const onDateFilterFromChange = (e) => {
         setFilterFromDate(e.target.value);
-        getFilterData(e.target.value, filterToDate, filterShed);
+        getFilterData(e.target.value, filterToDate, filterShed, cidfilter);
+    }
+
+    const clientFilterChange = (e) => {
+        let _client = e.target.value;
+       // history("/birdsale?uid="+_client)
+        // 
+        setCIdFilter(e.target.value);
+        getFilterData(filterFromDate, filterToDate, filterShed, _client);
     }
 
 
-    const getFilterData = (fromDate, toDate, shedid) => {
+
+    const getFilterData = (fromDate, toDate, shedid, cid) => {
         let _filterList = [];
         if (fromDate !== "" && toDate !== "") {
             _filterList = birdSaleListFilter.filter((c) => dateyyyymmdd(c.Date) >= dateyyyymmdd(fromDate) && dateyyyymmdd(c.Date) <= dateyyyymmdd(toDate));
@@ -833,18 +860,22 @@ function BirdSale(props) {
             _filterList = _filterList.filter((c) => c.ShedId === parseInt(shedid));
         }
 
+        if (cid > 0) {
+            _filterList = _filterList.filter((c) => c.CustomerId === parseInt(cid));
+        }
+
 
         setBirdSaleList(_filterList);
     }
 
     const onDateFilterToChange = (e) => {
         setFilterToDate(e.target.value);
-        getFilterData(filterFromDate, e.target.value, filterShed);
+        getFilterData(filterFromDate, e.target.value, filterShed, cidfilter);
     }
 
     const onShedFilterChange = (e) => {
         setFilterShed(e.target.value);
-        getFilterData(filterFromDate, filterToDate, e.target.value)
+        getFilterData(filterFromDate, filterToDate, e.target.value, cidfilter)
     }
 
     let BirdSaleListDowanloadArr = [];
@@ -956,7 +987,31 @@ function BirdSale(props) {
                         </Form.Select>
                     </div>
 
-                    <div className="col-6" style={{ textAlign: 'right', marginTop: 30 }}>
+                    <div className="col-2">
+                    <p style={{ fontSize: 13 }}><strong >Customer</strong></p>
+                            <Form.Select style={{ fontSize: 13 }}
+                                onChange={clientFilterChange} required>
+                                <option selected value="">Choose...</option>
+                                {
+
+                                    clientlist.length > 0 && clientlist.map((item) => {
+
+                                        let fullname = (item.MiddleName != "" && item.MiddleName != null) ?
+                                            item.FirstName + " " + item.MiddleName + " " + item.LastName :
+                                            item.FirstName + " " + item.LastName;
+                                        return (
+                                            <option value={item.ID} key={item.ID}
+                                                selected={item.ID === birdsaledata.CustomerId}>{fullname}</option>)
+                                    })
+
+
+                                }
+                            </Form.Select>
+                    </div>
+
+                    <div className="col-4" style={{ textAlign: 'right', marginTop: 30 }}>
+                    <a className="mr-2 btn btn-primary"
+                        style={{ marginRight: '20px' }} href={`/birdsalepaymentin/?custtype=${process.env.REACT_APP_CUST_TYPE_BIRD}`}>Payment</a>
                         <i className="fa-regular fa-file-excel fa-2xl"
                             style={{ color: '#bea2a2', marginRight: 30 }}
                             onClick={() => onDownloadExcel()} ></i>
@@ -1309,7 +1364,7 @@ function BirdSale(props) {
                                                 disabled={true}
                                             />
 
-<InputField controlId="Discount" label="Discount"
+                                            <InputField controlId="Discount" label="Discount"
                                                 type="number"
                                                 value={birdsaledata.Discount}
                                                 name="Discount"
@@ -1320,7 +1375,7 @@ function BirdSale(props) {
                                                 onChange={discountChange}
                                             />
 
-                                            <InputField controlId="FinalCost" label="FinalCost"
+                                            <InputField controlId="FinalCost" label="Final cost"
                                                 type="number"
                                                 value={birdsaledata.FinalCost}
                                                 name="FinalCost"
@@ -1332,7 +1387,7 @@ function BirdSale(props) {
                                         </Row>
 
                                         <Row>
-                                            
+
                                         </Row>
                                         <Row>
 
@@ -1414,7 +1469,8 @@ function BirdSale(props) {
 
                                             <Form.Group as={Col} controlId="PaymentDate">
                                                 <Form.Label style={{ fontSize: 13 }}>Payment date*</Form.Label>
-                                                <DateComponent date={null} onChange={paymentDateChange} isRequired={true} value={birdsaledata.PaymentDate} />
+                                                <DateComponent date={null} onChange={paymentDateChange}
+                                                    isRequired={false} value={birdsaledata.PaymentDate} />
                                                 <Form.Control.Feedback type="invalid">
                                                     Please select payment date
                                                 </Form.Control.Feedback>
@@ -1433,7 +1489,8 @@ function BirdSale(props) {
                                         <Row className="mb-12">
                                             <Form.Group controlId="Comments" as={Col} >
                                                 <Form.Label style={{ fontSize: 13 }}>Comments</Form.Label>
-                                                <Form.Control as="textarea" rows={3} name="Comments" onChange={commentsChange} value={birdsaledata.Comments}
+                                                <Form.Control as="textarea" rows={3} name="Comments"
+                                                    onChange={commentsChange} value={birdsaledata.Comments}
                                                     placeholder="Comments" style={{ fontSize: 13 }} />
                                             </Form.Group>
                                         </Row>
@@ -1441,7 +1498,8 @@ function BirdSale(props) {
                                         <Form.Group as={Col}>
                                             {birdsaledata.Id <= 0 ?
 
-                                                <Button variant="primary" type="submit" style={{ marginTop: "30px" }} onClick={(e) => handleSubmitAdd(e)}>
+                                                <Button variant="primary" type="submit" style={{ marginTop: "30px" }}
+                                                    onClick={(e) => handleSubmitAdd(e)}>
                                                     Add
                                                 </Button>
                                                 : null
