@@ -872,7 +872,7 @@ function BirdSale(props) {
                     Date: birdsaledata.Date,
                     CustomerId: birdsaledata.CustomerId,
                     // BirdCount: birdsaledata.BirdCount,
-                    // TotalWeight: birdsaledata.TotalWeight,
+                     TotalWeight: birdsaledata.TotalWeight,
                     // UnitId: birdsaledata.UnitId,
                     // Rate: birdsaledata.Rate,
                     TotalAmount: birdsaledata.TotalAmount,
@@ -985,7 +985,7 @@ function BirdSale(props) {
                     Date: birdsaledata.Date,
                     CustomerId: birdsaledata.CustomerId,
                     //BirdCount: birdsaledata.BirdCount,
-                    // TotalWeight: birdsaledata.TotalWeight,
+                     TotalWeight: birdsaledata.TotalWeight,
                     //UnitId: birdsaledata.UnitId,
                     // Rate: birdsaledata.Rate,
                     TotalAmount: birdsaledata.TotalAmount,
@@ -1259,7 +1259,7 @@ function BirdSale(props) {
                         {/* <th>Lot</th> */}
                         <th>Customer name</th>
                         {/* <th>Bird count</th> */}
-                        {/* <th>Total weight</th> */}
+                        <th>Total weight</th>
                         {/* <th>Rate</th> */}
                         <th>Total amount</th>
                         <th>Paid</th>
@@ -1302,12 +1302,13 @@ function BirdSale(props) {
                                     {/* <td align='left'>{_lotname}</td> */}
                                     <td align='center'>{p.CustomerName}</td>
                                     {/* <td align='center'>{p.BirdCount}</td> */}
-                                    {/* <td align='center'>{p.TotalWeight + " " + _uname}</td> */}
+                                    <td align='center'>{p.TotalWeight}</td>
                                     {/* <td align='center'>{p.Rate}</td> */}
+
                                     <td align='center'>{p.TotalAmount.toFixed(2)}</td>
                                     <td align='center'>{p.Paid.toFixed(2)}</td>
                                     <td align='center'>{p.Due.toFixed(2)}</td>
-                                    <td align='center'>{moment(p.PaymentDate).format('DD-MMM-YYYY')}</td>
+                                    <td align='center'>{p.PaymentDate!=null?moment(p.PaymentDate).format('DD-MMM-YYYY'):""}</td>
                                     <td align='center'>{p.Comments}</td>
                                     <td align='center'>{p.VehicleNo}</td>
                                     <td>

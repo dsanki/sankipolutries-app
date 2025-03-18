@@ -10,7 +10,7 @@ import {
     dateyyyymmdd, HandleLogout, downloadExcel,
     FetchCompanyDetails, AmountInWords, ReplaceNonNumeric, Commarize,
     FecthEggCategory, FecthEggSaleInvoiceList, ConvertNumberToWords,
-    FecthEggSaleInvoiceById, FectAllEggSaleInvoiceList, CalculateNoOfDays
+    FecthEggSaleInvoiceById, FectAllEggSaleInvoiceList, CalculateNoOfDays, downloadExcelFilter
 } from './../../Utility'
 import Loading from '../Loading/Loading'
 
@@ -354,16 +354,49 @@ function EggSaleInvoiceList(props) {
         }
     }
 
+    // AdditionalCharge: 200.00
+    // Advance: null
+    // Cash: null
+    // CashDeposite: null
+    // Cheque: 185630.00
+    // Comments: ""
+    // CompanyId: 2
+    // Complimentary: null
+    // CustomerId: 2034
+    // CustomerName: "Tara Maa Egg Centre"
+    // Due: 0.00
+    // EggSaleList: Count = 2
+    // FinalCostInvoice: 185630.00
+    // Id: 6188
+    // InvoiceNo: "SP/EGG/282/2024-2025"
+    // NetBanking: null
+    // Paid: 185630.00
+    // PhonePay: null
+    // PurchaseDate: {06/03/2025 00:00:00}
+    // TotalCost: 193620.00
+    // TotalDiscount: 8190.00
+    // TotalQuantity: 42000
+    // VehicleNo: ""
+
     const onDownloadExcel = () => {
         const _list = eggsalelist.map((p) => {
             return ({
                 Date: moment(p.Date).format('DD-MMM-YYYY'),
-                Quantity: p.Quantity, Rate: p.EggRate, TotalCost: p.TotalCost.toFixed(2), Discount: p.Discount.toFixed(2), FinalCost: p.FinalCost.toFixed(2),
-                Paid: p.Paid.toFixed(2), Due: p.Due.toFixed(2), Comments: p.Comments
+                //InvoiceNo:p.InvoiceNo,
+                CustomerName: p.CustomerName,
+                //Quantity: p.TotalQuantity, 
+                TotalCost: parseFloat(p.TotalCost||0).toFixed(2), 
+                // Discount: parseFloat(p.TotalDiscount||0).toFixed(2), 
+                // FinalCost: parseFloat(p.FinalCostInvoice||0).toFixed(2),
+                // Paid: parseFloat(p.Paid||0).toFixed(2),
+                // Due: parseFloat(p.Due||0).toFixed(2), 
+                // Comments: p.Comments
             });
         });
 
-        downloadExcel(_list, "EggSale");
+       // downloadExcel(_list, "EggSale");
+        downloadExcelFilter(_list, "EggSale", companydetails[0].CompanyName,filterFromDate,filterToDate);
+            
     }
 
     const clickInvoice = (eggsale) => {

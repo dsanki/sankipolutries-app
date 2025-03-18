@@ -9,7 +9,7 @@ import DateComponent from '../DateComponent';
 import {
     dateyyyymmdd, HandleLogout, downloadExcel,
     FetchCompanyDetails, AmountInWords, ConvertNumberToWords, ReplaceNonNumeric,
-    Commarize, FecthEggSaleInvoiceList, FecthEggCategory, FetchAdvanceListByCustId
+    Commarize, FecthEggSaleInvoiceList, FecthEggCategory, FetchAdvanceListByCustId, downloadExcelFilter
 } from './../../Utility'
 
 import Loading from '../Loading/Loading'
@@ -350,14 +350,22 @@ function EggSale(props) {
 
     const onDownloadExcel = () => {
         const _list = eggsalelist.map((p) => {
-            return ({
-                Date: moment(p.Date).format('DD-MMM-YYYY'),
-                Quantity: p.Quantity, Rate: p.EggRate, TotalCost: p.TotalCost.toFixed(2), Discount: p.Discount.toFixed(2), FinalCost: p.FinalCost.toFixed(2),
-                Paid: p.Paid.toFixed(2), Due: p.Due.toFixed(2), Comments: p.Comments
-            });
+          return ({
+                          Date: moment(p.Date).format('DD-MMM-YYYY'),
+                         // InvoiceNo:p.InvoiceNo,
+                          CustomerName: p.CustomerName,
+                          //Quantity: p.TotalQuantity, 
+                          TotalCost: parseFloat(p.TotalCost||0).toFixed(2), 
+                        //   Discount: parseFloat(p.TotalDiscount||0).toFixed(2), 
+                        //   FinalCost: parseFloat(p.FinalCostInvoice||0).toFixed(2),
+                        //   Paid: parseFloat(p.Paid||0).toFixed(2),
+                        //   Due: parseFloat(p.Due||0).toFixed(2), 
+                        //   Comments: p.Comments
+                      });
         });
 
-        downloadExcel(_list, "EggSale");
+      //  downloadExcel(_list, "EggSale");
+      downloadExcelFilter(_list, "EggSale", companydetails[0].CompanyName,filterFromDate,filterToDate);
     }
 
     const clickInvoice = (eggsale) => {

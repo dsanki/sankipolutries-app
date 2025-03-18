@@ -661,12 +661,13 @@ function EggDailyTracker(props) {
 
             return ({
                 Date: moment(p.Date).format('DD-MMM-YYYY'),
-                ShedName: shedname, LotName: p.LotName, Birds: p.TotalBirds, Eggs: p.TotalEggs, BrokenEggs: p.BrokenEggs,
+                ShedName: shedname, LotName: p.LotName, 
+                Birds: p.TotalBirds, 
+                Eggs: p.TotalEggs, BrokenEggs: p.BrokenEggs,
                 OKEggs: p.OkEggs,
                 EggBig: p.EggBig,
                 EggMcp: p.EggMcp, EggCp: p.EggCp, EggScp: p.EggScp,
                 FeedIntech: p.FeedIntech, Age: AgeDays / AgeWeeks, ProductionPercentage: p.ProductionPercentage,
-
             });
         });
 

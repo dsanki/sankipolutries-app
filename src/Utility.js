@@ -222,6 +222,38 @@ export const FetchLots = async (apiurl) => {
   return data;
 }
 
+export const downloadExcelFilter = (data, name,compname,fromdate,todate) => {
+
+  if (data.length > 0) {
+    /* new worksheet from JS objects */
+    var ws = XLSX.utils.json_to_sheet(data,{origin:3});
+
+    /* new workbook */
+    var wb = XLSX.utils.book_new();
+
+    XLSX.utils.sheet_add_aoa(
+      ws,
+      [[compname]],
+      { origin: 0 }
+    );
+    XLSX.utils.sheet_add_aoa(
+      ws,
+      [['From: '+ fromdate]],
+      { origin: 1 }
+    );
+    XLSX.utils.sheet_add_aoa(
+      ws,
+      [['Todate: '+ todate]],
+      { origin: 2 }
+    );
+
+    XLSX.utils.book_append_sheet(wb, ws, name);
+    /* write file */
+    XLSX.writeFile(wb, `${name}.xlsx`);
+  }
+};
+
+
 export const downloadExcel = (data, name) => {
 
   if (data.length > 0) {
@@ -230,6 +262,7 @@ export const downloadExcel = (data, name) => {
 
     /* new workbook */
     var wb = XLSX.utils.book_new();
+
     XLSX.utils.book_append_sheet(wb, ws, name);
     /* write file */
     XLSX.writeFile(wb, `${name}.xlsx`);
