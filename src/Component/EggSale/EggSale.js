@@ -373,7 +373,7 @@ function EggSale(props) {
             FinalCostInvoice: eggsale.FinalCostInvoice,
             Paid: eggsale.Paid,
             Due: eggsale.Due,
-            AmountInWords: ConvertNumberToWords(parseFloat(eggsale.FinalCostInvoice || 0) + parseFloat(eggsale.AdditionalCharge || 0)),
+            AmountInWords: ConvertNumberToWords(parseFloat(eggsale.FinalCostInvoice || 0)),
             EggSale: eggsale.EggSaleList,
             VehicleNo: eggsale.VehicleNo,
             AdditionalCharge: eggsale.AdditionalCharge,
@@ -706,7 +706,7 @@ function EggSale(props) {
                                     eggsaledata={eggsaledata}
                                     customerdetails={customerdetails}
                                     eggcategory={eggcategory}
-                                    bankdetails={bankdetails} />
+                                    bankdetails={bankdetails} advancedata={advancedata}/>
                             </PDFViewer>
                         </Fragment>
                     </Modal.Body>

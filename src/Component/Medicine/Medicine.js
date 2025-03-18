@@ -308,12 +308,6 @@ function Medicine(props) {
     setMedicineFields(data);
   }
 
-
-
-
-
-
-
   // const totalAmountChange = (e) => {
   //   setMedData({ ...meddata, TotalAmount: e.target.value, Due: e.target.value - meddata.Paid });
   // }
@@ -364,7 +358,6 @@ function Medicine(props) {
         ...meddata, Paid: meddata.TotalAmount, Due: 0, IsSettle: !meddata.IsSettle
       });
     }
-
   }
 
 

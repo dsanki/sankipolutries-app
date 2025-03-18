@@ -52,13 +52,7 @@ const styles = StyleSheet.create({
     },
 
     amountinwords: {
-        // width: '100%',
         textAlign: 'left',
-        // borderRightColor: borderColor,
-        // borderRightWidth: 1,
-        // paddingRight: 10,
-        // paddingLeft: 10,
-        //fontFamily: 'Helvetica-Bold',
         textTransform: 'capitalize',
         fontSize: 9
     },
@@ -66,7 +60,6 @@ const styles = StyleSheet.create({
         width: '40%',
     },
     paymentMode: {
-        // width: '100%',
         textAlign: 'right',
         width: '80%',
         fontSize: 9,
@@ -74,7 +67,6 @@ const styles = StyleSheet.create({
         paddingRight: 8
     },
     paymentModeLbl: {
-        // fontFamily:'italic',
         fontSize: 8,
         textAlign: 'left',
         marginLeft: 5
@@ -104,14 +96,17 @@ const InvoiceTableFooter = (props) => {
     }
 
     if (props.eggsaledata.CashDeposite != null) {
-        paymentmode = paymentmode + " CashDeposite- "
+        paymentmode = paymentmode + " Cash Deposite- "
             + Number.parseFloat(props.eggsaledata.CashDeposite).toFixed(2)
     }
 
     if (props.eggsaledata.Cheque != null) {
-        paymentmode = paymentmode + " Cheque- "
+        paymentmode = paymentmode + " Adv.Settle- "
             + Number.parseFloat(props.eggsaledata.Cheque).toFixed(2)
     }
+
+    let advamt = parseFloat(props.advancedata.Amount || 0).toFixed(2);
+
 
 
 
@@ -143,8 +138,9 @@ const InvoiceTableFooter = (props) => {
             <View style={styles.row}>
                 <Text style={styles.description}>Payble Amount</Text>
                 <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />
-                    {parseFloat(Number.parseFloat(props.eggsaledata.FinalCostInvoice) +
-                        Number.parseFloat(props.eggsaledata.AdditionalCharge || 0)).toFixed(2)}</Text>
+                    {parseFloat(props.eggsaledata.FinalCostInvoice).toFixed(2)}
+
+                </Text>
             </View>
 
 
@@ -253,23 +249,52 @@ props.eggsaledata.Cheque !=null && paymentmode.concat(paymentmode+ ", Cheque-"
 
 
             <View style={styles.row}>
-                <Text style={styles.description}>Balance</Text>
+                <Text style={styles.description}>Due</Text>
                 <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />
                     {Number.parseFloat(props.eggsaledata.Due).toFixed(2)}</Text>
             </View>
 
 
 
-            <View style={styles.row}>
+            {/* <View style={styles.row}>
                 <Text style={styles.amountinwordslblarea}>
                     <Text style={styles.msgEggCount}>
                         N.B.</Text>
                     <Text style={styles.msgEggCount}> 1 box contains 210 eggs</Text></Text>
+            </View> */}
+
+            {/* <View style={styles.row}>
+                <Text style={styles.amountinwordslblarea}>
+                    <Text style={styles.msgEggCount}>
+                        Advance amount:</Text>
+                    <Text style={styles.msgEggCount}>{parseFloat(props.advancedata.Amount||0)}</Text></Text>
+            </View> */}
+            {
+
+                advamt > 0 ? <View style={styles.row}>
+                    <Text style={styles.amountinwordslblarea}>
+                        <Text style={styles.amountinwordslbl}>
+                            Advance amount:</Text>
+                        <Text style={styles.amountinwords}><Image src={rup} style={styles.logoRupee} />{advamt}</Text></Text>
+                </View> : ""
+            }
+
+            <View style={styles.row}>
+                <Text style={styles.amountinwordslblarea}>
+                    <Text style={styles.paymentModeLbl}>
+                        N.B:</Text>
+                    <Text style={styles.paymentModeLbl}>1 box contains 210 eggs</Text></Text>
             </View>
-           
-            <Text style={styles.paymentModeLbl}>Payment mode: {paymentmode}</Text>
-           
-           
+
+            <View style={styles.row}>
+                <Text style={styles.paymentModeLbl}>Payment mode: {paymentmode}</Text>
+            </View>
+
+
+            {/* <View style={styles.row}>
+            <Text style={styles.paymentModeLbl}>1 box contains 210 eggs</Text>
+            </View> */}
+
 
         </>
     )

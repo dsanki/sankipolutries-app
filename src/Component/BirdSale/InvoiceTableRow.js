@@ -62,15 +62,23 @@ const InvoiceTableRow = (props) => {
     return (
 
         <Fragment>
-                    <View style={styles.row} key={props.birdsaledata.Id}>
-                    <Text style={styles.slno}>1</Text>
+            {
+               props.birdsaledata.BirdSaleDetailsList.map((p, i) => {
+                return(
+                      <View style={styles.row} key={p.Id}>
+                         <Text style={styles.slno}>{i+1}</Text>
+                         <Text style={styles.qty}>{p.BirdTypeName}</Text>
                         {/* <Text style={styles.cat}>{props.birdsaledata.Date}</Text> */}
-                        <Text style={styles.qty}>{props.birdsaledata.BirdCount}</Text>
-                        <Text style={styles.weight}>{props.birdsaledata.TotalWeight+" "+props.birdsaledata.UnitName}</Text>
-                        <Text style={styles.rate}>{props.birdsaledata.Rate}</Text>
-                        <Text style={styles.rate}>{props.birdsaledata.AdditionalCharge}</Text>
-                        <Text style={styles.amount}>{Number.parseFloat(props.birdsaledata.TotalAmount).toFixed(2)}</Text>
+                        <Text style={styles.qty}>{p.BirdCount}</Text>
+                        <Text style={styles.weight}>{p.TotalWeight+" "+p.UnitName}</Text>
+                        <Text style={styles.rate}>{p.Rate}</Text>
+                        <Text style={styles.amount}>{Number.parseFloat(p.Amount).toFixed(2)}</Text>
+                        {/* <Text style={styles.rate}>{props.birdsaledata.AdditionalCharge}</Text>
+                        <Text style={styles.amount}>{Number.parseFloat(props.birdsaledata.TotalAmount).toFixed(2)}</Text> */}
                     </View>
+                       )
+                    })
+                }
 
         </Fragment>
 

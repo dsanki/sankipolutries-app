@@ -47,6 +47,9 @@ const EggStockInventory = (props) => {
     //         })
     // }
 
+    const clickUpdateEggStockInventory= async () => {
+    }
+
     const fetchEggStockInventory = async () => {
 
         FecthEggStockInventory(process.env.REACT_APP_API)
@@ -74,8 +77,34 @@ const EggStockInventory = (props) => {
         setCount(num + 1);
     };
 
-    const clickAddEggStockInventory = (e) => {
+    const clickAddEggStockInventory = async () => {
+        await fetch(process.env.REACT_APP_API + 'EggInventory/GetEggInventory',
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    //setClients(data.Result);
+                    setCount(data.Result.length);
+                    //setTotalPages(Math.ceil(data.Result.length / process.env.REACT_APP_PAGE_PAGINATION_NO));
+                }
+                else if (data.StatusCode === 401) {
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found!!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                }
 
+            });
     }
     return (
         <div>
@@ -86,7 +115,11 @@ const EggStockInventory = (props) => {
             <div class="row">
                 <div class="col-md-6" style={{ textAlign: 'right' }}> <Button className="mr-2" variant="primary"
                     style={{ marginRight: "17.5px" }}
-                    onClick={() => clickAddEggStockInventory()}>Add</Button></div>
+                    onClick={() => clickAddEggStockInventory()}>Add</Button>
+                    
+                    <Button className="mr-2" variant="primary"
+                    style={{ marginRight: "17.5px" }}
+                    onClick={() => clickUpdateEggStockInventory()}>Generate</Button></div>
 
 
             </div>

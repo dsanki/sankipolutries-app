@@ -61,7 +61,7 @@ const InvoiceBirdSale = (props) => (
                 
             </View>
           
-            <View style={styles.gap}></View>
+            {/* <View style={styles.gap}></View> */}
 
             <InvoiceItemsTable birdsaledata={props.birdsaledata} 
             />

@@ -5,10 +5,10 @@ import moment from 'moment';
 
 const styles = StyleSheet.create({
   headerContainer: {
-    width: '50%',
+    width: '60%',
     flexDirection: 'column',
     justifyContent: 'flex-start',
-    marginTop: 8
+    marginTop: 4
   },
   company: {
     // marginTop: 20,
@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
 
     // color: '#61dafb',
     letterSpacing: 1,
-    fontSize: 14,
+    fontSize: 10,
     // textAlign: 'center',
     textTransform: 'uppercase',
     fontFamily: 'Helvetica-Bold'
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 40,
     height: 40,
-    marginBottom: 10
+    marginBottom: 5
     // marginLeft: 'auto',
     // marginRight: 'auto'
   },
@@ -44,34 +44,13 @@ function leftFillNum(num, targetLength) {
 }
 
 const Company = (props) => (
-  // <View style={styles.row}>
-  //   <Fragment style={styles.headerContainer}>
-  //     <Text style={styles.company}>{props.companydetails[0].CompanyName}</Text><br/>
-  //     <Text>{props.companydetails[0].Address}</Text><br/>
-  //     <Text>{`Phone no: ${props.companydetails[0].PhoneNo}`}</Text><br/>
-  //     <Text>{`Email: ${props.companydetails[0].Email}`}</Text><br/>
-  //     <Text>{`PAN: ${props.companydetails[0].PAN}`}</Text>
-  //   </Fragment>
-  //   {/* <Image style={styles.logo} src={logo} /> */}
-
-  //   <Fragment  style={styles.headerContainer}>
-  //   <View style={styles.invoiceDateContainer}>
-  //     <Text style={styles.invoiceDate}>Invoice No: 0564737</Text><br />
-  //     <Text style={styles.invoiceDate}>Invoice Date: 23/10/2014</Text>
-  //     </View>
-  //   </Fragment>
-  // </View>
-
-
-
   
     <View style={styles.headerContainer}>
-     
       <Text style={styles.company}>{props.companydetails[0].CompanyName}</Text><br />
-      <Text style={{fontSize:10}}>{props.companydetails[0].Address}</Text><br />
-      <Text style={{fontSize:10}}>{`Phone no: ${props.companydetails[0].PhoneNo}`}</Text><br />
-      <Text style={{fontSize:10}}>{`Email: ${props.companydetails[0].Email}`}</Text><br />
-      <Text style={{fontSize:10}}>{`PAN: ${props.companydetails[0].PAN}`}</Text>
+      <Text style={{fontSize:9}}>{props.companydetails[0].Address}</Text><br />
+      <Text style={{fontSize:9}}>{`Phone no: ${props.companydetails[0].PhoneNo}`}</Text><br />
+      <Text style={{fontSize:9}}>{`Email: ${props.companydetails[0].Email}`}</Text><br />
+      <Text style={{fontSize:9}}>{`PAN: ${props.companydetails[0].PAN}`}</Text>
     </View>
   
 );

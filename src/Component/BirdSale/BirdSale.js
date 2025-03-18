@@ -8,7 +8,7 @@ import InputField from '../ReuseableComponent/InputField'
 import {
     FetchUnit, FetchShedsList, FetchLots, FetchLotById, FetchShedLotMapList, FetchBirdSaleList,
     dateyyyymmdd, downloadExcel, HandleLogout, NumberInputKeyDown, FetchCompanyDetails,
-    AmountInWords, ReplaceNonNumeric, Commarize, ConvertNumberToWords, GetCustomerByTypeId
+    AmountInWords, ReplaceNonNumeric, Commarize, ConvertNumberToWords, GetCustomerByTypeId, FecthBirdType
 } from '../../Utility'
 
 import Loading from '../Loading/Loading'
@@ -53,36 +53,106 @@ function BirdSale(props) {
 
     const [cidfilter, setCIdFilter] = useState();
 
+    const [ucount, setUCount] = useState(0);
+    const objupdate = useMemo(() => ({ ucount }), [ucount]);
+    const [newcount, setAddNewCount] = useState(0);
+    const objAddNew = useMemo(() => ({ newcount }), [newcount]);
+    const [birdtypelist, setBirdTypeList] = useState([]);
 
     let addModalClose = () => {
         setAddModalShow(false);
         setValidated(false);
     };
 
+    let addUCount = (num) => {
+        setUCount(num + 1);
+    };
+
+    let addNewCount = (num) => {
+        setAddNewCount(num + 1);
+    };
+
+    const initialBirdSalesDetailsValues = {
+        Id: '0',
+        BirdTypeId: '',
+        ShedId: '',
+        LotId: '',
+        BirdCount: '',
+        UnitId: '',
+        UnitPrice: '',
+        Amount: '',
+        ParentId: '0',
+        LotName: "",
+        CompanyId: localStorage.getItem('companyid')
+    }
+
+    const [birdSalesDetailsFields, setBirdSalesDetailsFields] = useState([
+        {
+            Id: '0',
+            BirdTypeId: '',
+            ShedId: '',
+            LotId: '',
+            BirdCount: '',
+            UnitId: '',
+            UnitPrice: '',
+            Amount: '',
+            ParentId: '0',
+            LotName: "",
+            CompanyId:localStorage.getItem('companyid')
+        }
+    ])
+
+    const addFields = (e) => {
+        let object = {
+            Id: '0',
+            BirdTypeId: '',
+            ShedId: '',
+            LotId: '',
+            BirdCount: '',
+            UnitId: '',
+            UnitPrice: '',
+            Amount: '',
+            ParentId: '0',
+            LotName: "",
+            CompanyId: localStorage.getItem('companyid')
+        }
+
+        setBirdSalesDetailsFields([...birdSalesDetailsFields, object]);
+        addNewCount(newcount);
+    }
+
+    const removeFields = (index) => {
+        let data = [...birdSalesDetailsFields];
+        data.splice(index, 1);
+        setBirdSalesDetailsFields(data);
+        addUCount(ucount);
+    }
+
     const initialvalues = {
         modaltitle: "",
         Id: 0,
-        LotId: "",
-        ShedId: "",
+        // LotId: "",
+        //ShedId: "",
         Date: "",
         CustomerId: uid,
-        BirdCount: "",
-        TotalWeight: "",
-        UnitId: "",
-        Rate: "",
-        TotalAmount: "",
+        // BirdCount: "",
+         TotalWeight: "",
+        // UnitId: "",
+        // Rate: "",
+        // TotalAmount: "",
         Paid: "",
         Due: "",
         PaymentDate: "",
         Comments: "",
-        LotName: "",
+        // LotName: "",
         TotalBirdSale: "",
         CustomerName: "",
         VehicleNo: "",
         UnitName: _unitname,
-        CompanyId: "",
+        CompanyId: localStorage.getItem('companyid'),
         Discount: "",
-        FinalCost: ""
+        FinalCost: "",
+        BirdSaleDetailsList: [initialBirdSalesDetailsValues],
     };
 
     const downloadfields = [{
@@ -102,8 +172,8 @@ function BirdSale(props) {
         Comments: "",
         CustomerName: "",
         VehicleNo: "",
-        UnitName: "",
-        CompanyId: "",
+        //UnitName: "",
+        CompanyId: localStorage.getItem('companyid'),
         Discount: "",
         FinalCost: ""
     }];
@@ -112,36 +182,38 @@ function BirdSale(props) {
 
     const clickAddBirdSale = () => {
         setAddModalShow({ addModalShow: true });
+        setBirdSalesDetailsFields([initialBirdSalesDetailsValues]);
         setBirdSaleData({
             modaltitle: "Add",
             Id: 0,
-            LotId: "",
-            ShedId: "",
+            // LotId: "",
+            //ShedId: "",
             Date: "",
             CustomerId: uid,
-            BirdCount: "",
-            TotalWeight: "",
-            UnitId: "",
-            Rate: "",
+            //BirdCount: "",
+            //TotalWeight: "",
+            //UnitId: "",
+            //Rate: "",
             TotalAmount: "",
             Paid: "",
             Due: "",
             PaymentDate: "",
             Comments: "",
-            LotName: "",
+            //LotName: "",
             TotalBirdSale: "",
             InvoiceNo: "",
             VehicleNo: "",
-            UnitName: "",
+            // UnitName: "",
             AdditionalCharge: "",
             Cash: "",
             PhonePay: "",
             NetBanking: "",
             CashDeposite: "",
-            Cheque: "",
-            CompanyId: "",
+            //Cheque: "",
+            CompanyId: localStorage.getItem('companyid'),
             Discount: "",
-            FinalCost: ""
+            FinalCost: "",
+            BirdSaleDetailsList: [initialBirdSalesDetailsValues]
         })
     }
 
@@ -149,44 +221,45 @@ function BirdSale(props) {
         BankName: "",
         AccountNo: "",
         IfscCode: ""
-
     }
 
     const [bankdetails, setBankDetails] = useState(_bankdetails);
 
     const clickEditBirdSale = (md) => {
         setAddModalShow({ addModalShow: true });
+        setBirdSalesDetailsFields(md.BirdSaleDetailsList);
         setBirdSaleData({
             modaltitle: "Edit Bird Sale",
             Id: md.Id,
-            LotId: md.LotId,
-            ShedId: md.ShedId,
+            //LotId: md.LotId,
+            //ShedId: md.ShedId,
             Date: md.Date,
             CustomerId: md.CustomerId,
-            BirdCount: md.BirdCount,
-            TotalWeight: md.TotalWeight,
-            UnitId: md.UnitId,
-            Rate: md.Rate,
+            //BirdCount: md.BirdCount,
+            //TotalWeight: md.TotalWeight,
+            //UnitId: md.UnitId,
+            //Rate: md.Rate,
             TotalAmount: md.TotalAmount,
             Paid: md.Paid,
             Due: md.Due,
             PaymentDate: md.PaymentDate,
             Comments: md.Comments,
-            LotName: md.LotName,
+            // LotName: md.LotName,
             TotalBirdSale: md.TotalBirdSale,
             InvoiceNo: md.InvoiceNo,
             CustomerName: md.CustomerName,
             VehicleNo: md.VehicleNo,
-            UnitName: md.UnitName,
+            //UnitName: md.UnitName,
             AdditionalCharge: md.AdditionalCharge,
             Cash: md.Cash,
             PhonePay: md.PhonePay,
             NetBanking: md.NetBanking,
             CashDeposite: md.CashDeposite,
-            Cheque: md.Cheque,
-            CompanyId: md.CompanyId,
+            // Cheque: md.Cheque,
+            CompanyId: localStorage.getItem('companyid'),
             Discount: md.Discount,
-            FinalCost: md.FinalCost
+            FinalCost: md.FinalCost,
+            BirdSaleDetailsList: md.BirdSaleDetailsList
         })
     }
 
@@ -197,8 +270,14 @@ function BirdSale(props) {
     const vehicleNoChange = (e) => {
         setBirdSaleData({ ...birdsaledata, VehicleNo: e.target.value });
     }
+    const birdTypeChange = (e, index) => {
+        let data = [...birdSalesDetailsFields];
 
-    const shedChange = (e) => {
+        data[index]["BirdTypeId"] = e.target.value;
+        setBirdSalesDetailsFields(data);
+        //setBirdSaleData({ ...birdsaledata, VehicleNo: e.target.value });
+    }
+    const shedChange = (e, index) => {
         let lotid = "";
         let lotname = "";
         let totalbirdsale = "";
@@ -208,15 +287,29 @@ function BirdSale(props) {
         if (filterval.length > 0) {
             lotid = filterval[0].lotid;
             lotname = filterval[0].lotname;
-            setBirdSaleData({ ...birdsaledata, ShedId: e.target.value, LotId: filterval[0].lotid });
+
+
+            let data = [...birdSalesDetailsFields];
+
+            data[index]["ShedId"] = e.target.value;
+            data[index]["LotId"] = lotid;
+
             setLotName(filterval[0].lotname);
+
+            data[index]["LotName"] = lotname;
+
             FetchLotById(filterval[0].lotid)
                 .then(data => {
                     totalbirdsale = data.TotalBirdSale;
-                    setTotalBirds(data.TotalBirdSale);
+                    //setTotalBirds(data.TotalBirdSale);
                 });
 
-            setBirdSaleData({ ...birdsaledata, ShedId: e.target.value, LotId: lotid, LotName: lotname, TotalBirdSale: totalbirdsale });
+            setBirdSalesDetailsFields(data);
+            //addUCount(ucount);
+
+            //setBirdSaleData({ ...birdsaledata, ShedId: e.target.value, LotId: filterval[0].lotid });
+            // setBirdSaleData({ ...birdsaledata, ShedId: e.target.value, LotId: lotid, 
+            //     LotName: lotname, TotalBirdSale: totalbirdsale });
         }
     }
 
@@ -228,73 +321,113 @@ function BirdSale(props) {
         setBirdSaleData({ ...birdsaledata, CustomerId: e.target.value });
     }
 
-    const birdcountChange = (e) => {
-
+    const birdcountChange = (e, index) => {
         const re = /^[0-9\b]+$/;
         if (e.target.value === '' || re.test(e.target.value)) {
-            setBirdSaleData({ ...birdsaledata, BirdCount: e.target.value });
+
+            let data = [...birdSalesDetailsFields];
+            data[index]["BirdCount"] = e.target.value;
+            setBirdSalesDetailsFields(data);
+            //addUCount(ucount);
+
+            //setBirdSaleData({ ...birdsaledata, BirdCount: e.target.value });
         }
     }
 
-    const totalWeightChange = (e) => {
+    const totalWeightChange = (e, index) => {
         const re = /^\d*\.?\d{0,2}$/
         let totalwt = e.target.value;
 
         if (totalwt === '' || re.test(totalwt)) {
 
-            let totalamt = (parseFloat(totalwt || 0) * parseFloat(birdsaledata.Rate || 0))
-                + (parseFloat(birdsaledata.AdditionalCharge || 0));
+            let data = [...birdSalesDetailsFields];
+            data[index]["TotalWeight"] = totalwt;
 
-            let _finalcost = Math.round((parseFloat(totalamt || 0) - parseFloat(birdsaledata.Discount || 0)));
+            let totalamt = (parseFloat(totalwt || 0) * parseFloat(data[index]["Rate"] || 0));
+            data[index]["Amount"] = totalamt;
 
-            let due = _finalcost - (parseFloat(birdsaledata.Cash || 0)
-                + parseFloat(birdsaledata.PhonePay || 0)
-                + parseFloat(birdsaledata.NetBanking || 0) + parseFloat(birdsaledata.Cheque || 0)
-                + parseFloat(birdsaledata.CashDeposite || 0));
+            //  let _finalcost = Math.round((parseFloat(totalamt || 0) - parseFloat(birdsaledata.Discount || 0)));
 
-            setBirdSaleData({
-                ...birdsaledata,
-                TotalWeight: totalwt,
-                TotalAmount: totalamt.toFixed(2),
-                Due: due.toFixed(2),
-                FinalCost: _finalcost
-            });
+            // let due = _finalcost - (parseFloat(birdsaledata.Cash || 0)
+            //     + parseFloat(birdsaledata.PhonePay || 0)
+            //     + parseFloat(birdsaledata.NetBanking || 0) + parseFloat(birdsaledata.Cheque || 0)
+            //     + parseFloat(birdsaledata.CashDeposite || 0));
+
+            setBirdSalesDetailsFields(data);
+            addUCount(ucount);
+
+            // setBirdSaleData({
+            //     ...birdsaledata,
+            //     TotalWeight: totalwt,
+            //     TotalAmount: totalamt.toFixed(2),
+            //     Due: due.toFixed(2),
+            //     FinalCost: _finalcost
+            // });
         }
     }
 
-    const unitIdChange = (e) => {
-        setBirdSaleData({ ...birdsaledata, UnitId: e.target.value });
+    const unitIdChange = (e, index) => {
+        let data = [...birdSalesDetailsFields];
+        data[index]["UnitId"] = e.target.value;
+        setBirdSalesDetailsFields(data);
+        //addUCount(ucount);
+        //etBirdSaleData({ ...birdsaledata, UnitId: e.target.value });
     }
 
-    const rateChange = (e) => {
+    // const rateChange = (e) => {
+    //     const re = /^\d*\.?\d{0,2}$/
+    //     let rate = e.target.value;
+
+    //     if (rate === '' || re.test(rate)) {
+
+    //         let Adchrg = parseFloat(birdsaledata.AdditionalCharge || 0);
+    //         let totalamt = (birdsaledata.TotalWeight * parseFloat(rate || 0)) + Adchrg;
+    //         let _finalcost = Math.round((parseFloat(totalamt || 0) - parseFloat(birdsaledata.Discount || 0)));
+    //         let due = _finalcost - parseFloat(birdsaledata.Paid || 0);
+
+    //         setBirdSaleData({
+    //             ...birdsaledata,
+    //             Rate: rate,
+    //             TotalAmount: totalamt.toFixed(2),
+    //             Due: due.toFixed(2),
+    //             FinalCost: _finalcost.toFixed(2)
+    //         });
+    //     }
+    // }
+
+
+    const rateChange = (e, index) => {
         const re = /^\d*\.?\d{0,2}$/
         let rate = e.target.value;
 
         if (rate === '' || re.test(rate)) {
+            let data = [...birdSalesDetailsFields];
 
-            let Adchrg = parseFloat(birdsaledata.AdditionalCharge || 0);
-            let totalamt = (birdsaledata.TotalWeight * parseFloat(rate || 0)) + Adchrg;
-            let _finalcost = Math.round((parseFloat(totalamt || 0) - parseFloat(birdsaledata.Discount || 0)));
-            let due = _finalcost - parseFloat(birdsaledata.Paid || 0);
-
-            setBirdSaleData({
-                ...birdsaledata,
-                Rate: rate,
-                TotalAmount: totalamt.toFixed(2),
-                Due: due.toFixed(2),
-                FinalCost: _finalcost.toFixed(2)
-            });
+            data[index]["Rate"] = rate;
+            let totalamount = (parseFloat(rate)) * parseFloat(data[index]["TotalWeight"] || 0);
+            data[index]["Amount"] = totalamount;
+            //let Adchrg = parseFloat(birdsaledata.AdditionalCharge || 0);
+            //let totalamt = (birdsaledata.TotalWeight * parseFloat(rate || 0));
+            // let _finalcost = Math.round((parseFloat(totalamt || 0) - parseFloat(birdsaledata.Discount || 0)));
+            // let due = _finalcost - parseFloat(birdsaledata.Paid || 0);
+            setBirdSalesDetailsFields(data);
+            addUCount(ucount);
+            // setBirdSaleData({
+            //     ...birdsaledata,
+            //     Rate: rate,
+            //     TotalAmount: totalamount.toFixed(2)
+            //     //Due: due.toFixed(2),
+            //     //FinalCost: _finalcost.toFixed(2)
+            // });
         }
     }
-
-
 
     const fetchCompanyDetails = async () => {
         FetchCompanyDetails(process.env.REACT_APP_API)
             .then(data => {
                 if (data.StatusCode === 200) {
-                    let _companydetils = data.Result.filter((x) => x.Id == 
-                    localStorage.getItem('companyid'));
+                    let _companydetils = data.Result.filter((x) => x.Id ==
+                        localStorage.getItem('companyid'));
                     setCompanyDetails(_companydetils);
                 }
                 else if (data.StatusCode === 401) {
@@ -338,15 +471,16 @@ function BirdSale(props) {
         let addch = parseFloat(e.target.value || 0);
 
         // let Adchrg=parseFloat(birdsaledata.AdditionalCharge||0);
-        let totalamt = (birdsaledata.TotalWeight * parseFloat(birdsaledata.Rate || 0)) + addch;
-        let _finalcost = Math.round((parseFloat(totalamt || 0) - parseFloat(birdsaledata.Discount || 0)));
+        //let totalamt = (birdsaledata.TotalAmount * parseFloat(birdsaledata.Rate || 0)) + addch;
+        let _finalcost = Math.round((parseFloat(birdsaledata.TotalAmount || 0) -
+            parseFloat(birdsaledata.Discount || 0))) + addch;
         let due = _finalcost - parseFloat(birdsaledata.Paid || 0);
 
 
         setBirdSaleData({
             ...birdsaledata, AdditionalCharge: e.target.value,
-            Due: due.toFixed(2),
-            TotalAmount: totalamt.toFixed(2),
+            Due:due>=0? due.toFixed(2):0,
+            //TotalAmount: totalamt.toFixed(2),
             FinalCost: _finalcost.toFixed(2)
 
         });
@@ -354,11 +488,14 @@ function BirdSale(props) {
 
     const discountChange = (e) => {
         let _finalcost = Math.round((parseFloat(birdsaledata.TotalAmount || 0) - parseFloat(e.target.value || 0)));
+        let _due=_finalcost - parseFloat(birdsaledata.Paid || 0);
+        
+        
         setBirdSaleData({
             ...birdsaledata,
             Discount: e.target.value,
             FinalCost: _finalcost.toFixed(2),
-            Due: (_finalcost - parseFloat(birdsaledata.Paid || 0)).toFixed(2)
+            Due:_due>=0? _due.toFixed(2):0// (_finalcost - parseFloat(birdsaledata.Paid || 0)).toFixed(2)
         });
     }
 
@@ -367,16 +504,22 @@ function BirdSale(props) {
 
         if (e.target.value === '' || re.test(e.target.value)) {
             let cashamt = parseFloat(e.target.value || 0);
+            
             setBirdSaleData({
                 ...birdsaledata, Cash: e.target.value,
+
                 Paid: (cashamt + parseFloat(birdsaledata.PhonePay || 0) +
                     parseFloat(birdsaledata.NetBanking || 0) + parseFloat(birdsaledata.CashDeposite || 0)
-                    + parseFloat(birdsaledata.Cheque || 0)),
+                ),
                 Due: (birdsaledata.FinalCost -
                     (cashamt + parseFloat(birdsaledata.PhonePay || 0) +
                         parseFloat(birdsaledata.NetBanking || 0) + parseFloat(birdsaledata.CashDeposite || 0)
                         + parseFloat(birdsaledata.Cheque || 0))
-                ).toFixed(2)
+                ).toFixed(2)>0?(birdsaledata.FinalCost -
+                    (cashamt + parseFloat(birdsaledata.PhonePay || 0) +
+                        parseFloat(birdsaledata.NetBanking || 0) + parseFloat(birdsaledata.CashDeposite || 0)
+                        + parseFloat(birdsaledata.Cheque || 0))
+                ).toFixed(2):0
             });
         }
     }
@@ -391,12 +534,12 @@ function BirdSale(props) {
                 ...birdsaledata, PhonePay: e.target.value,
                 Paid: (phpayamt + parseFloat(birdsaledata.Cash || 0) +
                     parseFloat(birdsaledata.NetBanking || 0) + parseFloat(birdsaledata.CashDeposite || 0)
-                    + parseFloat(birdsaledata.Cheque || 0)),
+                ),
                 Due: (birdsaledata.FinalCost -
                     (phpayamt + parseFloat(birdsaledata.Cash || 0) +
                         parseFloat(birdsaledata.NetBanking || 0)
                         + parseFloat(birdsaledata.CashDeposite || 0)
-                        + parseFloat(birdsaledata.Cheque || 0))
+                    )
                 ).toFixed(2)
             });
         }
@@ -412,11 +555,11 @@ function BirdSale(props) {
                 ...birdsaledata, NetBanking: e.target.value,
                 Paid: (nbamt + parseFloat(birdsaledata.Cash || 0) +
                     parseFloat(birdsaledata.PhonePay || 0) + parseFloat(birdsaledata.CashDeposite || 0)
-                    + parseFloat(birdsaledata.Cheque || 0)),
+                ),
                 Due: (birdsaledata.FinalCost -
                     (nbamt + parseFloat(birdsaledata.Cash || 0) +
                         parseFloat(birdsaledata.PhonePay || 0) + parseFloat(birdsaledata.CashDeposite || 0)
-                        + parseFloat(birdsaledata.Cheque || 0))
+                    )
                 ).toFixed(2)
             });
         }
@@ -432,11 +575,11 @@ function BirdSale(props) {
                 ...birdsaledata, CashDeposite: e.target.value,
                 Paid: (upiamt + parseFloat(birdsaledata.Cash || 0) +
                     parseFloat(birdsaledata.PhonePay || 0) + parseFloat(birdsaledata.NetBanking || 0)
-                    + parseFloat(birdsaledata.Cheque || 0)),
+                ),
                 Due: (birdsaledata.FinalCost -
                     (upiamt + parseFloat(birdsaledata.Cash || 0) +
                         parseFloat(birdsaledata.PhonePay || 0) + parseFloat(birdsaledata.NetBanking || 0)
-                        + parseFloat(birdsaledata.Cheque || 0))
+                    )
                 ).toFixed(2)
             });
         }
@@ -503,7 +646,7 @@ function BirdSale(props) {
             fetchSheds();
             fetchLots();
             fetchShedLotsMapList();
-
+            _fetchBirdType();
             fetchCompanyDetails();
             fetchClient();
             setBirdSaleData({ ...birdsaledata, CustomerId: uid });
@@ -528,6 +671,66 @@ function BirdSale(props) {
             history("/login")
         }
     }, [obj]);
+
+    useEffect((e) => {
+
+        if (localStorage.getItem('token')) {
+            setBirdSaleData({
+                ...birdsaledata, BirdSaleDetailsList: birdSalesDetailsFields
+            });
+        }
+        else {
+        }
+    }, [objAddNew]);
+
+
+    useEffect((e) => {
+
+        setBirdSaleData({
+            ...birdsaledata, BirdSaleDetailsList: birdSalesDetailsFields
+        });
+
+        const { totalCost, totalWeight } =
+            birdSalesDetailsFields.reduce((accumulator, item) => {
+                accumulator.totalCost += item.Amount;
+                accumulator.totalWeight += item.TotalWeight;
+                return accumulator;
+            }, { totalCost: 0, totalWeight: 0 })
+
+        //   let cost=totalCost;
+        //   let data=birdsaledata;
+        let _finalCost = Math.round((parseFloat(totalCost || 0) + parseFloat(birdsaledata.AdditionalCharge || 0)) -
+            parseFloat(birdsaledata.Discount || 0)).toFixed(2);
+
+        let _due = (parseFloat(_finalCost || 0) - parseFloat(birdsaledata.Paid || 0)).toFixed(2)
+
+        //  // data.BirdSaleDetailsList=birdSalesDetailsFields;
+        //   data.TotalAmount=parseFloat(totalCost||0).toFixed(2);
+        //   data.FinalCost=_finalCost;
+        //   data.Due=_due;
+
+        //   //data["FinalCost"]=_finalCost;
+        //  // data["Due"]=_due;
+
+        //   setBirdSaleData(data);
+
+        setBirdSaleData({
+            ...birdsaledata, BirdSaleDetailsList: birdSalesDetailsFields,
+
+            // Due:((parseFloat(totalCost||0)+ parseFloat(birdsaledata.AdditionalCharge || 0))-
+            //  parseFloat(birdsaledata.Discount || 0))-parseFloat(birdsaledata.Paid || 0)
+
+            Due: _due>=0?_due:0,// parseFloat(Math.round(totalCost - parseFloat(birdsaledata.Paid || 0))).toFixed(2),
+
+            TotalWeight:totalWeight,
+            TotalAmount: parseFloat(Math.round(totalCost)).toFixed(2),
+            FinalCost: _finalCost>=0?_finalCost:0
+
+
+        });
+
+    }, [objupdate]);
+
 
 
     const fetchUnit = () => {
@@ -593,6 +796,29 @@ function BirdSale(props) {
             props.showAlert("Error occurred!!", "danger")
         }
     }
+    //
+
+    const _fetchBirdType = () => {
+        FecthBirdType(process.env.REACT_APP_API)
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setBirdTypeList(data.Result);
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+                    history("/login")
+                }
+                else if (data.StatusCode === 500) {
+                    HandleLogout();
+                    history("/login")
+                }
+                else {
+                    setIsLoaded(false);
+                    errorHandle(data.StatusCode);
+                }
+            });
+    }
+
 
     const _birdSaleList = (uid) => {
         setIsLoaded(true);
@@ -641,14 +867,14 @@ function BirdSale(props) {
                 body: JSON.stringify({
 
                     Id: birdsaledata.Id,
-                    LotId: birdsaledata.LotId,
-                    ShedId: birdsaledata.ShedId,
+                    // LotId: birdsaledata.LotId,
+                    // ShedId: birdsaledata.ShedId,
                     Date: birdsaledata.Date,
                     CustomerId: birdsaledata.CustomerId,
-                    BirdCount: birdsaledata.BirdCount,
-                    TotalWeight: birdsaledata.TotalWeight,
-                    UnitId: birdsaledata.UnitId,
-                    Rate: birdsaledata.Rate,
+                    // BirdCount: birdsaledata.BirdCount,
+                    // TotalWeight: birdsaledata.TotalWeight,
+                    // UnitId: birdsaledata.UnitId,
+                    // Rate: birdsaledata.Rate,
                     TotalAmount: birdsaledata.TotalAmount,
                     Paid: birdsaledata.Paid,
                     Due: birdsaledata.Due,
@@ -660,10 +886,11 @@ function BirdSale(props) {
                     PhonePay: birdsaledata.PhonePay,
                     NetBanking: birdsaledata.NetBanking,
                     CashDeposite: birdsaledata.CashDeposite,
-                    Cheque: birdsaledata.Cheque,
+                    //  Cheque: birdsaledata.Cheque,
                     CompanyId: localStorage.getItem('companyid'),
                     Discount: birdsaledata.Discount,
-                    FinalCost: birdsaledata.FinalCost
+                    FinalCost: birdsaledata.FinalCost,
+                    BirdSaleDetailsList: birdsaledata.BirdSaleDetailsList
 
                 })
             }).then(res => res.json())
@@ -700,14 +927,14 @@ function BirdSale(props) {
 
         setBirdSaleData({
             Id: birdsaledata.Id,
-            LotId: birdsaledata.LotId,
-            ShedId: birdsaledata.ShedId,
+            //LotId: birdsaledata.LotId,
+            //ShedId: birdsaledata.ShedId,
             Date: birdsaledata.Date,
             CustomerId: birdsaledata.CustomerId,
-            BirdCount: birdsaledata.BirdCount,
-            TotalWeight: birdsaledata.TotalWeight,
-            UnitId: birdsaledata.UnitId,
-            Rate: birdsaledata.Rate,
+            //BirdCount: birdsaledata.BirdCount,
+            //TotalWeight: birdsaledata.TotalWeight,
+            //UnitId: birdsaledata.UnitId,
+            //Rate: birdsaledata.Rate,
             TotalAmount: birdsaledata.TotalAmount,
             Paid: birdsaledata.Paid,
             Due: birdsaledata.Due,
@@ -716,16 +943,17 @@ function BirdSale(props) {
             AmountInWords: ConvertNumberToWords(birdsaledata.TotalAmount),
             InvoiceNo: birdsaledata.InvoiceNo,
             VehicleNo: birdsaledata.VehicleNo,
-            UnitName: birdsaledata.UnitName,
+            //UnitName: birdsaledata.UnitName,
             AdditionalCharge: birdsaledata.AdditionalCharge,
             Cash: birdsaledata.Cash,
             PhonePay: birdsaledata.PhonePay,
             NetBanking: birdsaledata.NetBanking,
             CashDeposite: birdsaledata.CashDeposite,
-            Cheque: birdsaledata.Cheque,
+            //Cheque: birdsaledata.Cheque,
             CompanyId: localStorage.getItem('companyid'),
             Discount: birdsaledata.Discount,
-            FinalCost: birdsaledata.FinalCost
+            FinalCost: birdsaledata.FinalCost,
+            BirdSaleDetailsList: birdsaledata.BirdSaleDetailsList
         });
 
         fetchCustomerDetails(birdsaledata.CustomerId);
@@ -752,14 +980,14 @@ function BirdSale(props) {
                 },
                 body: JSON.stringify({
                     Id: birdsaledata.Id,
-                    LotId: birdsaledata.LotId,
-                    ShedId: birdsaledata.ShedId,
+                    //LotId: birdsaledata.LotId,
+                    //ShedId: birdsaledata.ShedId,
                     Date: birdsaledata.Date,
                     CustomerId: birdsaledata.CustomerId,
-                    BirdCount: birdsaledata.BirdCount,
-                    TotalWeight: birdsaledata.TotalWeight,
-                    UnitId: birdsaledata.UnitId,
-                    Rate: birdsaledata.Rate,
+                    //BirdCount: birdsaledata.BirdCount,
+                    // TotalWeight: birdsaledata.TotalWeight,
+                    //UnitId: birdsaledata.UnitId,
+                    // Rate: birdsaledata.Rate,
                     TotalAmount: birdsaledata.TotalAmount,
                     Paid: birdsaledata.Paid,
                     Due: birdsaledata.Due,
@@ -771,10 +999,11 @@ function BirdSale(props) {
                     PhonePay: birdsaledata.PhonePay,
                     NetBanking: birdsaledata.NetBanking,
                     CashDeposite: birdsaledata.CashDeposite,
-                    Cheque: birdsaledata.Cheque,
+                    //Cheque: birdsaledata.Cheque,
                     CompanyId: localStorage.getItem('companyid'),
                     Discount: birdsaledata.Discount,
-                    FinalCost: birdsaledata.FinalCost
+                    FinalCost: birdsaledata.FinalCost,
+                    BirdSaleDetailsList: birdsaledata.BirdSaleDetailsList
 
                 })
             }).then(res => res.json())
@@ -833,7 +1062,7 @@ function BirdSale(props) {
 
     const clientFilterChange = (e) => {
         let _client = e.target.value;
-       // history("/birdsale?uid="+_client)
+        // history("/birdsale?uid="+_client)
         // 
         setCIdFilter(e.target.value);
         getFilterData(filterFromDate, filterToDate, filterShed, _client);
@@ -988,30 +1217,30 @@ function BirdSale(props) {
                     </div>
 
                     <div className="col-2">
-                    <p style={{ fontSize: 13 }}><strong >Customer</strong></p>
-                            <Form.Select style={{ fontSize: 13 }}
-                                onChange={clientFilterChange} required>
-                                <option selected value="">Choose...</option>
-                                {
+                        <p style={{ fontSize: 13 }}><strong >Customer</strong></p>
+                        <Form.Select style={{ fontSize: 13 }}
+                            onChange={clientFilterChange} required>
+                            <option selected value="">Choose...</option>
+                            {
 
-                                    clientlist.length > 0 && clientlist.map((item) => {
+                                clientlist.length > 0 && clientlist.map((item) => {
 
-                                        let fullname = (item.MiddleName != "" && item.MiddleName != null) ?
-                                            item.FirstName + " " + item.MiddleName + " " + item.LastName :
-                                            item.FirstName + " " + item.LastName;
-                                        return (
-                                            <option value={item.ID} key={item.ID}
-                                                selected={item.ID === birdsaledata.CustomerId}>{fullname}</option>)
-                                    })
+                                    let fullname = (item.MiddleName != "" && item.MiddleName != null) ?
+                                        item.FirstName + " " + item.MiddleName + " " + item.LastName :
+                                        item.FirstName + " " + item.LastName;
+                                    return (
+                                        <option value={item.ID} key={item.ID}
+                                            selected={item.ID === birdsaledata.CustomerId}>{fullname}</option>)
+                                })
 
 
-                                }
-                            </Form.Select>
+                            }
+                        </Form.Select>
                     </div>
 
                     <div className="col-4" style={{ textAlign: 'right', marginTop: 30 }}>
-                    <a className="mr-2 btn btn-primary"
-                        style={{ marginRight: '20px' }} href={`/birdsalepaymentin/?custtype=${process.env.REACT_APP_CUST_TYPE_BIRD}`}>Payment</a>
+                        <a className="mr-2 btn btn-primary"
+                            style={{ marginRight: '20px' }} href={`/birdsalepaymentin/?custtype=${process.env.REACT_APP_CUST_TYPE_BIRD}`}>Payment</a>
                         <i className="fa-regular fa-file-excel fa-2xl"
                             style={{ color: '#bea2a2', marginRight: 30 }}
                             onClick={() => onDownloadExcel()} ></i>
@@ -1026,12 +1255,12 @@ function BirdSale(props) {
                 <thead>
                     <tr align='center' className="tr-custom">
                         <th>Date</th>
-                        <th>Shed</th>
+                        {/* <th>Shed</th> */}
                         {/* <th>Lot</th> */}
                         <th>Customer name</th>
-                        <th>Bird count</th>
-                        <th>Total weight</th>
-                        <th>Rate</th>
+                        {/* <th>Bird count</th> */}
+                        {/* <th>Total weight</th> */}
+                        {/* <th>Rate</th> */}
                         <th>Total amount</th>
                         <th>Paid</th>
                         <th>Due</th>
@@ -1047,37 +1276,34 @@ function BirdSale(props) {
                     {
 
                         itemsToDiaplay && itemsToDiaplay.length > 0 ? itemsToDiaplay.map((p) => {
-                            const _unit = unitlist.filter((c) => c.ID === p.UnitId);
-                            const _uname = _unit.length > 0 ? _unit[0].UnitName : "";
+                            //const _unit = unitlist.filter((c) => c.ID === p.UnitId);
+                            //const _uname = _unit.length > 0 ? _unit[0].UnitName : "";
 
-                            const _shed = shedlist.filter((c) => c.ShedId === p.ShedId);
-                            const _shedname = _shed.length > 0 ? _shed[0].ShedName : "";
+                            // const _shed = shedlist.filter((c) => c.ShedId === p.ShedId);
+                            // const _shedname = _shed.length > 0 ? _shed[0].ShedName : "";
 
-                            const _lot = lots.filter((c) => c.Id === p.LotId);
-                            const _lotname = _lot.length > 0 ? _lot[0].LotName : "";
-                            p.LotName = _lotname;
-                            //p.UnitName=_uname;
-                            //const [_unitname, setUnitName] = useState();
-                            //setBirdSaleData({ ...birdsaledata, UnitName: _uname });
-                            // setUnitName(_uname);
-                            BirdSaleListDowanloadArr.push({
-                                Date: moment(p.Date).format('DD-MMM-YYYY'),
-                                ShedName: _shedname, LotName: _lotname, CustomerId: p.CustomerId, BirdCount: p.BirdCount, TotalWeight: p.TotalWeight + " " + _uname,
-                                Rate: p.Rate, TotalAmount: p.TotalAmount.toFixed(2), Paid: p.Paid.toFixed(2), Due: p.Due.toFixed(2), PaymentDate: moment(p.PaymentDate).format('DD-MMM-YYYY'),
-                                Comments: p.Comments, CustomerName: p.CustomerName
-                            });
+                            //const _lot = lots.filter((c) => c.Id === p.LotId);
+                            //const _lotname = _lot.length > 0 ? _lot[0].LotName : "";
+                            // p.LotName = _lotname;
+
+                            // BirdSaleListDowanloadArr.push({
+                            //     Date: moment(p.Date).format('DD-MMM-YYYY'),
+                            //     ShedName: _shedname, LotName: _lotname, CustomerId: p.CustomerId, BirdCount: p.BirdCount, TotalWeight: p.TotalWeight + " " + _uname,
+                            //     Rate: p.Rate, TotalAmount: p.TotalAmount.toFixed(2), Paid: p.Paid.toFixed(2), Due: p.Due.toFixed(2), PaymentDate: moment(p.PaymentDate).format('DD-MMM-YYYY'),
+                            //     Comments: p.Comments, CustomerName: p.CustomerName
+                            // });
 
 
 
                             return (
                                 !isloaded && <tr align='center' key={p.Id} style={{ fontSize: 13 }}>
                                     <td align='center'>{moment(p.Date).format('DD-MMM-YYYY')}</td>
-                                    <td align='center'>{_shedname}</td>
+                                    {/* <td align='center'>{_shedname}</td> */}
                                     {/* <td align='left'>{_lotname}</td> */}
                                     <td align='center'>{p.CustomerName}</td>
-                                    <td align='center'>{p.BirdCount}</td>
-                                    <td align='center'>{p.TotalWeight + " " + _uname}</td>
-                                    <td align='center'>{p.Rate}</td>
+                                    {/* <td align='center'>{p.BirdCount}</td> */}
+                                    {/* <td align='center'>{p.TotalWeight + " " + _uname}</td> */}
+                                    {/* <td align='center'>{p.Rate}</td> */}
                                     <td align='center'>{p.TotalAmount.toFixed(2)}</td>
                                     <td align='center'>{p.Paid.toFixed(2)}</td>
                                     <td align='center'>{p.Due.toFixed(2)}</td>
@@ -1173,7 +1399,7 @@ function BirdSale(props) {
                 <Modal
                     show={addModalShow}
                     {...props}
-                    size="lg"
+                    size="xl"
                     aria-labelledby="contained-modal-title-vcenter"
                     centered
                 >
@@ -1198,6 +1424,229 @@ function BirdSale(props) {
                                                 </Form.Control.Feedback>
                                             </Form.Group>
 
+                                            <Form.Group controlId="ClientId" as={Col} >
+                                                <Form.Label style={{ fontSize: 13 }}>Customer</Form.Label>
+                                                <Form.Select style={{ fontSize: 13 }}
+                                                    onChange={clientChange} required>
+                                                    <option selected disabled value="">Choose...</option>
+                                                    {
+
+                                                        clientlist.length > 0 && clientlist.map((item) => {
+
+                                                            let fullname = (item.MiddleName != "" && item.MiddleName != null) ?
+                                                                item.FirstName + " " + item.MiddleName + " " + item.LastName :
+                                                                item.FirstName + " " + item.LastName;
+                                                            return (
+                                                                <option value={item.ID} key={item.ID}
+                                                                    selected={item.ID === birdsaledata.CustomerId}>{fullname}</option>)
+                                                        })
+
+
+                                                    }
+                                                </Form.Select>
+                                                <Form.Control.Feedback type="invalid">
+                                                    Please select customer
+                                                </Form.Control.Feedback>
+                                            </Form.Group>
+                                        </Row>
+
+
+                                        <Row>
+                                            <div className="row">
+                                                <form>
+                                                    <Row className="mb-12" style={{ fontSize: '12px', marginTop: '10px' }}>
+                                                        <div class="col"><p class="form-label">Bird Type</p></div>
+                                                        <div class="col"><p class="form-label">Shed</p></div>
+                                                        <div class="col"><p class="form-label">Lot</p></div>
+                                                        <div class="col"><p class="form-label">Bird Count</p></div>
+                                                        <div class="col"><p class="form-label">Weight</p></div>
+                                                        <div class="col"><p class="form-label">Unit</p></div>
+                                                        <div class="col"><p class="form-label">Unit Price</p></div>
+                                                        <div class="col"><p class="form-label">Amount</p></div>
+                                                        <div class="col"><p class="form-label" ing>Delete</p></div>
+                                                        <hr className="line" />
+                                                    </Row>
+
+
+                                                    {birdsaledata.BirdSaleDetailsList.map((form, index) => {
+                                                        return (
+                                                            <div key={index} style={{ marginTop: 10 }}>
+                                                                <Row className="mb-12">
+
+                                                                    <Form.Group controlId="Id" as={Col} >
+                                                                        <Form.Control type="text" name="Id" hidden disabled value={birdsaledata.LotId}
+                                                                        />
+                                                                        <Form.Select aria-label="Default select example" style={{ fontSize: 13 }}
+                                                                            onChange={event => birdTypeChange(event, index)} required>
+                                                                            <option selected disabled value="">Choose...</option>
+                                                                            {
+                                                                                birdtypelist.map((item) => {
+                                                                                    return (
+                                                                                        <option
+                                                                                            key={item.Id}
+                                                                                            defaultValue={item.Id == null ? null : item.Id}
+                                                                                            selected={item.Id === form.BirdTypeId}
+                                                                                            value={item.Id}
+                                                                                        >{item.BirdTypeName}</option>
+                                                                                    );
+                                                                                })
+                                                                            }
+                                                                        </Form.Select>
+                                                                        <Form.Control.Feedback type="invalid">
+                                                                            Please select bird type
+                                                                        </Form.Control.Feedback>
+                                                                    </Form.Group>
+
+                                                                    <Form.Group controlId="ShedId" as={Col} >
+                                                                        <Form.Control type="text" name="LotId" hidden disabled value={birdsaledata.LotId}
+                                                                        />
+                                                                        <Form.Select aria-label="Default select example" style={{ fontSize: 13 }}
+                                                                            onChange={event => shedChange(event, index)} required
+                                                                        //onChange={shedChange} 
+                                                                        >
+                                                                            <option selected disabled value="">Choose...</option>
+                                                                            {
+                                                                                shedlist.map((item) => {
+                                                                                    return (
+                                                                                        <option
+                                                                                            key={item.ShedId}
+                                                                                            defaultValue={item.ShedId == null ? null : item.ShedId}
+                                                                                            selected={item.ShedId === form.ShedId}
+                                                                                            value={item.ShedId}
+                                                                                        >{item.ShedName}</option>
+                                                                                    );
+                                                                                })
+                                                                            }
+                                                                        </Form.Select>
+                                                                        <Form.Control.Feedback type="invalid">
+                                                                            Please select shed
+                                                                        </Form.Control.Feedback>
+                                                                    </Form.Group>
+
+                                                                    <InputField controlId="LotName"
+                                                                        label=""
+                                                                        type="text"
+                                                                        value={form.LotName}
+                                                                        name="LotName"
+                                                                        placeholder="Lot name"
+                                                                        errormessage="Please provide lot name"
+                                                                        required={true}
+                                                                        disabled={true}
+                                                                    />
+
+                                                                    <InputField controlId="BirdCount"
+                                                                        label=""
+                                                                        type="text"
+                                                                        value={form.BirdCount}
+                                                                        name="BirdCount"
+                                                                        placeholder="Bird count"
+                                                                        errormessage="Please provide bird count"
+                                                                        required={true}
+                                                                        disabled={false}
+                                                                        // onChange={birdcountChange}
+                                                                        onChange={event => birdcountChange(event, index)}
+                                                                    //onKeyDown={NumberInputKeyDown}
+                                                                    />
+
+                                                                    <InputField controlId="TotalWeight"
+                                                                        label=""
+                                                                        type="text"
+                                                                        value={form.TotalWeight}
+                                                                        name="TotalWeight"
+                                                                        placeholder="Total weight"
+                                                                        errormessage="Please provide total weight"
+                                                                        required={true}
+                                                                        disabled={false}
+                                                                        //onChange={totalWeightChange}
+                                                                        onChange={event => totalWeightChange(event, index)}
+                                                                    />
+
+                                                                    <Form.Group controlId="UnitId" as={Col} >
+                                                                        <Form.Select aria-label="Default select example"
+                                                                            onChange={event => unitIdChange(event, index)}
+                                                                            required style={{ fontSize: 13 }}>
+                                                                            <option selected disabled value="">Choose...</option>
+                                                                            {
+                                                                                unitlist.map((item) => {
+                                                                                    return (
+                                                                                        <option
+                                                                                            key={item.ID}
+                                                                                            defaultValue={item.ID == null ? null : item.ID}
+                                                                                            selected={item.ID === form.UnitId}
+                                                                                            value={item.ID}
+                                                                                        >{item.UnitName}</option>
+                                                                                    );
+                                                                                })
+                                                                            }
+                                                                        </Form.Select>
+                                                                        <Form.Control.Feedback type="invalid">
+                                                                            Please select unit
+                                                                        </Form.Control.Feedback>
+                                                                    </Form.Group>
+
+                                                                    <InputField controlId="Rate"
+                                                                        label=""
+                                                                        type="text"
+                                                                        value={form.Rate}
+                                                                        name="Rate"
+                                                                        placeholder="Rate"
+                                                                        errormessage="Please enter rate"
+                                                                        required={true}
+                                                                        disabled={false}
+                                                                        onChange={event => rateChange(event, index)}
+                                                                    />
+
+                                                                    <InputField controlId="Amount" label=""
+                                                                        type="text"
+                                                                        value={form.Amount}
+                                                                        name="TotalAmount"
+                                                                        placeholder="Total Amount"
+                                                                        errormessage="Please provide total amount"
+                                                                        required={true}
+                                                                        disabled={true}
+                                                                    />
+                                                                    <div className="col">
+                                                                        <i className="fa-solid fa-trash" style={{
+                                                                            color: '#f81616',
+                                                                            marginLeft: '15px'
+                                                                        }}
+                                                                            onClick={() => removeFields(index)}></i>
+                                                                    </div>
+                                                                </Row>
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </form>
+                                            </div>
+                                            <i class="fa-solid fa-circle-plus" style={{ marginTop: '5px', width: '25px' }}
+                                                onClick={(e) => addFields(e)}></i>
+                                            <hr className="line" style={{ marginTop: '20px' }} />
+                                        </Row>
+
+                                        {/* <Row className="mb-12">
+                                            <div className="col-8">
+                                                <p class="form-label">Total weight :</p>
+                                            </div>
+                                            <div className="col-4" style={{ textAlign: 'left' }}>
+                                                <p class="form-label">
+                                                 {parseFloat(birdsaledata.TotalWeight || 0).toFixed(2)}</p>
+                                            </div>
+                                            <hr className="line" style={{ marginTop: '10px' }} />
+                                        </Row> */}
+
+                                        <Row className="mb-12">
+                                            <div className="col-8">
+                                                <p class="form-label">Total amount:</p>
+                                            </div>
+                                            <div className="col-4" style={{ textAlign: 'left' }}>
+                                                <p class="form-label"><span>&#8377;</span> {parseFloat(birdsaledata.TotalAmount || 0).toFixed(2)}</p>
+                                            </div>
+                                            <hr className="line" style={{ marginTop: '10px' }} />
+                                        </Row>
+
+
+
+                                        {/* <Row>
                                             <Form.Group controlId="ShedId" as={Col} >
                                                 <Form.Label style={{ fontSize: 13 }}>Shed*</Form.Label>
                                                 <Form.Control type="text" name="LotId" hidden disabled value={birdsaledata.LotId}
@@ -1233,37 +1682,12 @@ function BirdSale(props) {
                                                 required={true}
                                                 disabled={true}
                                             />
-                                        </Row>
-                                        <Row className="mb-12">
+                                        </Row> */}
 
-                                        </Row>
                                         <Row className="mb-12">
                                             {/* <input type="hidden" value={birdsaledata.CustomerId} name="name" /> */}
 
-                                            <Form.Group controlId="ClientId" as={Col} >
-                                                <Form.Label style={{ fontSize: 13 }}>Customer</Form.Label>
-                                                <Form.Select style={{ fontSize: 13 }}
-                                                    onChange={clientChange} required>
-                                                    <option selected disabled value="">Choose...</option>
-                                                    {
 
-                                                        clientlist.length > 0 && clientlist.map((item) => {
-
-                                                            let fullname = (item.MiddleName != "" && item.MiddleName != null) ?
-                                                                item.FirstName + " " + item.MiddleName + " " + item.LastName :
-                                                                item.FirstName + " " + item.LastName;
-                                                            return (
-                                                                <option value={item.ID} key={item.ID}
-                                                                    selected={item.ID === birdsaledata.CustomerId}>{fullname}</option>)
-                                                        })
-
-
-                                                    }
-                                                </Form.Select>
-                                                <Form.Control.Feedback type="invalid">
-                                                    Please select customer
-                                                </Form.Control.Feedback>
-                                            </Form.Group>
 
                                             {/* <InputField controlId="CustomerName"
                                                 label="Customer name*"
@@ -1278,7 +1702,7 @@ function BirdSale(props) {
 
                                             /> */}
 
-                                            <InputField controlId="BirdCount"
+                                            {/* <InputField controlId="BirdCount"
                                                 label="Bird count*"
                                                 type="text"
                                                 value={birdsaledata.BirdCount}
@@ -1289,9 +1713,9 @@ function BirdSale(props) {
                                                 disabled={false}
                                                 onChange={birdcountChange}
                                                 onKeyDown={NumberInputKeyDown}
-                                            />
+                                            /> */}
 
-                                            <InputField controlId="TotalWeight"
+                                            {/* <InputField controlId="TotalWeight"
                                                 label="Total weight*"
                                                 type="text"
                                                 value={birdsaledata.TotalWeight}
@@ -1301,10 +1725,10 @@ function BirdSale(props) {
                                                 required={true}
                                                 disabled={false}
                                                 onChange={totalWeightChange}
-                                            />
+                                            /> */}
 
                                         </Row>
-                                        <Row className="mb-12">
+                                        {/* <Row className="mb-12">
 
                                             <Form.Group controlId="UnitId" as={Col} >
                                                 <Form.Label style={{ fontSize: 13 }}>Unit*</Form.Label>
@@ -1338,23 +1762,14 @@ function BirdSale(props) {
                                                 errormessage="Please enter rate"
                                                 required={true}
                                                 disabled={false}
-                                                onChange={rateChange}
+                                                onChange={event => rateChange(event, index)}
                                             />
 
-                                            <InputField controlId="AdditionalCharge" label="Additional charge"
-                                                type="number"
-                                                value={birdsaledata.AdditionalCharge}
-                                                name="AdditionalCharge"
-                                                placeholder="Additional charge"
-                                                errormessage="Please enter Additional charge"
-                                                required={false}
-                                                disabled={false}
-                                                onChange={additionalChargeChange}
-                                            />
-                                        </Row>
+                                          
+                                        </Row> */}
                                         <Row className="mb-12">
 
-                                            <InputField controlId="TotalAmount" label="Total amount*"
+                                            {/* <InputField controlId="TotalAmount" label="Total amount*"
                                                 type="text"
                                                 value={birdsaledata.TotalAmount}
                                                 name="TotalAmount"
@@ -1362,7 +1777,7 @@ function BirdSale(props) {
                                                 errormessage="Please provide total amount"
                                                 required={true}
                                                 disabled={true}
-                                            />
+                                            /> */}
 
                                             <InputField controlId="Discount" label="Discount"
                                                 type="number"
@@ -1375,6 +1790,17 @@ function BirdSale(props) {
                                                 onChange={discountChange}
                                             />
 
+                                            <InputField controlId="AdditionalCharge" label="Additional charge"
+                                                type="number"
+                                                value={birdsaledata.AdditionalCharge}
+                                                name="AdditionalCharge"
+                                                placeholder="Additional charge"
+                                                errormessage="Please enter Additional charge"
+                                                required={false}
+                                                disabled={false}
+                                                onChange={additionalChargeChange}
+                                            />
+
                                             <InputField controlId="FinalCost" label="Final cost"
                                                 type="number"
                                                 value={birdsaledata.FinalCost}
@@ -1382,7 +1808,7 @@ function BirdSale(props) {
                                                 placeholder="Final cost"
                                                 errormessage="Please provide final cost"
                                                 required={false}
-                                                disabled={false}
+                                                disabled={true}
                                             />
                                         </Row>
 
@@ -1434,7 +1860,7 @@ function BirdSale(props) {
                                                 onChange={cashDepositeChange}
                                             />
 
-                                            <InputField controlId="Cheque" label="Cheque"
+                                            {/* <InputField controlId="Cheque" label="Cheque"
                                                 type="text"
                                                 value={birdsaledata.Cheque}
                                                 name="Cheque"
@@ -1443,7 +1869,7 @@ function BirdSale(props) {
                                                 required={false}
                                                 disabled={false}
                                                 onChange={chequeChange}
-                                            />
+                                            /> */}
                                         </Row>
                                         <Row>
 

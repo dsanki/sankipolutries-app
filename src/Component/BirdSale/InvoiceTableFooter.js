@@ -121,7 +121,7 @@ const InvoiceTableFooter = (props) => {
     
                 if(props.birdsaledata.Cheque!=null)
                     {
-                        paymentmode= paymentmode+ " Cheque- "
+                        paymentmode= paymentmode+ " Adv.Settle- "
                         +Number.parseFloat(props.birdsaledata.Cheque).toFixed(2)
                     }
     return (
@@ -132,11 +132,36 @@ const InvoiceTableFooter = (props) => {
 
             </View> */}
 
+            
+{
+    <View style={styles.row}>
+    <Text style={styles.description}>Total Amount</Text>
+    <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />
+    {Number.parseFloat(props.birdsaledata.TotalAmount||0).toFixed(2)}</Text>
+</View>
+
+}
+{
+      <View style={styles.row}>
+      <Text style={styles.amountinwordslblarea}> 
+          <Text style={styles.amountinwordslbl}>Amount in words: </Text>
+          <Text style={styles.amountinwords}>{props.birdsaledata.AmountInWords}</Text>
+      </Text>
+      </View>
+}
+
 {
     <View style={styles.row}>
     <Text style={styles.description}>Discount</Text>
     <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />
     {Number.parseFloat(props.birdsaledata.Discount||0).toFixed(2)}</Text>
+</View>
+}
+{
+    <View style={styles.row}>
+    <Text style={styles.description}>Additional charge</Text>
+    <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />
+    {Number.parseFloat(props.birdsaledata.AdditionalCharge||0).toFixed(2)}</Text>
 </View>
 }
 <View style={styles.row}>
@@ -153,12 +178,7 @@ const InvoiceTableFooter = (props) => {
                 Number.parseFloat(props.eggsaledata.AdditionalCharge||0)).toFixed(2)}</Text>
             </View> */}
             
-            <View style={styles.row}>
-            <Text style={styles.amountinwordslblarea}> 
-                <Text style={styles.amountinwordslbl}>Amount in words: </Text>
-                <Text style={styles.amountinwords}>{props.birdsaledata.AmountInWords}</Text>
-            </Text>
-            </View>
+          
             <View style={styles.row}>
                 <Text style={styles.description}>Paid</Text>
                 <Text style={styles.total}><Image src={rup} style={styles.logoRupee} />{Number.parseFloat(props.birdsaledata.Paid).toFixed(2)}</Text>

@@ -65,11 +65,13 @@ const styles = StyleSheet.create({
   const InvoiceTableHeader = () => (
     <View style={styles.container}>
         <Text style={styles.slno}>Sl.No.</Text>
+        <Text style={styles.qty}>Bird Type</Text>
         <Text style={styles.qty}>Total Birds</Text>
-        <Text style={styles.weight}>Total Weight</Text>
+        <Text style={styles.weight}>Weight</Text>
         <Text style={styles.rate}>Rate</Text>
-        <Text style={styles.rate}>Addn. Charge</Text>
-        <Text style={styles.amount}>Total Cost</Text>
+        <Text style={styles.amount}>Amount</Text>
+        {/* <Text style={styles.rate}>Addn. Charge</Text> */}
+        {/* <Text style={styles.amount}>Total Cost</Text> */}
        
     </View>
   );

@@ -33,7 +33,7 @@ const Invoice = (props) => (
         <Page size="A4" style={styles.page}>
             <Image style={styles.logo} src={logoSP} />
             <InvoiceTitle title='Invoice' />
-            <InvoiceNo invoice={props.invoice} />
+            {/* <InvoiceNo invoice={props.invoice} /> */}
             <BillTo invoice={props.invoice} />
             <InvoiceItemsTable invoice={props.invoice} />
             <InvoiceThankYouMsg bankdetails={props.bankdetails} 

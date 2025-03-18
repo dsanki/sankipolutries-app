@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
        
     },
     qtyH: {
-        width: '17%',
+        width: '15%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         textAlign: 'center',
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
         //fontStyle: 'bold'
     },
     discntH: {
-        width: '10%',
+        width: '15%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         textAlign: 'center',
@@ -130,11 +130,9 @@ const styles = StyleSheet.create({
         fontSize:9
     },
     finalamountH: {
-        width: '20%',
+        width: '18%',
         textAlign: 'right',
-       // marginRight:8,
         fontFamily: 'Helvetica-Bold',
-        //borderRightColor: borderColor,
         fontSize:9,
         paddingRight: 8,
     },

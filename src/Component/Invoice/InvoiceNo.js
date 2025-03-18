@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end'
     },
     invoiceDate: {
-        fontSize: 9,
+        fontSize: 8,
         fontStyle: 'bold',
     },
     label: {
@@ -40,12 +40,12 @@ const InvoiceNo = (props) => (
     <Fragment>
 
 
-        <View style={styles.invoiceNoContainer}>
+        {/* <View style={styles.invoiceNoContainer}>
             <Text style={styles.invoiceDate}>{`Invoice No: ${leftFillNum(props.invoice.Id, 5)}`}</Text>
         </View >
         <View style={styles.invoiceDateContainer}>
             <Text style={styles.invoiceDate}>{`Date: ${moment(props.invoice.PurchaseDate).format('DD/MM/YYYY')}`}</Text>
-        </View>
+        </View> */}
 
     </Fragment>
 );

@@ -21,7 +21,6 @@ function Login(props) {
           .then(data => {
             if (data.StatusCode === 200) {
               setCompanyList(data.Result);
-    
             }
             else if (data.StatusCode === 401) {
               HandleLogout();
@@ -37,7 +36,6 @@ function Login(props) {
       }
 
       useEffect((e) => {
-
         fetchCompanyDetails();
       }, []);
 

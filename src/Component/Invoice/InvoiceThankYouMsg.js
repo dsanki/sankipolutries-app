@@ -9,7 +9,6 @@ const styles = StyleSheet.create({
     },
     companyTitle: {
         fontSize: 12,
-        // textAlign: 'center',
         textTransform: 'uppercase',
         width: '100%',
         textAlign: 'right',
@@ -21,8 +20,6 @@ const styles = StyleSheet.create({
 
     reportTitle: {
         fontSize: 12,
-        // textAlign: 'center',
-        //  textTransform: 'uppercase',
         width: '100%',
         textAlign: 'right',
         borderTopColor: '#dee2e6',
@@ -30,6 +27,7 @@ const styles = StyleSheet.create({
         borderRightWidth: 1,
         paddingRight: 2
     },
+
     Footer: {
         position: 'absolute',
         left: 0,
@@ -37,59 +35,61 @@ const styles = StyleSheet.create({
         right: 40,
         textAlign: 'right'
     },
+    FooterSignature: {
+        position: 'absolute',
+        left: 0,
+        bottom: 70,
+        right: 40,
+        textAlign: 'right'
+    },
+   
 
     FooterBankDetails:{
         position: 'absolute',
         left: 60,
-        bottom:40,
+        bottom:70,
         right: 60,
         textAlign: 'left',
         border:1,
         borderColor:  '#dee2e6',
         padding:5,
         fontSize:10,
-        width: '50%',
-
-
+        width: '50%'
     },
+
     bankdetails:
     {
         fontFamily: 'Helvetica-Bold'
     },
+    
     client:{
         position: 'absolute',
         left: 60,
-        bottom: 120,
+        bottom: 140,
         right: 40,
-        textAlign: 'left'
+        textAlign: 'left',
+        fontSize: 9
     }
-
-
 });
 
-
-// function drawRectangle(x, y, w, h) {
-//     ctx.strokeStyle = color;
-//     ctx.strokeRect(x, y, w, h);
-// }
-const Square=()=>
-{
-    
-}
 const InvoiceThankYouMsg = (props) => (
     
-    <>
+<>
 <View  style={styles.client}><Text>Customer Signature</Text></View>
 <View style={styles.FooterBankDetails}>
-<Text style={{fontFamily: 'Helvetica-Bold',fontSize:8}}>Bank Details of {props.companydetails[0].CompanyName}:</Text>
-<Text><Text style={{fontFamily: 'Helvetica-Bold',fontSize: 8}}>Bank Name: </Text><Text style={{fontSize: 8}}>{props.companydetails[0].BankName}</Text></Text>
+<Text style={{fontFamily: 'Helvetica-Bold',fontSize:8}}>Bank Details of {" "}
+     {props.companydetails[0].CompanyName}:</Text>
+<Text><Text style={{fontFamily: 'Helvetica-Bold',fontSize: 8}}>Bank Name: </Text>
+<Text style={{fontSize: 8}}>{props.companydetails[0].BankName}</Text></Text>
 <Text><Text style={{fontFamily: 'Helvetica-Bold', fontSize: 8}}>A/C No: </Text><Text style={{fontSize: 8}}>{props.companydetails[0].AccountNo}</Text></Text>
 <Text><Text style={{fontFamily: 'Helvetica-Bold', fontSize: 8}}>Branch IFSC Code: </Text><Text style={{fontSize: 8}}>{props.companydetails[0].IFSCCode}</Text></Text>
 <Text><Text style={{fontFamily: 'Helvetica-Bold', fontSize: 8}}>Branch Name: </Text><Text style={{fontSize: 8}}>{props.companydetails[0].BranchName}</Text></Text>
 </View>
 
-<View style={styles.Footer}>
-<Svg viewBox="-210 -05 200 100">
+{/* <View style={styles.Footer}>
+
+<Svg viewBox="-210 -0 200 100">
+
             <Rect
                 width="70"
                 height="50"
@@ -97,12 +97,13 @@ const InvoiceThankYouMsg = (props) => (
                 stroke="gray"
             />
         </Svg>
-</View>
-    <View style={styles.Footer}>
+</View> */}
 
-       
-        <Text >Authorized Signature For</Text><br />
-        <Text style={{fontFamily: 'Helvetica-Bold'}} >{props.companydetails[0].CompanyName}</Text>
+    <View style={styles.FooterSignature}>
+    
+        <Text style={{fontSize:'9px'}}>Authorized Signature For</Text><br />
+        <Text style={{fontFamily: 'Helvetica-Bold', fontSize:8}} >
+            {props.companydetails[0].CompanyName}</Text>
     </View>
     </>
 );

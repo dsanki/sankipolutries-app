@@ -14,6 +14,8 @@ export default function NavComponent(props) {
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         localStorage.removeItem('isadmin');
+        localStorage.removeItem('companydetails');
+        localStorage.removeItem('companyid');
         history('/login')
     }
 

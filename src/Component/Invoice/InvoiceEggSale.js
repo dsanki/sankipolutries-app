@@ -33,83 +33,34 @@ const styles = StyleSheet.create({
     },
     gap:
     {
-        marginBottom: 10
+        marginBottom: 5
     },
     sectionROW: {
-        margin: 10,
-        padding: 10,
-       // flexGrow: 1,
+        margin: 5,
+        padding: 5,
         flexDirection: 'row'
       }
-    // logo: {
-    //     width: 40,
-    //     height: 40,
-    //     marginLeft: 'auto',
-    //     marginRight: 'auto'
-    // },
-
-    //     container: {
-    //         flexDirection: 'row',
-    //         borderBottomColor: '#bff0fd',
-    //         backgroundColor: '#bff0fd',
-    //         borderBottomWidth: 1,
-    //         alignItems: 'center',
-    //         height: 24,
-    //         textAlign: 'center',
-    //         fontStyle: 'bold',
-    //         flexGrow: 1,
-    //     },
-    //     date: {
-    //         width: '40%',
-    //         borderRightColor: borderColor,
-    //         borderRightWidth: 1,
-    //     },
-    //     qty: {
-    //         width: '20%',
-    //         borderRightColor: borderColor,
-    //         borderRightWidth: 1,
-    //     },
-    //     rate: {
-    //         width: '20%',
-    //         borderRightColor: borderColor,
-    //         borderRightWidth: 1,
-    //     },
-    //     amount: {
-    //         width: '20%'
-    //     }
 });
 
 // Create Document Component
 const InvoiceEggSale = (props) => (
     <Document>
         <Page size="A4" style={styles.page}>
-            <InvoiceTitle title='Invoice' eggsaledata={props.eggsaledata} companydetails={props.companydetails}
+            <InvoiceTitle title='Invoice' eggsaledata={props.eggsaledata} 
+            companydetails={props.companydetails}
              invoiceno={props.eggsaledata.InvoiceNo} date={props.eggsaledata.PurchaseDate} />
-            {/* <InvoiceNo invoice={props.eggsaledata} /> */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
                 <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
-                {/* <View>
-                    <Text style={{ width: 50, textAlign: 'center' }}>Hello</Text>
-                </View> */}
                 <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
             </View>
-            {/* <Image style={styles.logo} src={props.companydetails.CompanyLogo} /> */}
-            {/* <Image style={styles.logo} src={logo} /> */}
             <View style={styles.sectionROW}>
-                <Company style={{marginTop:8}} companydetails={props.companydetails} />
-                <BillTo style={{marginTop:8}}  customerdetails={props.customerdetails}  
+                <Company style={{marginTop:2}} companydetails={props.companydetails} />
+                <BillTo style={{marginTop:2}}  customerdetails={props.customerdetails}  
                 vehicle={props.eggsaledata} />
             </View>
-            <View style={styles.gap}></View>
-
-
-
-            {/* <BillTo customerdetails={props.customerdetails} /> */}
-
-
+            {/* <View style={styles.gap}></View> */}
             <InvoiceItemsTable eggsaledata={props.eggsaledata} 
-            eggcategory={props.eggcategory} />
-            
+            eggcategory={props.eggcategory} advancedata={props.advancedata} />
             <InvoiceThankYouMsg bankdetails={props.bankdetails} 
             companydetails={props.companydetails}/>
         </Page>

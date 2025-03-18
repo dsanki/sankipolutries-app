@@ -37,23 +37,14 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 80,
-    height: 80,
-    //marginBottom: 10
-    // marginLeft: 'auto',
-    // marginRight: 'auto'
+    height: 80
   },
   logokp: {
     width: 80,
-    height: 80,
-    //marginBottom: 10
-    // marginLeft: 'auto',
-    // marginRight: 'auto'
+    height: 80
   }
 });
 
-function leftFillNum(num, targetLength) {
-  return num.toString().padStart(targetLength, '0');
-}
 const InvoiceTitle = (props) => (
   <View style={styles.row}>
     {
@@ -64,10 +55,10 @@ const InvoiceTitle = (props) => (
     <Text style={styles.reportTitle}>{props.title}</Text>
     <Fragment style={styles.date}>
       <View style={styles.invoiceDateContainer}>
-        <Text><Text style={{ fontFamily: 'Helvetica-Bold', fontSize:'12px' }}>Invoice No:</Text>
-        <Text style={{fontSize:'10px' }}> {props.invoiceno}</Text></Text><br />
-        <Text><Text style={{ fontFamily: 'Helvetica-Bold', fontSize:'12px' }}>Date: </Text>
-        <Text style={{fontSize:'10px' }}>{moment(props.date).format('DD/MM/YYYY')}</Text></Text>
+        <Text><Text style={{ fontFamily: 'Helvetica-Bold', fontSize:'9px' }}>Invoice No:</Text>
+        <Text style={{fontSize:'9px' }}> {props.invoiceno}</Text></Text><br />
+        <Text><Text style={{ fontFamily: 'Helvetica-Bold', fontSize:'9px' }}>Date: </Text>
+        <Text style={{fontSize:'9px' }}>{moment(props.date).format('DD/MM/YYYY')}</Text></Text>
        
       </View >
 

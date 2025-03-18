@@ -532,6 +532,38 @@ function EggSalePaymentIn(props) {
         addCount(count);
     }
 
+     const deletePaymentHistory = (id) => {
+            if (window.confirm('Are you sure?')) {
+                fetch(process.env.REACT_APP_API + 'PaymentHistory/DeletePaymentHistory?id=' + id, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': localStorage.getItem('token')
+                    }
+                }).then(res => res.json())
+                    .then((data) => {
+                        if (data.StatusCode === 200) {
+                            addCount(count);
+                            props.showAlert("Successfully deleted", "info")
+                        }
+                        else if (data.StatusCode === 401) {
+                            HandleLogout();
+                            history("/login")
+                        }
+                        else if (data.StatusCode === 404) {
+                            props.showAlert("Data not found!!", "danger")
+                        }
+                        else {
+                            props.showAlert("Error occurred!!", "danger")
+                        }
+                    },
+                        (error) => {
+                            props.showAlert("Error occurred!!", "danger")
+                        });
+            }
+        }
+
     return (
 
         <div>
@@ -717,6 +749,8 @@ function EggSalePaymentIn(props) {
                                                 <th>Date</th>
                                                 <th>Amount (<span>&#8377;</span>)</th>
                                                 <th>Mode </th>
+                                                <th>Option</th>
+
 
                                             </tr>
                                         </thead>
@@ -735,7 +769,10 @@ function EggSalePaymentIn(props) {
                                                             </td>
 
                                                             <td>{p.PaymentMode}</td>
-                                                            {/* <td> </td> */}
+                                                           <td> {localStorage.getItem('isadmin') === 'true' &&
+                                                        <i className="fa-solid fa-trash" style={{ color: '#f81616', marginLeft: '15px' }} 
+                                                        onClick={() => deletePaymentHistory(p.Id)}></i>}</td>
+                                                          
 
                                                         </tr>
                                                     )

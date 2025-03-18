@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     //     //fontStyle: 'bold'
     // },
     qty: {
-        width: '18%',
+        width: '15%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         textAlign: 'center',
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     //     fontSize:10
     // },
     discnt: {
-        width: '10%',
+        width: '15%',
         borderRightColor: borderColor,
         borderRightWidth: 1,
         textAlign: 'center',
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     //     fontSize:10
     // },
     finalamount: {
-        width: '20%',
+        width: '18%',
         textAlign: 'right',
         paddingRight: 8,
        // borderRightColor: borderColor,
@@ -193,6 +193,14 @@ const InvoiceTableRow = (props) => {
                     let _loseEgg=p.EggLose>0?"\n" +p.EggLose +" piece(s)":"";
                     let _eggpack=p.EggPack>0?p.EggPack +" Box":p.Quantity;
                     let _height=_loseEgg===""?25:50;
+                    let type="";
+                    if(p.EggDiscountType==1){
+                        type= "/egg"}
+                        else if(p.EggDiscountType==2)
+                        {
+                            type= "%"
+                        }
+
                     return(
                     <View style={styles.row} key={p.Id}>
                         <Text style={styles.SLNo}>{i+1}</Text>
@@ -200,7 +208,7 @@ const InvoiceTableRow = (props) => {
                         <Text style={styles.qty}>{_eggpack}{_loseEgg}</Text>
                         <Text style={styles.rate}>{p.EggRate}</Text>
                         <Text style={styles.amount}>{Number.parseFloat(p.TotalCost).toFixed(2)}</Text>
-                        <Text style={styles.discnt}>{p.DiscountPerEgg!=null?Number.parseFloat(p.DiscountPerEgg).toFixed(2):"0.00"}</Text>
+                        <Text style={styles.discnt}>{p.DiscountPerEgg!=null?Number.parseFloat(p.DiscountPerEgg).toFixed(2):"0.00"}{type}</Text>
                         <Text style={styles.totaltdiscnt}>{Number.parseFloat(p.TotalDiscount).toFixed(2)}</Text>
                         <Text style={styles.finalamount}>{Number.parseFloat(p.FinalCost).toFixed(2)}</Text>
                     </View>

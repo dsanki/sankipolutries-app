@@ -338,8 +338,6 @@ export const FecthEggStockInventory = async (apiurl) => {
   return data;
 }
 
-//FecthEggCategory
-
 export const FecthEggSaleInvoiceById = async (id, apiurl) => {
   const response =await fetch(apiurl + 'EggSale/GetEggSaleInvoiceById?id='+id,
     {
@@ -353,7 +351,20 @@ export const FecthEggSaleInvoiceById = async (id, apiurl) => {
 }
 
 export const FecthStockListById = async (catid, apiurl) => {
+
   const response =await fetch(apiurl + 'Stock/GetStockList?category='+catid,
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+  const data = await response.json();
+  return data;
+}
+
+export const FecthBirdType = async (apiurl) => {
+  const response =await fetch(apiurl + 'BirdSale/GetBirdType',
     {
       method: 'GET',
       headers: {
