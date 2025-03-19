@@ -8,7 +8,8 @@ import InputField from '../ReuseableComponent/InputField'
 import {
     FetchUnit, FetchShedsList, FetchLots, FetchLotById, FetchShedLotMapList, FetchBirdSaleList,
     dateyyyymmdd, downloadExcel, HandleLogout, NumberInputKeyDown, FetchCompanyDetails,
-    AmountInWords, ReplaceNonNumeric, Commarize, ConvertNumberToWords, GetCustomerByTypeId, FecthBirdType
+    AmountInWords, ReplaceNonNumeric, Commarize, ConvertNumberToWords, GetCustomerByTypeId, FecthBirdType,
+    downloadExcelFilter
 } from '../../Utility'
 
 import Loading from '../Loading/Loading'
@@ -1107,10 +1108,18 @@ function BirdSale(props) {
         getFilterData(filterFromDate, filterToDate, e.target.value, cidfilter)
     }
 
-    let BirdSaleListDowanloadArr = [];
+    //let BirdSaleListDowanloadArr = [];
     const onDownloadExcel = () => {
+        const _list = birdSaleList.map((p) => {
+                  return ({
+                                  Date: moment(p.Date).format('DD-MMM-YYYY'),
+                                  CustomerName: p.CustomerName,
+                                  TotalCost: parseFloat(p.TotalAmount||0).toFixed(2), 
+                              });
+                });
+        
 
-        downloadExcel(BirdSaleListDowanloadArr, "BirdSaleList");
+        downloadExcelFilter(_list, "BirdSaleList", companydetails[0].CompanyName,filterFromDate,filterToDate);
     }
 
     const handlePageChange = (newPage) => {

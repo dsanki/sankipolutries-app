@@ -406,6 +406,39 @@ function EggSale(props) {
         setInvoiceModalShow(false);
     };
 
+    //  const fetchPendingEggSaleInvoiceList = async (uid) => {
+    //         setIsLoaded(true);
+    //         fetch(process.env.REACT_APP_API + 'EggSale/GetPendingEggSaleInvoiceListByCustId?CustId='
+    //             + uid + '&CompanyId=' + localStorage.getItem('companyid'),
+    //             {
+    //                 method: 'GET',
+    //                 headers: {
+    //                     'Accept': 'application/json',
+    //                     'Content-Type': 'application/json',
+    //                     'Authorization': localStorage.getItem('token')
+    //                 }
+    //             })
+    //             .then(response => response.json())
+    //             .then(data => {
+    //                 if (data.StatusCode === 200) {
+    //                     setEggSaleDueList(data.Result);
+    //                     setIsLoaded(false);
+    //                 }
+    //                 else if (data.StatusCode === 401) {
+    //                     HandleLogout();
+    //                     history("/login")
+    //                 }
+    //                 else if (data.StatusCode === 404) {
+    //                     props.showAlert("Data not found !!", "danger")
+    //                 }
+    //                 else {
+    //                     props.showAlert("Error occurred !!", "danger")
+    //                 }
+    //             });
+    
+    //         setIsLoaded(false);
+    //     }
+
     const fetchAdvanceListByCustId = async (custid) => {
 
         FetchAdvanceListByCustId(custid)

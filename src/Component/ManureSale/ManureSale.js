@@ -9,7 +9,7 @@ import {
     FetchUnit,
     dateyyyymmdd, downloadExcel, HandleLogout, NumberInputKeyDown, FetchCompanyDetails, GetCustomerByTypeId,
     AmountInWords, ReplaceNonNumeric, Commarize, ConvertNumberToWords
-} from '../../Utility'
+,downloadExcelFilter} from '../../Utility'
 
 import Loading from '../Loading/Loading'
 
@@ -41,6 +41,8 @@ function ManureSale(props) {
     const [invoiceModalShow, setInvoiceModalShow] = useState(false);
     const [_unitname, setUnitName] = useState();
     const [itemsPerPage, setItemsPerPage] = useState(10);
+     const [companydetailsfromlocal, setCompanyDetailsFromLocal] = 
+     useState(JSON.parse(localStorage.getItem('companydetails')));
 
      const [ucount, setUCount] = useState(0);
         const objupdate = useMemo(() => ({ ucount }), [ucount]);
@@ -751,6 +753,21 @@ function ManureSale(props) {
         addCount(count);
     }
 
+    const onDownloadExcel = () => {
+            const _list = manureSaleList.map((p) => {
+              return ({
+                              Date: Moment(p.Date).format('DD-MMM-YYYY'),
+                              CustomerName: p.CustomerName,
+                              TotalCost: parseFloat(p.TotalAmount||0).toFixed(2)
+                          });
+            });
+
+            
+
+          downloadExcelFilter(_list, "ManureSale", companydetailsfromlocal.CompanyName,filterFromDate,filterToDate);
+        }
+    
+
     return (
         <div>
             {isloaded && <Loading />}
@@ -793,7 +810,7 @@ function ManureSale(props) {
                     <div className="col-4" style={{ textAlign: 'right'}}>
                         <i className="fa-regular fa-file-excel fa-2xl"
                             style={{ color: '#bea2a2', marginRight: 30 }}
-                        ></i>
+                            onClick={() => onDownloadExcel()} ></i>
                         <Button className="mr-2" variant="primary"
                             style={{ marginRight: "17.5px" }}
                             onClick={() => clickAddManureSale()}>New</Button>

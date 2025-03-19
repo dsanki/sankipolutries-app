@@ -1213,6 +1213,27 @@ function EggSaleModule(props) {
 
                         </div>
                     }
+                    {
+                        // advancedataticked != null && advancedataticked.Amount > 0 &&
+                        <div className="alert alert-danger" role="alert">
+                            <strong>  Total Due of Rs:
+                                5000.00
+                                </strong>
+                            {
+                               // eggsalearr.length > 0 && 
+                                <Form.Check
+                                    type="checkbox"
+                                    id="chkIsDueSettle"
+                                    label="Inclue preveous due"
+                                    onChange={isSettleChange}
+                                    value={issettle}
+                                    checked={issettle}
+                                    style={{ fontSize: '13px' }}
+                                />
+                            }
+
+                        </div>
+                    }
                 </div>
 
                 <div class="col-md-6" style={{ textAlign: 'right' }}> <Button className="mr-2" variant="primary"

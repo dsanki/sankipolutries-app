@@ -8,7 +8,7 @@ import DateComponent from '../DateComponent';
 import {
     dateyyyymmdd, HandleLogout, downloadExcel, FetchGunnyBagSaleList,
     FetchCompanyDetails, AmountInWords, ConvertNumberToWords, ReplaceNonNumeric,
-    Commarize, FecthEggSaleInvoiceList, GetCustomerByTypeId, GetGunnybagTypeList
+    Commarize, FecthEggSaleInvoiceList, GetCustomerByTypeId, GetGunnybagTypeList, downloadExcelFilter
 } from './../../Utility'
 
 import Loading from '../Loading/Loading'
@@ -44,6 +44,10 @@ function GunnyBag(props) {
     const [newcount, setAddNewCount] = useState(0);
     const objAddNew = useMemo(() => ({ newcount }), [newcount]);
     const objupdate = useMemo(() => ({ ucount }), [ucount]);
+
+     const [companydetailsfromlocal, setCompanyDetailsFromLocal] = 
+         useState(JSON.parse(localStorage.getItem('companydetails')));
+    
     // const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const initialGunnyBagSubvalues = {
@@ -649,6 +653,20 @@ function GunnyBag(props) {
         }
     }
 
+    const onDownloadExcel = () => {
+                const _list = gunnybagsalelist.map((p) => {
+                  return ({
+                                  Date: moment(p.Date).format('DD-MMM-YYYY'),
+                                  CustomerName: p.CustomerName,
+                                  TotalCost: parseFloat(p.TotalAmount ||0).toFixed(2)
+                              });
+                });
+    
+                
+    
+              downloadExcelFilter(_list, "GunnyBag", companydetailsfromlocal.CompanyName,filterFromDate,filterToDate);
+            }
+
 
     return (
         <div>
@@ -669,9 +687,14 @@ function GunnyBag(props) {
                             isRequired={false} value={filterToDate} />
                     </div>
                     <div className="col-6" style={{ textAlign: 'right', marginTop: '38px' }}>
-                        <i className="fa-regular fa-file-excel fa-2xl"
+
+                    <i className="fa-regular fa-file-excel fa-2xl"
                             style={{ color: '#bea2a2', marginRight: 30 }}
-                        ></i>
+                            title='Download Gunny Bag List' onClick={() => onDownloadExcel()} ></i>
+
+                        {/* <i className="fa-regular fa-file-excel fa-2xl"
+                            style={{ color: '#bea2a2', marginRight: 30 }} 
+                        ></i> */}
                         <Button className="mr-2" variant="primary"
                             style={{ marginRight: "17.5px" }}
                             onClick={() => clickAddGunnyBag()}>Add</Button>
