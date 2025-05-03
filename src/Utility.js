@@ -346,6 +346,26 @@ export const FectAllEggSaleInvoiceList = async (fromdate,todate, apiurl) => {
   return data;
 }
 
+
+
+export const FetchDueListByCustId = async (uid, apiurl) => {
+  const response =await fetch(apiurl + 'EggSale/GetDueListByCustId?CustId='
+            + uid + '&CompanyId=' + localStorage.getItem('companyid'),
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            });
+
+            const data = await response.json();
+            return data;
+    }
+
+
+
 export const FecthEggSaleInvoiceList = async (custid, apiurl) => {
   const response =await fetch(apiurl + 'EggSale/GetEggSaleInvoiceList?CustId='
     +custid+'&CompanyId='+localStorage.getItem('companyid'),

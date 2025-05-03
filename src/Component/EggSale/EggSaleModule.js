@@ -10,7 +10,7 @@ import {
     dateyyyymmdd, HandleLogout, downloadExcel,
     FetchCompanyDetails, AmountInWords, ReplaceNonNumeric, Commarize,
     FecthEggCategory, FecthEggSaleInvoiceList, FecthEggSaleInvoiceById, FetchAdvanceListByCustId,
-    FetchEggDiscountTypes
+    FetchEggDiscountTypes, FetchDueListByCustId
 } from './../../Utility'
 import Loading from '../Loading/Loading'
 
@@ -196,7 +196,7 @@ function EggSaleModule(props) {
             let _totalDiscount = eggsaledata.TotalDiscount;
 
             if (val === "1") {
-                _totalDiscount = (eggsaledata.Quantity * parseFloat(e.target.value||0));
+                _totalDiscount = (eggsaledata.Quantity * parseFloat(e.target.value || 0));
 
                 // setEggSaletData({S
                 //     ...eggsaledata, DiscountPerEgg: e.target.value,
@@ -206,7 +206,7 @@ function EggSaleModule(props) {
             }
             else if (val === "2") {
                 let totalCost = eggsaledata.TotalCost;
-                _totalDiscount = totalCost * (parseFloat(e.target.value||0) / 100);
+                _totalDiscount = totalCost * (parseFloat(e.target.value || 0) / 100);
 
 
             }
@@ -657,6 +657,27 @@ function EggSaleModule(props) {
 
     }
 
+    const [isduesettle, setIsDueSettle] = useState(false);
+    const [duesettleticked, setDueSettleTicked] = useState([]);
+    const isDueSettleChange = (e) => {
+        let _due = parseFloat(duelist || 0),
+            totladueAmt = parseFloat(eggsaleinvdata.Due || 0);
+        if (!isduesettle) {
+            let _di = _due + totladueAmt;
+            setEggSaleInvoiceData({
+                ...eggsaleinvdata, Due: _di
+            });
+        }
+        else {
+            let _d = totladueAmt - _due;
+            setEggSaleInvoiceData({
+                ...eggsaleinvdata, Due: _d
+            });
+        }
+
+        setIsDueSettle(!isduesettle);
+    }
+
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
@@ -665,7 +686,8 @@ function EggSaleModule(props) {
             // fetchCompanyDetails(localStorage.getItem('companyid'));
             fetchEggCategory();
             fetchAdvanceListByCustId(uid);
-
+            fetchDueListByCustId(uid);
+            fetchPendingEggSaleInvoiceList(uid);
             fetchEggDiscountTypes();
             setBankDetails({
                 ...bankdetails, BankName: process.env.REACT_APP_BANK_NAME,
@@ -789,6 +811,62 @@ function EggSaleModule(props) {
     //             }
     //         })
     // }
+
+    const [_duelist, setEggSaleDueList] = useState([]);
+    const fetchPendingEggSaleInvoiceList = async (uid) => {
+        // setIsLoaded(true);
+        fetch(process.env.REACT_APP_API + 'EggSale/GetPendingEggSaleInvoiceListByCustId?CustId='
+            + uid + '&CompanyId=' + localStorage.getItem('companyid'),
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setEggSaleDueList(data.Result);
+                    // setIsLoaded(false);
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found !!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred !!", "danger")
+                }
+            });
+
+        //setIsLoaded(false);
+    }
+
+
+    //
+    const [duelist, setDueList] = useState(0);
+    const fetchDueListByCustId = async (uid) => {
+        FetchDueListByCustId(uid, process.env.REACT_APP_API)
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setDueList(data.Result);
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found!!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                }
+            })
+    }
 
     const fecthEggSaleInvoiceById = async (id) => {
         FecthEggSaleInvoiceById(id, process.env.REACT_APP_API)
@@ -1053,7 +1131,9 @@ function EggSaleModule(props) {
                     Advance: eggsaleinvdata.Advance,
                     Complimentary: eggsaleinvdata.Complimentary,
                     CompanyId: localStorage.getItem('companyid'),
-                    Comments:eggsaleinvdata.Comments
+                    Comments: eggsaleinvdata.Comments,
+                    IsDueSettle: isduesettle
+
 
                 })
             }).then(res => res.json())
@@ -1122,8 +1202,8 @@ function EggSaleModule(props) {
                     Advance: eggsaleinvdata.Advance,
                     Complimentary: eggsaleinvdata.Complimentary,
                     CompanyId: localStorage.getItem('companyid'),
-                    Comments:eggsaleinvdata.Comments
-
+                    Comments: eggsaleinvdata.Comments,
+                    IsDueSettle: isduesettle
                 })
             }).then(res => res.json())
                 .then((result) => {
@@ -1160,6 +1240,61 @@ function EggSaleModule(props) {
         setInvoiceModalShow(false);
     };
 
+
+    // const _duedetails = {
+    //     Id: "",
+    //     InvoiceNo: "",
+    //     Due: "",
+    //     isChecked:false
+    // }
+    const [users, setUsers] = useState([]);
+
+    // useEffect(() => {
+    //   setUsers(_duedetails);
+    // }, []);
+
+    // const checkChange = (due) => {
+
+    // //     let _due = parseFloat(duelist || 0),
+    // //     totladueAmt = parseFloat(eggsaleinvdata.Due || 0);
+    // // if (!isduesettle) {
+    // //     let _di = _due + totladueAmt;
+    // //     setEggSaleInvoiceData({
+    // //         ...eggsaleinvdata, Due: _di
+    // //     });
+    // // }
+    // // else {
+    // //     let _d = totladueAmt - _due;
+    // //     setEggSaleInvoiceData({
+    // //         ...eggsaleinvdata, Due: _d
+    // //     });
+    // // }
+
+    // !due?.some((user) =>
+    //      {
+    //         user?.IsChecked !== true;
+    //      }
+    //     );
+
+    //    return !due?.some((user) => user?.IsChecked !== true);
+    // }
+
+    const handleChange = (e) => {
+        const { name, checked } = e.target;
+        if (name === "0") {
+            let tempUser = _duelist.map((user) => {
+                return { ...user, IsChecked: checked };
+            });
+            //setUsers(tempUser);
+            setEggSaleDueList(tempUser);
+        } else {
+            let tempUser = _duelist.map((user) =>
+                user.Id === parseInt(name) ? { ...user, IsChecked: checked } : user
+            );
+            setEggSaleDueList(tempUser);
+            // setUsers(tempUser);
+        }
+    };
     return (
 
         <div>
@@ -1213,33 +1348,79 @@ function EggSaleModule(props) {
 
                         </div>
                     }
+                    {/* {
+                        _duelist &&
+                        <div className="alert" role="alert">
+                            <strong>Due List:</strong>
+                            <Table className="mt-4" striped bordered hover size="sm">
+                                <thead>
+                                    <tr style={{ fontSize: 12 }}>
+                                        <th>
+                                            <input
+                                                type="checkbox"
+                                                className="form-check-input"
+                                                name="0"
+                                                checked={checkChange(_duelist)}
+                                                //checked={!_duelist?.some((user) => user?.IsChecked !== true)}
+                                                onChange={handleChange}
+                                            />
+                                        </th>
+                                        <th>Invoice no</th>
+                                        <th>Purchase Date</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {_duelist &&
+                                        _duelist.map((data, index) => (
+                                            <tr id={index} style={{ fontSize: 12 }}>
+                                                <td>
+                                                    <input
+                                                        type="checkbox"
+                                                        className="form-check-input"
+                                                        name={data.Id}
+                                                        checked={data?.IsChecked || false}
+                                                        onChange={handleChange}
+                                                    />
+                                                </td>
+                                                <td>{data.InvoiceNo}</td>
+                                                <td>{moment(data.PurchaseDate).format('DD-MMM-YYYY')}</td>
+                                                <td>{new Intl.NumberFormat('en-IN', {
+                                                }).format(data.Due.toFixed(2))}</td>
+                                            </tr>
+                                        ))}
+                                </tbody>
+                            </Table>
+
+                        </div>
+                    }
                     {
-                        // advancedataticked != null && advancedataticked.Amount > 0 &&
+
+                        duelist != null && duelist > 0 &&
                         <div className="alert alert-danger" role="alert">
                             <strong>  Total Due of Rs:
-                                5000.00
-                                </strong>
+                                {parseFloat(duelist).toFixed(2)}
+                            </strong>
                             {
-                               // eggsalearr.length > 0 && 
+                                eggsalearr.length > 0 &&
                                 <Form.Check
                                     type="checkbox"
                                     id="chkIsDueSettle"
                                     label="Inclue preveous due"
-                                    onChange={isSettleChange}
-                                    value={issettle}
-                                    checked={issettle}
+                                    onChange={isDueSettleChange}
+                                    value={isduesettle}
+                                    checked={isduesettle}
                                     style={{ fontSize: '13px' }}
                                 />
                             }
 
                         </div>
-                    }
+                    } */}
                 </div>
 
                 <div class="col-md-6" style={{ textAlign: 'right' }}> <Button className="mr-2" variant="primary"
                     style={{ marginRight: "17.5px" }}
                     onClick={() => clickAddEggSale()}>Add Item</Button></div>
-
 
             </div>
 

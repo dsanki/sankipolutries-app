@@ -190,7 +190,8 @@ function EggSaleInvoiceList(props) {
     }
 
     const calculateValues = (data) => {
-        const { totalCost, totalQuantity, totalDiscount, totalFinalCost, totalPaid, totalDue } = data.reduce((accumulator, item) => {
+        const { totalCost, totalQuantity, totalDiscount, 
+            totalFinalCost, totalPaid, totalDue } = data.reduce((accumulator, item) => {
             accumulator.totalCost += item.TotalCost;
             accumulator.totalQuantity += parseInt(item.TotalQuantity);
             accumulator.totalDiscount += item.TotalDiscount;
@@ -198,7 +199,8 @@ function EggSaleInvoiceList(props) {
             accumulator.totalPaid += item.Paid;
             accumulator.totalDue += item.Due;
             return accumulator;
-        }, { totalCost: 0, totalQuantity: 0, totalDiscount: 0, totalFinalCost: 0, totalPaid: 0, totalDue: 0 })
+        }, { totalCost: 0, totalQuantity: 0, totalDiscount: 0, 
+            totalFinalCost: 0, totalPaid: 0, totalDue: 0 })
 
         _setTotalQuantity(totalQuantity);
         _setTotalCost(totalCost);
@@ -381,11 +383,12 @@ function EggSaleInvoiceList(props) {
     const onDownloadExcel = () => {
         const _list = eggsalelist.map((p) => {
             return ({
-                Date: moment(p.Date).format('DD-MMM-YYYY'),
+                Date: moment(p.PurchaseDate).format('DD-MMM-YYYY'),
                 //InvoiceNo:p.InvoiceNo,
                 CustomerName: p.CustomerName,
                 //Quantity: p.TotalQuantity, 
                 TotalCost: parseFloat(p.TotalCost||0).toFixed(2), 
+                FinalCost: parseFloat(p.FinalCost||0).toFixed(2), 
                 // Discount: parseFloat(p.TotalDiscount||0).toFixed(2), 
                 // FinalCost: parseFloat(p.FinalCostInvoice||0).toFixed(2),
                 // Paid: parseFloat(p.Paid||0).toFixed(2),
@@ -394,7 +397,24 @@ function EggSaleInvoiceList(props) {
             });
         });
 
+        // let _filterList = [];
+        // if (filterFromDate !== "" && filterToDate !== "") {
+        //     _filterList = _list.filter((c) => dateyyyymmdd(c.PurchaseDate) >= dateyyyymmdd(filterFromDate) 
+        //     && dateyyyymmdd(c.PurchaseDate) <= dateyyyymmdd(filterToDate));
+        // }
+        // else if (filterFromDate === "" && filterToDate !== "") {
+        //     _filterList = _list.filter((c) => dateyyyymmdd(c.PurchaseDate) <= dateyyyymmdd(filterToDate));
+        // }
+        // else if (filterFromDate !== "" && filterToDate === "") {
+        //     _filterList = _list.filter((c) => dateyyyymmdd(c.PurchaseDate) >= 
+        //     dateyyyymmdd(filterFromDate));
+        // }
+        // else {
+        //     _filterList = _list;
+        // }
+
        // downloadExcel(_list, "EggSale");
+       //getFilterData(filterFromDate,filterToDate);
         downloadExcelFilter(_list, "EggSale", companydetails[0].CompanyName,filterFromDate,filterToDate);
             
     }
@@ -579,20 +599,46 @@ function EggSaleInvoiceList(props) {
                         </tr>
                     }
                 </tbody>
-                {/* <tfoot style={{ backgroundColor: '#cccccc', fontWeight: 'bold' }}>
+                <tfoot style={{ backgroundColor: '#cccccc', fontWeight: 'bold', fontSize: 13 }}>
                     <td align='center'>Total</td>
+                    <td align='center'></td>
 
-                    <td align='center'>{_totalquantity}</td>
-                    <td align='center'>{parseFloat(_totalcost).toFixed(2)}</td>
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                    }).format(parseInt(_totalquantity || 0))}</td>
 
-                    <td align='center'>{parseFloat(_totaldiscount).toFixed(2)}</td>
-                    <td align='center'>{parseFloat(_finalcost).toFixed(2)}</td>
-                    <td align='center'>{parseFloat(_totalPaid).toFixed(2)}</td>
-                    <td align='center'>{parseFloat(_totalDue).toFixed(2)}</td>
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(_totalcost || 0).toFixed(2))}</td>
+
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(_totaldiscount || 0).toFixed(2))}</td>
+
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(_finalcost || 0).toFixed(2))}</td>
+
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(_totalPaid || 0).toFixed(2))}</td>
+                    <td align='center'>{new Intl.NumberFormat('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(parseFloat(_totalDue || 0).toFixed(2))}</td>
+
+                   
+
+
                     <td></td>
                     <td></td>
                     <td></td>
-                </tfoot> */}
+                </tfoot>
             </Table >
 
             {

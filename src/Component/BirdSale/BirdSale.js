@@ -99,7 +99,7 @@ function BirdSale(props) {
             Amount: '',
             ParentId: '0',
             LotName: "",
-            CompanyId:localStorage.getItem('companyid')
+            CompanyId: localStorage.getItem('companyid')
         }
     ])
 
@@ -137,7 +137,7 @@ function BirdSale(props) {
         Date: "",
         CustomerId: uid,
         // BirdCount: "",
-         TotalWeight: "",
+        TotalWeight: "",
         // UnitId: "",
         // Rate: "",
         // TotalAmount: "",
@@ -328,10 +328,17 @@ function BirdSale(props) {
 
             let data = [...birdSalesDetailsFields];
             data[index]["BirdCount"] = e.target.value;
-            setBirdSalesDetailsFields(data);
-            //addUCount(ucount);
 
-            //setBirdSaleData({ ...birdsaledata, BirdCount: e.target.value });
+            if (parseInt(data[index]["UnitId"]) === 5) {
+                let totalamt = (parseInt(e.target.value || 0) * parseFloat(data[index]["Rate"] || 0));
+                data[index]["Amount"] = totalamt;
+            }
+            else {
+                let totalamt = (parseFloat(data[index]["TotalWeight"]  || 0) * parseFloat(data[index]["Rate"] || 0));
+                data[index]["Amount"] = totalamt;
+            }
+
+            setBirdSalesDetailsFields(data);
         }
     }
 
@@ -344,32 +351,37 @@ function BirdSale(props) {
             let data = [...birdSalesDetailsFields];
             data[index]["TotalWeight"] = totalwt;
 
-            let totalamt = (parseFloat(totalwt || 0) * parseFloat(data[index]["Rate"] || 0));
-            data[index]["Amount"] = totalamt;
-
-            //  let _finalcost = Math.round((parseFloat(totalamt || 0) - parseFloat(birdsaledata.Discount || 0)));
-
-            // let due = _finalcost - (parseFloat(birdsaledata.Cash || 0)
-            //     + parseFloat(birdsaledata.PhonePay || 0)
-            //     + parseFloat(birdsaledata.NetBanking || 0) + parseFloat(birdsaledata.Cheque || 0)
-            //     + parseFloat(birdsaledata.CashDeposite || 0));
+            if (parseInt(data[index]["UnitId"]) === 5) {
+                let totalamt = (parseFloat(data[index]["BirdCount"] || 0) * parseFloat(data[index]["Rate"] || 0));
+                data[index]["Amount"] = totalamt;
+            }
+            else {
+                let totalamt = (parseFloat(totalwt || 0) * parseFloat(data[index]["Rate"] || 0));
+                data[index]["Amount"] = totalamt;
+            }
+          //  let totalamt = (parseFloat(totalwt || 0) * parseFloat(data[index]["Rate"] || 0));
+           // data[index]["Amount"] = totalamt;
 
             setBirdSalesDetailsFields(data);
             addUCount(ucount);
-
-            // setBirdSaleData({
-            //     ...birdsaledata,
-            //     TotalWeight: totalwt,
-            //     TotalAmount: totalamt.toFixed(2),
-            //     Due: due.toFixed(2),
-            //     FinalCost: _finalcost
-            // });
         }
     }
 
     const unitIdChange = (e, index) => {
         let data = [...birdSalesDetailsFields];
         data[index]["UnitId"] = e.target.value;
+
+
+        if (parseInt(e.target.value) === 5) {
+            let totalamt = (parseInt(data[index]["BirdCount"]|| 0) * parseFloat(data[index]["Rate"] || 0));
+            data[index]["Amount"] = totalamt;
+        }
+        else {
+            let totalamt = (parseFloat(data[index]["TotalWeight"]  || 0) * parseFloat(data[index]["Rate"] || 0));
+            data[index]["Amount"] = totalamt;
+        }
+
+
         setBirdSalesDetailsFields(data);
         //addUCount(ucount);
         //etBirdSaleData({ ...birdsaledata, UnitId: e.target.value });
@@ -405,8 +417,16 @@ function BirdSale(props) {
             let data = [...birdSalesDetailsFields];
 
             data[index]["Rate"] = rate;
-            let totalamount = (parseFloat(rate)) * parseFloat(data[index]["TotalWeight"] || 0);
-            data[index]["Amount"] = totalamount;
+
+            if (parseInt(data[index]["UnitId"]) === 5) {
+                let totalamt = (parseFloat(data[index]["BirdCount"] || 0) * parseFloat(rate || 0));
+                data[index]["Amount"] = totalamt;
+            }
+            else {
+                let totalamount = (parseFloat(rate)) * parseFloat(data[index]["TotalWeight"] || 0);
+                data[index]["Amount"] = totalamount;
+            }
+           
             //let Adchrg = parseFloat(birdsaledata.AdditionalCharge || 0);
             //let totalamt = (birdsaledata.TotalWeight * parseFloat(rate || 0));
             // let _finalcost = Math.round((parseFloat(totalamt || 0) - parseFloat(birdsaledata.Discount || 0)));
@@ -480,7 +500,7 @@ function BirdSale(props) {
 
         setBirdSaleData({
             ...birdsaledata, AdditionalCharge: e.target.value,
-            Due:due>=0? due.toFixed(2):0,
+            Due: due >= 0 ? due.toFixed(2) : 0,
             //TotalAmount: totalamt.toFixed(2),
             FinalCost: _finalcost.toFixed(2)
 
@@ -489,14 +509,14 @@ function BirdSale(props) {
 
     const discountChange = (e) => {
         let _finalcost = Math.round((parseFloat(birdsaledata.TotalAmount || 0) - parseFloat(e.target.value || 0)));
-        let _due=_finalcost - parseFloat(birdsaledata.Paid || 0);
-        
-        
+        let _due = _finalcost - parseFloat(birdsaledata.Paid || 0);
+
+
         setBirdSaleData({
             ...birdsaledata,
             Discount: e.target.value,
             FinalCost: _finalcost.toFixed(2),
-            Due:_due>=0? _due.toFixed(2):0// (_finalcost - parseFloat(birdsaledata.Paid || 0)).toFixed(2)
+            Due: _due >= 0 ? _due.toFixed(2) : 0// (_finalcost - parseFloat(birdsaledata.Paid || 0)).toFixed(2)
         });
     }
 
@@ -505,7 +525,7 @@ function BirdSale(props) {
 
         if (e.target.value === '' || re.test(e.target.value)) {
             let cashamt = parseFloat(e.target.value || 0);
-            
+
             setBirdSaleData({
                 ...birdsaledata, Cash: e.target.value,
 
@@ -516,11 +536,11 @@ function BirdSale(props) {
                     (cashamt + parseFloat(birdsaledata.PhonePay || 0) +
                         parseFloat(birdsaledata.NetBanking || 0) + parseFloat(birdsaledata.CashDeposite || 0)
                         + parseFloat(birdsaledata.Cheque || 0))
-                ).toFixed(2)>0?(birdsaledata.FinalCost -
+                ).toFixed(2) > 0 ? (birdsaledata.FinalCost -
                     (cashamt + parseFloat(birdsaledata.PhonePay || 0) +
                         parseFloat(birdsaledata.NetBanking || 0) + parseFloat(birdsaledata.CashDeposite || 0)
                         + parseFloat(birdsaledata.Cheque || 0))
-                ).toFixed(2):0
+                ).toFixed(2) : 0
             });
         }
     }
@@ -721,11 +741,11 @@ function BirdSale(props) {
             // Due:((parseFloat(totalCost||0)+ parseFloat(birdsaledata.AdditionalCharge || 0))-
             //  parseFloat(birdsaledata.Discount || 0))-parseFloat(birdsaledata.Paid || 0)
 
-            Due: _due>=0?_due:0,// parseFloat(Math.round(totalCost - parseFloat(birdsaledata.Paid || 0))).toFixed(2),
+            Due: _due >= 0 ? _due : 0,// parseFloat(Math.round(totalCost - parseFloat(birdsaledata.Paid || 0))).toFixed(2),
 
-            TotalWeight:totalWeight,
+            TotalWeight: totalWeight,
             TotalAmount: parseFloat(Math.round(totalCost)).toFixed(2),
-            FinalCost: _finalCost>=0?_finalCost:0
+            FinalCost: _finalCost >= 0 ? _finalCost : 0
 
 
         });
@@ -873,7 +893,7 @@ function BirdSale(props) {
                     Date: birdsaledata.Date,
                     CustomerId: birdsaledata.CustomerId,
                     // BirdCount: birdsaledata.BirdCount,
-                     TotalWeight: birdsaledata.TotalWeight,
+                    TotalWeight: birdsaledata.TotalWeight,
                     // UnitId: birdsaledata.UnitId,
                     // Rate: birdsaledata.Rate,
                     TotalAmount: birdsaledata.TotalAmount,
@@ -986,7 +1006,7 @@ function BirdSale(props) {
                     Date: birdsaledata.Date,
                     CustomerId: birdsaledata.CustomerId,
                     //BirdCount: birdsaledata.BirdCount,
-                     TotalWeight: birdsaledata.TotalWeight,
+                    TotalWeight: birdsaledata.TotalWeight,
                     //UnitId: birdsaledata.UnitId,
                     // Rate: birdsaledata.Rate,
                     TotalAmount: birdsaledata.TotalAmount,
@@ -1111,15 +1131,15 @@ function BirdSale(props) {
     //let BirdSaleListDowanloadArr = [];
     const onDownloadExcel = () => {
         const _list = birdSaleList.map((p) => {
-                  return ({
-                                  Date: moment(p.Date).format('DD-MMM-YYYY'),
-                                  CustomerName: p.CustomerName,
-                                  TotalCost: parseFloat(p.TotalAmount||0).toFixed(2), 
-                              });
-                });
-        
+            return ({
+                Date: moment(p.Date).format('DD-MMM-YYYY'),
+                CustomerName: p.CustomerName,
+                TotalCost: parseFloat(p.TotalAmount || 0).toFixed(2),
+            });
+        });
 
-        downloadExcelFilter(_list, "BirdSaleList", companydetails[0].CompanyName,filterFromDate,filterToDate);
+
+        downloadExcelFilter(_list, "BirdSaleList", companydetails[0].CompanyName, filterFromDate, filterToDate);
     }
 
     const handlePageChange = (newPage) => {
@@ -1317,7 +1337,7 @@ function BirdSale(props) {
                                     <td align='center'>{p.TotalAmount.toFixed(2)}</td>
                                     <td align='center'>{p.Paid.toFixed(2)}</td>
                                     <td align='center'>{p.Due.toFixed(2)}</td>
-                                    <td align='center'>{p.PaymentDate!=null?moment(p.PaymentDate).format('DD-MMM-YYYY'):""}</td>
+                                    <td align='center'>{p.PaymentDate != null ? moment(p.PaymentDate).format('DD-MMM-YYYY') : ""}</td>
                                     <td align='center'>{p.Comments}</td>
                                     <td align='center'>{p.VehicleNo}</td>
                                     <td>
