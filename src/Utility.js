@@ -25,7 +25,7 @@ export const CalculateAgeInDays = (date) => {
   return days;
 };
 
-export const CalculateNoOfDaysUpdated = (fromdate,todate) => {
+export const CalculateNoOfDaysUpdated = (fromdate, todate) => {
   var a = moment(new Date(todate), 'DD-MM-YYYY');
   var b = moment(new Date(fromdate), 'DD-MM-YYYY');
   let days = a.diff(b, 'days');
@@ -38,14 +38,13 @@ export const CalculateAgeInWeeksUpdated = (fromdate, todate) => {
   var b = moment(new Date(fromdate), 'DD-MM-YYYY');
   var diff = moment.duration(a.diff(b));
 
-  var _week=Math.floor(diff.asWeeks());
-  var n=diff.asWeeks();
-  var result = (n - Math. floor(n)) !== 0;
+  var _week = Math.floor(diff.asWeeks());
+  var n = diff.asWeeks();
+  var result = (n - Math.floor(n)) !== 0;
 
-if(result)
-{
-  _week=_week+1;
-}
+  if (result) {
+    _week = _week + 1;
+  }
   return _week;
 };
 
@@ -57,14 +56,13 @@ export const CalculateAgeInWeeks = (date) => {
   var b = moment(new Date(date), 'DD-MM-YYYY');
   var diff = moment.duration(a.diff(b));
 
-  var _week=Math.floor(diff.asWeeks());
-  var n=diff.asWeeks();
-  var result = (n - Math. floor(n)) !== 0;
+  var _week = Math.floor(diff.asWeeks());
+  var n = diff.asWeeks();
+  var result = (n - Math.floor(n)) !== 0;
 
-if(result)
-{
-  _week=_week+1;
-}
+  if (result) {
+    _week = _week + 1;
+  }
   return _week;
 };
 
@@ -99,7 +97,7 @@ export const NumberInputKeyDown = (e) => {
 export const FetchMortalityList = async (apiurl) => {
 
   const response = await fetch(apiurl + 'Mortality/GetMortalityShedLotMapList?CompanyId='
-    +localStorage.getItem('companyid'),
+    + localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
@@ -126,7 +124,7 @@ export const FetchPaymentMode = async (apiurl) => {
 
 export const FetchShedsList = async (apiurl) => {
   const response = await fetch(apiurl + 'ChicksMaster/GetShedList?CompanyId='
-    +localStorage.getItem('companyid'),
+    + localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
@@ -140,7 +138,7 @@ export const FetchShedsList = async (apiurl) => {
 
 export const FetchShedLotMapList = async (apiurl) => {
   const response = await fetch(apiurl + 'ChicksMaster/GetShedLotMapList?CompanyId='
-    +localStorage.getItem('companyid'),
+    + localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
@@ -155,8 +153,8 @@ export const FetchShedLotMapList = async (apiurl) => {
 
 
 
-export const FetchChicks = async (companyid,apiurl) => {
-  const response = await fetch(apiurl + 'ChicksMaster/GetChicksByCompanyId?CompanyId='+companyid,
+export const FetchChicks = async (companyid, apiurl) => {
+  const response = await fetch(apiurl + 'ChicksMaster/GetChicksByCompanyId?CompanyId=' + companyid,
     {
       method: 'GET',
       headers: {
@@ -167,8 +165,8 @@ export const FetchChicks = async (companyid,apiurl) => {
   return data;
 }
 
-export const FetchLotById = async (id,apiurl) => {
-  const response =await fetch(process.env.REACT_APP_API + 'ChicksMaster/' + id,
+export const FetchLotById = async (id, apiurl) => {
+  const response = await fetch(process.env.REACT_APP_API + 'ChicksMaster/' + id,
     {
       method: 'GET',
       headers: {
@@ -180,7 +178,7 @@ export const FetchLotById = async (id,apiurl) => {
 }
 
 export const FetchUnit = async (apiurl) => {
-  const response =await fetch(process.env.REACT_APP_API + 'Unit',
+  const response = await fetch(process.env.REACT_APP_API + 'Unit',
     {
       method: 'GET',
       headers: {
@@ -196,7 +194,7 @@ export const FetchUnit = async (apiurl) => {
 
 export const FetchFeed = async (apiurl) => {
   const response = await fetch(apiurl + 'Feed/GetFeedListByCompanyId?CompanyId='
-    +localStorage.getItem('companyid'),
+    + localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
@@ -210,7 +208,7 @@ export const FetchFeed = async (apiurl) => {
 
 export const FetchLots = async (apiurl) => {
   const response = await fetch(apiurl + 'ChicksMaster/GetLots?CompanyId='
-    +localStorage.getItem('companyid'),
+    + localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
@@ -222,11 +220,11 @@ export const FetchLots = async (apiurl) => {
   return data;
 }
 
-export const downloadExcelFilter = (data, name,compname,fromdate,todate) => {
+export const downloadExcelFilter = (data, name, compname, fromdate, todate) => {
 
   if (data.length > 0) {
     /* new worksheet from JS objects */
-    var ws = XLSX.utils.json_to_sheet(data,{origin:3});
+    var ws = XLSX.utils.json_to_sheet(data, { origin: 3 });
 
     /* new workbook */
     var wb = XLSX.utils.book_new();
@@ -238,12 +236,12 @@ export const downloadExcelFilter = (data, name,compname,fromdate,todate) => {
     );
     XLSX.utils.sheet_add_aoa(
       ws,
-      [['From: '+ fromdate]],
+      [['From: ' + fromdate]],
       { origin: 1 }
     );
     XLSX.utils.sheet_add_aoa(
       ws,
-      [['Todate: '+ todate]],
+      [['Todate: ' + todate]],
       { origin: 2 }
     );
 
@@ -269,9 +267,9 @@ export const downloadExcel = (data, name) => {
   }
 };
 
-export const FetchGunnyBagSaleList = async (uid,id,apiurl) => {
+export const FetchGunnyBagSaleList = async (uid, id, apiurl) => {
   const response = await fetch(apiurl + 'GunnyBagSale/GetGunnyBagSale?uid='
-    +uid +'&id='+id +'&CompanyId='+localStorage.getItem('companyid'),
+    + uid + '&id=' + id + '&CompanyId=' + localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
@@ -283,18 +281,17 @@ export const FetchGunnyBagSaleList = async (uid,id,apiurl) => {
   return data;
 }
 
-export const FetchBirdSaleList = async (uid,id,apiurl) => {
-  let url= apiurl + 'BirdSale/GetBirdSale?CompanyId='+localStorage.getItem('companyid');
+export const FetchBirdSaleList = async (uid, id, apiurl) => {
+  let url = apiurl + 'BirdSale/GetBirdSale?CompanyId=' + localStorage.getItem('companyid');
 
-if(uid!=null)
-{
- url= apiurl + 'BirdSale/GetBirdSale?uid='
-  +uid +'&CompanyId='+localStorage.getItem('companyid')
-}
-
+  if (uid != null) {
+    url = apiurl + 'BirdSale/GetBirdSale?uid='
+      + uid + '&CompanyId=' + localStorage.getItem('companyid')
+  }
 
 
-  const response =await fetch(url,
+
+  const response = await fetch(url,
     {
       method: 'GET',
       headers: {
@@ -306,7 +303,7 @@ if(uid!=null)
 }
 
 export const FetchCompanyDetails = async (apiurl) => {
-  const response =await fetch(apiurl + 'CompanyDetails/GetCompanyDetailsByCompanyId',
+  const response = await fetch(apiurl + 'CompanyDetails/GetCompanyDetailsByCompanyId',
     {
       method: 'GET',
       // headers: {
@@ -319,7 +316,7 @@ export const FetchCompanyDetails = async (apiurl) => {
 }
 
 export const FecthEggCategory = async (apiurl) => {
-  const response =await fetch(apiurl + 'EggSale/GetEggCategory',
+  const response = await fetch(apiurl + 'EggSale/GetEggCategory',
     {
       method: 'GET',
       headers: {
@@ -331,15 +328,15 @@ export const FecthEggCategory = async (apiurl) => {
 }
 
 
-export const FectAllEggSaleInvoiceList = async (fromdate,todate, apiurl) => {
-  const response =await fetch(apiurl + 'EggSale/GetAllEggSaleInvoiceList?fromdate='
-    +fromdate +'&todate='+todate +'&CompanyId='+localStorage.getItem('companyid'),
+export const FectAllEggSaleInvoiceList = async (fromdate, todate, apiurl) => {
+  const response = await fetch(apiurl + 'EggSale/GetAllEggSaleInvoiceList?fromdate='
+    + fromdate + '&todate=' + todate + '&CompanyId=' + localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
         'Authorization': localStorage.getItem('token')
         //'Access-Control-Allow-Origin':'http://spapi.local:85'
-       // 'Access-Control-Allow-Credentials':'true'
+        // 'Access-Control-Allow-Credentials':'true'
       }
     });
   const data = await response.json();
@@ -349,26 +346,26 @@ export const FectAllEggSaleInvoiceList = async (fromdate,todate, apiurl) => {
 
 
 export const FetchDueListByCustId = async (uid, apiurl) => {
-  const response =await fetch(apiurl + 'EggSale/GetDueListByCustId?CustId='
-            + uid + '&CompanyId=' + localStorage.getItem('companyid'),
-            {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                }
-            });
+  const response = await fetch(apiurl + 'EggSale/GetDueListByCustId?CustId='
+    + uid + '&CompanyId=' + localStorage.getItem('companyid'),
+    {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': localStorage.getItem('token')
+      }
+    });
 
-            const data = await response.json();
-            return data;
-    }
+  const data = await response.json();
+  return data;
+}
 
 
 
 export const FecthEggSaleInvoiceList = async (custid, apiurl) => {
-  const response =await fetch(apiurl + 'EggSale/GetEggSaleInvoiceList?CustId='
-    +custid+'&CompanyId='+localStorage.getItem('companyid'),
+  const response = await fetch(apiurl + 'EggSale/GetEggSaleInvoiceList?CustId='
+    + custid + '&CompanyId=' + localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
@@ -380,7 +377,7 @@ export const FecthEggSaleInvoiceList = async (custid, apiurl) => {
 }
 
 export const FecthEggStockInventory = async (apiurl) => {
-  const response =await fetch(apiurl + 'EggStockInventory/GetEggStockInventoryCompanyId?CompanyId='+localStorage.getItem('companyid'),
+  const response = await fetch(apiurl + 'EggStockInventory/GetEggStockInventoryCompanyId?CompanyId=' + localStorage.getItem('companyid'),
     {
       method: 'GET',
       headers: {
@@ -392,7 +389,7 @@ export const FecthEggStockInventory = async (apiurl) => {
 }
 
 export const FecthEggSaleInvoiceById = async (id, apiurl) => {
-  const response =await fetch(apiurl + 'EggSale/GetEggSaleInvoiceById?id='+id,
+  const response = await fetch(apiurl + 'EggSale/GetEggSaleInvoiceById?id=' + id,
     {
       method: 'GET',
       headers: {
@@ -405,7 +402,7 @@ export const FecthEggSaleInvoiceById = async (id, apiurl) => {
 
 export const FecthStockListById = async (catid, apiurl) => {
 
-  const response =await fetch(apiurl + 'Stock/GetStockList?category='+catid,
+  const response = await fetch(apiurl + 'Stock/GetStockList?category=' + catid,
     {
       method: 'GET',
       headers: {
@@ -417,7 +414,7 @@ export const FecthStockListById = async (catid, apiurl) => {
 }
 
 export const FecthBirdType = async (apiurl) => {
-  const response =await fetch(apiurl + 'BirdSale/GetBirdType',
+  const response = await fetch(apiurl + 'BirdSale/GetBirdType',
     {
       method: 'GET',
       headers: {
@@ -434,21 +431,21 @@ export const GetCustomerByTypeId = async (custtypeid, apiurl) => {
   // {
   //   url=apiurl + 'Customer/GetCustomerByTypeId?customerTypeId='+custtypeid;
   // }
-    
-    const response =await fetch(apiurl + 'Customer/GetCustomerByTypeId?customerTypeId='+custtypeid,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': localStorage.getItem('token')
-        }
-      });
-  
+
+  const response = await fetch(apiurl + 'Customer/GetCustomerByTypeId?customerTypeId=' + custtypeid,
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+
   const data = await response.json();
   return data;
 }
 
 export const GetGunnybagTypeList = async (apiurl) => {
-  const response =await fetch(apiurl + 'GunnyBagSale/GetGunnybagTypeMaster',
+  const response = await fetch(apiurl + 'GunnyBagSale/GetGunnybagTypeMaster',
     {
       method: 'GET',
       headers: {
@@ -459,10 +456,37 @@ export const GetGunnybagTypeList = async (apiurl) => {
   return data;
 }
 
-export const ReplaceNonNumeric=(numStr)=> {
+
+export const GetCustPendingEggSaleInvoiceList = async (uid,apiurl ) => {
+  // const response = await fetch(apiurl + 'EggSale/GetPendingEggSaleInvoiceListByCustId?CustId='
+  //   + uid + '&CompanyId=' + localStorage.getItem('companyid'),
+  //   {
+  //     method: 'GET',
+  //     headers: {
+  //       'Authorization': localStorage.getItem('token')
+  //     }
+  //   });
+
+
+    const response = await fetch(apiurl + 'EggSale/GetPendingEggSaleInvoiceListByCustId?CustId=' + uid +
+      '&CompanyId=' + localStorage.getItem('companyid'),
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
+      });
+
+  const data = await response.json();
+  return data;
+}
+
+
+
+export const ReplaceNonNumeric = (numStr) => {
   return String(numStr).replace(/[^0-9]/g, '')
 }
-export const Commarize=(numStr) =>{//
+export const Commarize = (numStr) => {//
   return Number(ReplaceNonNumeric(numStr)).toLocaleString(navigator.language, { minimumFractionDigits: 0 })
 }
 
@@ -481,9 +505,9 @@ const currency = "Rupees";
 const paisa = "Paisa";
 const only = "Only";
 
-export const ConvertNumberToWords =(amount)=> {
+export const ConvertNumberToWords = (amount) => {
   if (amount === 0) return `${zero} ${currency} ${only}`;
-  
+
   function convert(num) {
     let parts = [];
     if (num >= 1e9) {
@@ -532,76 +556,75 @@ export const ConvertNumberToWords =(amount)=> {
   return `${result} ${only}`;
 }
 
-export const FetchEggDiscountTypes=()=>{
+export const FetchEggDiscountTypes = () => {
 
-  const eggdistype =[
-        {
-            "Id": 1,
-            "Name": "Per Egg"
-        },
-        {
-           "Id": 2,
-            "Name": "%"
-      }
-      ]
+  const eggdistype = [
+    {
+      "Id": 1,
+      "Name": "Per Egg"
+    },
+    {
+      "Id": 2,
+      "Name": "%"
+    }
+  ]
 
-      return eggdistype;
+  return eggdistype;
 }
 
 
-export const AmountInWords=(value)=>
-{
-  const ones= ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
-  const tens= ['', '', 'twenty', 'thirty', 'fourty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+export const AmountInWords = (value) => {
+  const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+  const tens = ['', '', 'twenty', 'thirty', 'fourty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
   //const sep= ['', ' thousand ', ' million ', ' billion ', ' trillion ', ' quadrillion ', ' quintillion ', ' sextillion '];
 
-  const sep= ['', ' thousand ', ' Lakh ', ' Crore ', ' Arab ', ' quadrillion ', ' quintillion ', ' sextillion '];
+  const sep = ['', ' thousand ', ' Lakh ', ' Crore ', ' Arab ', ' quadrillion ', ' quintillion ', ' sextillion '];
   var val = value,
-  arr = [],
-  str = '';
+    arr = [],
+    str = '';
   let i = 0;
 
-  if ( val.length === 0 ) {
-    return;  
-}
+  if (val.length === 0) {
+    return;
+  }
 
-val = parseInt( val, 10 );
-if ( isNaN( val ) ) {
-    return;   
-}
+  val = parseInt(val, 10);
+  if (isNaN(val)) {
+    return;
+  }
 
-while ( val ) {
-    arr.push( val % 1000 );
-    val = parseInt( val / 1000, 10 );   
-}
+  while (val) {
+    arr.push(val % 1000);
+    val = parseInt(val / 1000, 10);
+  }
 
-while ( arr.length ) {
-  str = (function( a ) {
-      var x = Math.floor( a / 100 ),
-          y = Math.floor( a / 10 ) % 10,
-          z = a % 10;
-      
-      return ( x > 0 ? ones[x] + ' hundred ' : '' ) +                 
-             ( y >= 2 ? tens[y] + ' ' + ones[z] : ones[10*y + z] ); 
-  })( arr.shift() ) + sep[i++] + str;                     
-}
+  while (arr.length) {
+    str = (function (a) {
+      var x = Math.floor(a / 100),
+        y = Math.floor(a / 10) % 10,
+        z = a % 10;
 
-return str;
+      return (x > 0 ? ones[x] + ' hundred ' : '') +
+        (y >= 2 ? tens[y] + ' ' + ones[z] : ones[10 * y + z]);
+    })(arr.shift()) + sep[i++] + str;
+  }
+
+  return str;
 }
 
 export const FetchAdvanceListByCustId = async (custid) => {
-  const response =await fetch(process.env.REACT_APP_API 
+  const response = await fetch(process.env.REACT_APP_API
     + 'AdvancePayment/GetAdvancePaymentListByCustId?CustomerId=' +
-      custid + '&CompanyId=' + localStorage.getItem('companyid'),
-      {
-          method: 'GET',
-          headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-              'Authorization': localStorage.getItem('token')
-          }
-      });
-      const data = await response.json();
-      return data;
+    custid + '&CompanyId=' + localStorage.getItem('companyid'),
+    {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': localStorage.getItem('token')
+      }
+    });
+  const data = await response.json();
+  return data;
 }
 

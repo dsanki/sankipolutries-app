@@ -10,14 +10,14 @@ import {
     dateyyyymmdd, HandleLogout, downloadExcel,
     FetchCompanyDetails, AmountInWords, ReplaceNonNumeric, Commarize,
     FecthEggCategory, FecthEggSaleInvoiceList, FecthEggSaleInvoiceById, FetchAdvanceListByCustId,
-    FetchEggDiscountTypes, FetchDueListByCustId
+    FetchEggDiscountTypes, FetchDueListByCustId, GetCustPendingEggSaleInvoiceList
 } from './../../Utility'
 import Loading from '../Loading/Loading'
 
 import ReactDOM from 'react-dom';
 import { PDFViewer } from '@react-pdf/renderer';
 import InvoiceEggSale from '../Invoice/InvoiceEggSale';
-
+import CustomerDueList from './CustomerDueList';
 
 
 function EggSaleModule(props) {
@@ -678,6 +678,15 @@ function EggSaleModule(props) {
         setIsDueSettle(!isduesettle);
     }
 
+    // useEffect((e)=>{
+    //     fetchCustPendingEggSaleInvoiceList(uid);
+    //     if(uid!=null)
+    //     {
+
+    //     }
+
+    // }, [uid]);
+
     useEffect((e) => {
 
         if (localStorage.getItem('token')) {
@@ -687,7 +696,7 @@ function EggSaleModule(props) {
             fetchEggCategory();
             fetchAdvanceListByCustId(uid);
             fetchDueListByCustId(uid);
-            fetchPendingEggSaleInvoiceList(uid);
+            // fetchPendingEggSaleInvoiceList();
             fetchEggDiscountTypes();
             setBankDetails({
                 ...bankdetails, BankName: process.env.REACT_APP_BANK_NAME,
@@ -721,7 +730,8 @@ function EggSaleModule(props) {
 
         if (localStorage.getItem('token')) {
 
-            const { totalCost, totalQuantity, totalDiscount, totalFinalCost } = eggsalearr.reduce((accumulator, item) => {
+            const { totalCost, totalQuantity, totalDiscount, totalFinalCost } = 
+            eggsalearr.reduce((accumulator, item) => {
                 accumulator.totalCost += item.TotalCost;
                 accumulator.totalQuantity += parseInt(item.Quantity);
                 accumulator.totalDiscount += item.TotalDiscount;
@@ -813,38 +823,38 @@ function EggSaleModule(props) {
     // }
 
     const [_duelist, setEggSaleDueList] = useState([]);
-    const fetchPendingEggSaleInvoiceList = async (uid) => {
-        // setIsLoaded(true);
-        fetch(process.env.REACT_APP_API + 'EggSale/GetPendingEggSaleInvoiceListByCustId?CustId='
-            + uid + '&CompanyId=' + localStorage.getItem('companyid'),
-            {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.StatusCode === 200) {
-                    setEggSaleDueList(data.Result);
-                    // setIsLoaded(false);
-                }
-                else if (data.StatusCode === 401) {
-                    HandleLogout();
-                    history("/login")
-                }
-                else if (data.StatusCode === 404) {
-                    props.showAlert("Data not found !!", "danger")
-                }
-                else {
-                    props.showAlert("Error occurred !!", "danger")
-                }
-            });
+    // const fetchPendingEggSaleInvoiceList = async (uid) => {
+    //     // setIsLoaded(true);
+    //     fetch(process.env.REACT_APP_API + 'EggSale/GetPendingEggSaleInvoiceListByCustId?CustId='
+    //         + uid + '&CompanyId=' + localStorage.getItem('companyid'),
+    //         {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //                 'Authorization': localStorage.getItem('token')
+    //             }
+    //         })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             if (data.StatusCode === 200) {
+    //                 setEggSaleDueList(data.Result);
+    //                 // setIsLoaded(false);
+    //             }
+    //             else if (data.StatusCode === 401) {
+    //                 HandleLogout();
+    //                 history("/login")
+    //             }
+    //             else if (data.StatusCode === 404) {
+    //                 props.showAlert("Data not found !!", "danger")
+    //             }
+    //             else {
+    //                 props.showAlert("Error occurred !!", "danger")
+    //             }
+    //         });
 
-        //setIsLoaded(false);
-    }
+    //     //setIsLoaded(false);
+    // }
 
 
     //
@@ -1132,7 +1142,8 @@ function EggSaleModule(props) {
                     Complimentary: eggsaleinvdata.Complimentary,
                     CompanyId: localStorage.getItem('companyid'),
                     Comments: eggsaleinvdata.Comments,
-                    IsDueSettle: isduesettle
+                    IsDueSettle: isduesettle,
+                    DueList:_custduelist
 
 
                 })
@@ -1203,7 +1214,8 @@ function EggSaleModule(props) {
                     Complimentary: eggsaleinvdata.Complimentary,
                     CompanyId: localStorage.getItem('companyid'),
                     Comments: eggsaleinvdata.Comments,
-                    IsDueSettle: isduesettle
+                    IsDueSettle: isduesettle,
+                    DueList:_custduelist
                 })
             }).then(res => res.json())
                 .then((result) => {
@@ -1295,6 +1307,53 @@ function EggSaleModule(props) {
             // setUsers(tempUser);
         }
     };
+
+
+    const fetchCustPendingEggSaleInvoiceList = async (custid) => {
+        GetCustPendingEggSaleInvoiceList(custid, process.env.REACT_APP_API)
+            .then(data => {
+                if (data.StatusCode === 200) {
+                    setEggSaleDueList(data.Result);
+                }
+                else if (data.StatusCode === 401) {
+                    HandleLogout();
+                    history("/login")
+                }
+                else if (data.StatusCode === 404) {
+                    props.showAlert("Data not found!!", "danger")
+                }
+                else {
+                    props.showAlert("Error occurred!!", "danger")
+                }
+            })
+    }
+
+    const [_custduelist, setCustDueList] = useState([]);
+
+    const handleSaveNote = (e, _duelist) => {
+        // e.preventDefault();     
+        setCustDueList(_duelist);
+
+        const { totalPrevDue } = _duelist.filter(x=>x.IsChecked==true).reduce((accumulator, item) => {
+            accumulator.totalPrevDue += item.Due;
+            return accumulator;
+        }, { totalPrevDue: 0 })
+
+        //let due = eggsaleinvdata.Due;
+
+        let due = Math.round(eggsaleinvdata.FinalCostInvoice -
+            (parseFloat(eggsaleinvdata.Cheque || 0) + parseFloat(eggsaleinvdata.Cash || 0) +
+                parseFloat(eggsaleinvdata.PhonePay || 0) + parseFloat(eggsaleinvdata.NetBanking || 0)
+                + parseFloat(eggsaleinvdata.CashDeposite || 0))
+        )
+        let _duefinal = parseFloat(due) + parseFloat(totalPrevDue);
+
+        setEggSaleInvoiceData({
+            ...eggsaleinvdata,
+            Due: _duefinal
+        });
+    };
+    
     return (
 
         <div>
@@ -1348,6 +1407,7 @@ function EggSaleModule(props) {
 
                         </div>
                     }
+                    <CustomerDueList clickInclude={handleSaveNote} />
                     {/* {
                         _duelist &&
                         <div className="alert" role="alert">
@@ -1418,9 +1478,10 @@ function EggSaleModule(props) {
                     } */}
                 </div>
 
-                <div class="col-md-6" style={{ textAlign: 'right' }}> <Button className="mr-2" variant="primary"
-                    style={{ marginRight: "17.5px" }}
-                    onClick={() => clickAddEggSale()}>Add Item</Button></div>
+                <div class="col-md-6" style={{ textAlign: 'right' }}>
+                    <Button className="mr-2" variant="primary"
+                        style={{ marginRight: "17.5px" }}
+                        onClick={() => clickAddEggSale()}>Add Item</Button></div>
 
             </div>
 
@@ -1602,6 +1663,46 @@ function EggSaleModule(props) {
                             disabled={true}
                         /> */}
                     </Row>
+                    {
+                        <Col>
+                            {
+                                _custduelist.filter(x => x.IsChecked == true).map((p, i) => {
+                                    return (
+                                        <Row>
+                                            <InputField controlId="Invoice" label="Invoice"
+                                                type="text"
+                                                value={p.InvoiceNo}
+                                                name="InvoiceNo"
+                                                placeholder="Invoice no"
+                                                errormessage=""
+                                                required={false}
+                                                disabled={true}
+                                            />
+                                            <InputField controlId="Amount" label="Amount"
+                                                type="text"
+                                                value={p.Due.toFixed(2)}
+                                                name="Amount"
+                                                placeholder=""
+                                                errormessage=""
+                                                required={false}
+                                                disabled={true}
+                                            />
+                                        {
+                                            <ButtonToolbar>
+                                                {localStorage.getItem('isadmin') === 'true' &&
+                                                    <i className="fa-solid fa-trash" title='Delete'
+                                                        style={{ color: '#f81616', marginLeft: '15px' }}
+                                                        onClick={() => deleteEggSale(p)}></i>}
+
+                                            </ButtonToolbar>
+                                        }
+                                        </Row>
+                                    );
+                                })
+                            }
+                        </Col>
+                    }
+
                     <Row>
 
                         {/* <InputField controlId="Paid" label="Paid *"

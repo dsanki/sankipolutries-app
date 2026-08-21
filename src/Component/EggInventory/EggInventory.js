@@ -3,7 +3,7 @@ import { Button, ButtonToolbar, Table, Modal, Row, Col, Form } from 'react-boots
 import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
 import DateComponent from '../DateComponent';
-import {HandleLogout,downloadExcel,FecthEggStockInventory } from './../../Utility'
+import {HandleLogout,downloadExcel,FecthEggStockInventory, FecthEggCategory } from './../../Utility'
 import Loading from '../Loading/Loading'
 
 
